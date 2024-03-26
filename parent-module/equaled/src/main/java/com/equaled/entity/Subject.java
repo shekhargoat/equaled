@@ -4,8 +4,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.*;
-import java.sql.Timestamp;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -17,13 +18,13 @@ public class Subject extends BaseEntity{
     private static final long serialVersionUID = -7219416006713047882L;
     @Column(name = "name")
     private String name;
-    
+
     @Column(name = "description")
     private String description;
-    
+
     @Column(name = "created_on")
     private long createdOn;
-    
+
     @Column(name = "last_updated_on")
     private long lastUpdatedOn;
 

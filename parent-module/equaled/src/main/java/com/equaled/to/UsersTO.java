@@ -5,6 +5,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+import java.util.Set;
+
 @Getter @Setter @NoArgsConstructor
 public class UsersTO extends BaseTO {
 
@@ -18,6 +21,6 @@ public class UsersTO extends BaseTO {
     private long lastUpdatedOn;
     private AccountsTO relatedAccount;
     private YearGroupTO yearGroupId;
-
-
+    private Set<UsersTO> teachers;
+    private Set<UsersTO> students;
 }
