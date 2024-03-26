@@ -4,7 +4,7 @@
     <mapping type="one-way">
         <class-a>com.equaled.to.BaseTO</class-a>
         <class-b>com.equaled.entity.BaseEntity</class-b>
-        <field custom-converter="com.callcomm.eserve.chatbot.dozer.DefaultConverter">
+        <field custom-converter="com.equaled.dozer.DefaultConverter">
             <a>sid</a>
             <b>sid</b>
         </field>
@@ -12,7 +12,7 @@
     <mapping type="one-way" >
         <class-a>com.equaled.entity.BaseEntity</class-a>
         <class-b>com.equaled.to.BaseTO</class-b>
-        <field custom-converter="com.callcomm.eserve.chatbot.dozer.DefaultConverter">
+        <field custom-converter="com.equaled.dozer.DefaultConverter">
             <a>sid</a>
             <b>sid</b>
         </field>

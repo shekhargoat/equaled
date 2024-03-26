@@ -4,7 +4,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @Configuration
-@EnableJpaRepositories(basePackages = {"com.callcomm.eserve.chatbot.repository","com.callcomm.eserve.chatbot.customrepository"})
+@EnableJpaRepositories(basePackages = {"com.equaled.repository","com.equaled.customrepository"})
 public class PersistenceConfig {
 
 }
