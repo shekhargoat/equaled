@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ExternalStorageConfigurationManager" enabled="true" />
+  <component name="MavenProjectsManager">
+    <option name="originalFiles">
+      <list>
+        <option value="$PROJECT_DIR$/parent-module/infrastructure/pom.xml" />
+        <option value="$PROJECT_DIR$/parent-module/chatbot/pom.xml" />
+        <option value="$PROJECT_DIR$/parent-module/pom.xml" />
+        <option value="$PROJECT_DIR$/parent-module/equaled/pom.xml" />
+      </list>
+    </option>
+    <option name="ignoredFiles">
+      <set>
+        <option value="$PROJECT_DIR$/parent-module/infrastructure/common-cloud-services/pom.xml" />
+        <option value="$PROJECT_DIR$/parent-module/infrastructure/common-jms/pom.xml" />
+        <option value="$PROJECT_DIR$/parent-module/infrastructure/communicationframework-basic/pom.xml" />
+      </set>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" default="true" project-jdk-name="1.8 (2)" project-jdk-type="JavaSDK" />
+</project>

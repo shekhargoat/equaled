@@ -1,0 +1,17 @@
+{"properties": [
+  {
+    "name": "hornetq.port",
+    "type": "java.lang.String",
+    "description": "A description for 'hornetq.port'"
+  },
+  {
+    "name": "hornetq.ip",
+    "type": "java.lang.String",
+    "description": "A description for 'hornetq.ip'"
+  },
+  {
+    "name": "cors.origins",
+    "type": "java.lang.String",
+    "description": "A description for 'cors.origins'"
+  }
+]}

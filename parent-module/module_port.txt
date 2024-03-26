@@ -1,0 +1,21 @@
+serNow:   5001
+entity:   8080
+workflow: 8081
+chatbot:  8082
+oreport:  8083
+s-filter: 8084
+webhook:  8085
+reports:  8086
+cimport:  8087
+campaign: 8088
+echannel: 8089
+settings: 8090
+Webex:    8091
+outlook:  8092
+whatsapp: 8093
+SMS:      8094
+tele:     8095
+aupdate:  8096
+KBase:    9090
+dashboard:9091
+
