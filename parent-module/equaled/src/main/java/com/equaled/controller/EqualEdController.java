@@ -26,7 +26,7 @@ public class EqualEdController {
     IEqualEdService service;
     @GetMapping("/dashboard/user/{userId}")
     @ApiOperation(value = "get dashboard by userId", notes = "API to get all dashboards by UserId")
-    public ResponseEntity<?> getChatbotByName(
+    public ResponseEntity<?> getDashboardByUser(
             @ApiParam(value = "User id", required = true) @PathVariable("userId") Integer userId) {
         log.info(String.format("Request received : User %s for GET /dashboard/user/{userId} for particular ", userId));
         return ResponseEntity.ok(service.getDashboardsByUser(userId));

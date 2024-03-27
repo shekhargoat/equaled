@@ -14,6 +14,7 @@ import java.util.Objects;
 @Getter @Setter @NoArgsConstructor
 public class Users extends BaseEntity{
 
+    private static final long serialVersionUID = 7158036017058596386L;
     @Column(name = "username")
     private String username;
     @Column(name = "password")
@@ -34,7 +35,6 @@ public class Users extends BaseEntity{
     @JoinColumn(name = "related_account", referencedColumnName = "id", nullable = false)
     private Accounts relatedAccount;
 
-    @Column(name = "year_group_id")
     @ManyToOne
     @JoinColumn(name = "year_group_id", referencedColumnName = "id", nullable = true)
     private YearGroup yearGroup;

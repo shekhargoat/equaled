@@ -1,4 +1,4 @@
-package com.callcomm.eserve.chatbot.config;
+package com.equaled.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;

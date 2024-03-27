@@ -13,6 +13,7 @@ public class EqualEdApplication {
 
 	public static void main(String[] args) {
 
+		System.out.println("Starting EqualEd server");
 		SpringApplication.run(EqualEdApplication.class, args);
 	}
 }

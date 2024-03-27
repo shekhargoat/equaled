@@ -13,6 +13,7 @@ import java.util.Objects;
 @Getter @Setter @NoArgsConstructor
 public class YearGroup extends BaseEntity {
 
+    private static final long serialVersionUID = -1489551855160282479L;
     @Column(name = "year")
     private int year;
 

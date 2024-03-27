@@ -12,6 +12,7 @@ import java.util.Objects;
 @Getter @Setter @NoArgsConstructor
 public class Dashboard extends BaseEntity{
 
+    private static final long serialVersionUID = 8876305700473196377L;
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     private Users user;

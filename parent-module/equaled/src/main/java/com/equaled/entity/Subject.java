@@ -13,7 +13,8 @@ import java.util.Objects;
 @Table(name = "subject")
 @Getter @Setter @NoArgsConstructor
 public class Subject extends BaseEntity{
-    
+
+    private static final long serialVersionUID = -7219416006713047882L;
     @Column(name = "name")
     private String name;
     
