@@ -8,7 +8,6 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.util.Arrays;
 import java.util.Objects;
-
 @Entity
 @Table(name = "questions")
 @Getter @Setter @NoArgsConstructor

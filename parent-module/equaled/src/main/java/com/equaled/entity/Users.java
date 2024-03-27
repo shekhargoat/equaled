@@ -49,7 +49,6 @@ public class Users extends BaseEntity{
     @ManyToMany(mappedBy="students")
     private Set<Users> teachers;
 
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
