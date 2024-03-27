@@ -1,7 +1,10 @@
-package com.callcomm.eserve.chatbot.value;
+package com.equaled.value;
 
 
 public class EqualEdEnums {
-	
+
+    public enum UserRole{
+        STUDENT, TEACHER, PARENT
+    }
 
 }
