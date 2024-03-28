@@ -8,12 +8,12 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
 @Getter @Setter @NoArgsConstructor
 public class Users extends BaseEntity{
-
     private static final long serialVersionUID = 7158036017058596386L;
     @Column(name = "username")
     private String username;
@@ -39,6 +39,15 @@ public class Users extends BaseEntity{
     @JoinColumn(name = "year_group_id", referencedColumnName = "id", nullable = true)
     private YearGroup yearGroup;
 
+    @ManyToMany(cascade={CascadeType.ALL})
+    @JoinTable(
+            name = "teacher_has_students",
+            joinColumns = @JoinColumn(name = "teacher_id"),
+            inverseJoinColumns = @JoinColumn(name = "student_id"))
+    private Set<Users> students;
+
+    @ManyToMany(mappedBy="students")
+    private Set<Users> teachers;
 
     @Override
     public boolean equals(Object o) {
