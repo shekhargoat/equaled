@@ -34,5 +34,19 @@ public class EqualEdController {
         return ResponseEntity.ok(service.getDashboardsByUser(userId));
     }
 
+    @GetMapping("/category/year/{yearId}")
+    public ResponseEntity<?> getSubjectCategoryByYearGroup(
+            @ApiParam(value = "Year id", required = true) @PathVariable("yearId") Integer yearId){
+        log.info(String.format("Request received : User %s for GET /category/year/{yearId} for particular ", yearId));
+        return ResponseEntity.ok(service.getSubjectCategoriedByYear(yearId));
+    }
 
+    @GetMapping("/tests/year/{yearId}/subject/{subjectName}")
+    public ResponseEntity<?> getTestsByYearGroupAndSubject(
+            @ApiParam(value = "Year id", required = true) @PathVariable("yearId") Integer yearId,
+            @ApiParam(value = "Subject Name", required = true) @PathVariable("subjectName") String subjectName){
+        log.info(String.format("Request received : User %s for GET /tests/year/{yearId}/subject/{subjectName} " +
+                "for particular ", yearId,subjectName));
+        return ResponseEntity.ok(service.getTestsByYearAndSubjectName(yearId,subjectName));
+    }
 }

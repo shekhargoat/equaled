@@ -1,10 +1,9 @@
-package com.callcomm.eserve.chatbot;
+package com.equaled.chatbot;
 
-import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class ChatbotApplicationTests {
+class EqualEdApplicationTests {
 /*	  @Test
 	  void contextLoads() { } */
 }

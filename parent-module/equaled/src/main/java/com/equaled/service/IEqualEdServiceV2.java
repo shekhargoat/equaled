@@ -10,4 +10,8 @@ public interface IEqualEdServiceV2 {
 
     Map<String,List<CommonV2Response>> getDashboardsByUser(Integer userId);
     Map<String,List<CommonV2Response>> getDashboardsByUser(String userId);
+
+    Map<String,List<CommonV2Response>> getSubjectCategoriedByYear(Integer yearGroupId);
+
+    Map<String,List<CommonV2Response>> getTestsByYearAndSubjectName(Integer yearGroupId, String subjectName);
 }

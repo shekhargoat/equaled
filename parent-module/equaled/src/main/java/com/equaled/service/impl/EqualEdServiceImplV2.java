@@ -2,27 +2,23 @@ package com.equaled.service.impl;
 
 import com.equaled.dozer.DozerUtils;
 import com.equaled.entity.Dashboard;
-import com.equaled.eserve.common.DateTimeFrameUtils;
-import com.equaled.eserve.common.DateUtils;
+import com.equaled.entity.SubjectCategories;
+import com.equaled.entity.Test;
 import com.equaled.repository.IDashboardRepository;
-import com.equaled.service.IEqualEdService;
+import com.equaled.repository.ISubjectCategoryRepository;
+import com.equaled.repository.ITestRepository;
 import com.equaled.service.IEqualEdServiceV2;
 import com.equaled.to.CommonV2Response;
-import com.equaled.to.DashboardTO;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.ListUtils;
-import org.apache.commons.collections.MapUtils;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import java.sql.ClientInfoStatus;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,6 +27,9 @@ import java.util.stream.Collectors;
 public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
 
     IDashboardRepository dashboardRepository;
+    ISubjectCategoryRepository subjectCategoryRepository;
+    ITestRepository testRepository;
+
     DozerUtils mapper;
 
     @Override
@@ -79,6 +78,55 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
 
 
         return generateResponse(commonV2Responses);    }
+
+    @Override
+    public Map<String,List<CommonV2Response>> getSubjectCategoriedByYear(Integer yearGroupId){
+        log.trace("Finding Catgories by Year: {}",yearGroupId);
+        List<SubjectCategories> categories = Optional.ofNullable(subjectCategoryRepository
+                        .findSubjectsCategoriesByYrGroupId(yearGroupId))
+                .orElse(ListUtils.EMPTY_LIST);
+        log.debug("Categories fetched for year {} = {}",yearGroupId, categories.size());
+
+        List<CommonV2Response> commonV2Responses = categories.stream().map(category -> {
+            CommonV2Response commonV2Response = new CommonV2Response();
+            commonV2Response.setId(category.getStringSid());
+            commonV2Response.putField("year_group_id", String.valueOf(category.getYearGroup().getYear()));
+            commonV2Response.putField("category",category.getSubject().getName());
+            commonV2Response.putField("sub-Category", category.getSubCategory());
+            commonV2Response.putField("sub-Category_1", category.getSubCategory1());
+            return commonV2Response;
+        }).collect(Collectors.toList());
+
+
+        return generateResponse(commonV2Responses);
+    }
+
+    @Override
+    public Map<String,List<CommonV2Response>> getTestsByYearAndSubjectName(Integer yearGroupId, String subjectName){
+        log.trace("Finding Tests for Year {} and subjectName {}",yearGroupId, subjectName);
+        List<Test> tests = Optional.ofNullable(testRepository.getTestByYearAndSubject(yearGroupId, subjectName))
+                .orElse(ListUtils.EMPTY_LIST);
+        log.debug("Tests fetched for year {} = {}",yearGroupId, tests.size());
+
+        List<CommonV2Response> commonV2Responses = tests.stream().map(test -> {
+            CommonV2Response commonV2Response = new CommonV2Response();
+            commonV2Response.setId(test.getStringSid());
+            commonV2Response.putField("test_id", String.valueOf(test.id));
+            commonV2Response.putField("Test Description", test.getDescription());
+            commonV2Response.putField("Time", String.valueOf(test.getTimeAllottedInMins()));
+            commonV2Response.putField("Subject", test.getSubject().getName());
+            commonV2Response.putField("Subject_id", String.valueOf(test.getSubject().id));
+            commonV2Response.putField("year_group_id", String.valueOf(test.getYearGroupId().getYear()));
+            commonV2Response.putField("No_Questions", String.valueOf(test.getNoOfQuestions()));
+            commonV2Response.putField("Learn", String.valueOf(test.getTestType()));
+            return commonV2Response;
+        }).collect(Collectors.toList());
+
+
+        return generateResponse(commonV2Responses);
+    }
+
+
 
     public Map<String,List<CommonV2Response>> generateResponse(List<CommonV2Response> commonV2Responses){
         Map<String,List<CommonV2Response>> response = new HashMap<>();
