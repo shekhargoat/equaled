@@ -1,10 +1,7 @@
 package com.equaled.service.impl;
 
 import com.equaled.dozer.DozerUtils;
-import com.equaled.entity.Dashboard;
-import com.equaled.entity.Questions;
-import com.equaled.entity.SubjectCategories;
-import com.equaled.entity.Test;
+import com.equaled.entity.*;
 import com.equaled.repository.*;
 import com.equaled.service.IEqualEdService;
 import com.equaled.to.*;
@@ -26,6 +23,7 @@ public class EqualEdServiceImpl implements IEqualEdService {
     ITestRepository testRepository;
     IQuestionRepository questionRepository;
     IUserRepository userRepository;
+    ISetPracticeRepository setPracticeRepository;
 
     DozerUtils mapper;
 
@@ -83,6 +81,15 @@ public class EqualEdServiceImpl implements IEqualEdService {
     public UsersTO getUserById(Integer id){
         log.trace("Finding user by id : {}",id);
         return userRepository.findById(id).map(users -> mapper.convert(users, UsersTO.class)).orElse(null);
+    }
+
+    @Override
+    public List<SetpracticeTO> getSetpracticeByUserIdSubjectName(Integer userId, String practiceName, String subjectName){
+        log.trace("Finding Set practice for user {} and practiceName = {}, subject = {}", userId, practiceName, subjectName);
+        List<Setpractice> setpractices = Optional.ofNullable(setPracticeRepository
+                .getSetpracticeByUserIdSubjectName(userId, practiceName, subjectName)).orElse(ListUtils.EMPTY_LIST);
+        log.debug("Set Practices found  for user id {} subject {} and practice {} = {}",userId, subjectName, practiceName, setpractices.size());
+        return mapper.convertList(setpractices, SetpracticeTO.class);
     }
 
 }

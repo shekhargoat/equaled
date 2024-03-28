@@ -16,4 +16,6 @@ public interface IEqualEdService {
     List<QuestionsTO> getQuestionsBySubAndSubcat(Integer subjectId, String subcatName);
 
     UsersTO getUserById(Integer id);
+
+    List<SetpracticeTO> getSetpracticeByUserIdSubjectName(Integer userId, String practiceName, String subjectName);
 }
