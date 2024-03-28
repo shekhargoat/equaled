@@ -1,30 +1,27 @@
 package com.equaled.controller;
 
 import com.equaled.service.IEqualEdService;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-
+import com.equaled.service.IEqualEdServiceV2;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.client.RestTemplate;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @AllArgsConstructor
 @RestController
 @Api(value = "EqualED API's")
-@RequestMapping("/v1")
-public class EqualEdController {
+@RequestMapping("/v2")
+public class EqualEdControllerV2 {
 
-    private final IEqualEdService service;
+    private final IEqualEdServiceV2 service;
 
     @GetMapping("/dashboard/user/{userId}")
     @ApiOperation(value = "get dashboard by userId", notes = "API to get all dashboards by UserId")
@@ -45,7 +42,7 @@ public class EqualEdController {
     public ResponseEntity<?> getTestsByYearGroupAndSubject(
             @ApiParam(value = "Year id", required = true) @PathVariable("yearId") Integer yearId,
             @ApiParam(value = "Subject Name", required = true) @PathVariable("subjectName") String subjectName){
-        log.info(String.format("Request received : Tests %s for GET /tests/year/{yearId}/subject/{subjectName} " +
+        log.info(String.format("Request received : User %s for GET /tests/year/{yearId}/subject/{subjectName} " +
                 "for particular ", yearId,subjectName));
         return ResponseEntity.ok(service.getTestsByYearAndSubjectName(yearId,subjectName));
     }
@@ -54,9 +51,9 @@ public class EqualEdController {
     @ApiOperation(value = "get Questions by Subject and Sub category",
             notes = "API to get Questions by Subject and Sub category")
     public ResponseEntity<?> getQuestionsBySubAndSubcat(
-            @ApiParam(value = "Year id", required = true) @PathVariable("subjectId") Integer subjectId,
-            @ApiParam(value = "Subject Name", required = true) @PathVariable("subcat") String subcat){
-        log.info(String.format("Request received : Questions %s for GET /questions/subject/{subjectId}/subcate/{subcat} " +
+            @ApiParam(value = "Year id", required = true) @PathVariable("yearId") Integer subjectId,
+            @ApiParam(value = "Subject Name", required = true) @PathVariable("subjectName") String subcat){
+        log.info(String.format("Request received : User %s for GET /questions/subject/{subjectId}/subcate/{subcat} " +
                 "for particular ", subjectId,subcat));
         return ResponseEntity.ok(service.getQuestionsBySubAndSubcat(subjectId, subcat));
     }
@@ -74,7 +71,7 @@ public class EqualEdController {
 
     @GetMapping("/setpractice/user/{userId}/practice/{practiceName}/{subjectName}")
     public ResponseEntity<?> getSetpracticeByUserIdSubjectName(@ApiParam(value = "User id", required = true)
-                                                                   @PathVariable("userId") Integer userId,
+                                                               @PathVariable("userId") Integer userId,
                                                                @PathVariable("practiceName") String practiceName,
                                                                @PathVariable("subjecName") String subjectName){
 

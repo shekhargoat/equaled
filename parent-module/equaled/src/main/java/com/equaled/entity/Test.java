@@ -33,6 +33,8 @@ public class Test extends BaseEntity{
     @ManyToOne
     @JoinColumn(name = "subject_id", referencedColumnName = "id")
     private Subject subject;
+    @Column(name = "no_of_q")
+    private int noOfQuestions;
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -16,4 +16,8 @@ public class EqualEdEnums {
     public enum TestType {
         LEARN,TEST;
     }
+
+    public enum SetpracticeStatus {
+        COMPLETED, PENDING
+    }
 }
