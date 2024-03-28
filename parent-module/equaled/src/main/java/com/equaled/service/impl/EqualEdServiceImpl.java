@@ -2,15 +2,12 @@ package com.equaled.service.impl;
 
 import com.equaled.dozer.DozerUtils;
 import com.equaled.entity.Dashboard;
+import com.equaled.entity.Questions;
 import com.equaled.entity.SubjectCategories;
 import com.equaled.entity.Test;
-import com.equaled.repository.IDashboardRepository;
-import com.equaled.repository.ISubjectCategoryRepository;
-import com.equaled.repository.ITestRepository;
+import com.equaled.repository.*;
 import com.equaled.service.IEqualEdService;
-import com.equaled.to.DashboardTO;
-import com.equaled.to.SubjectCategoriesTO;
-import com.equaled.to.TestTO;
+import com.equaled.to.*;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.ListUtils;
@@ -27,6 +24,8 @@ public class EqualEdServiceImpl implements IEqualEdService {
     IDashboardRepository dashboardRepository;
     ISubjectCategoryRepository subjectCategoryRepository;
     ITestRepository testRepository;
+    IQuestionRepository questionRepository;
+    IUserRepository userRepository;
 
     DozerUtils mapper;
 
@@ -68,6 +67,22 @@ public class EqualEdServiceImpl implements IEqualEdService {
         log.debug("Tests fetched for year {} = {}",yearGroupId, tests.size());
         return mapper.convertList(tests, TestTO.class);
 
+    }
+
+    @Override
+    public List<QuestionsTO> getQuestionsBySubAndSubcat(Integer subjectId, String subcatName){
+        log.trace("Finding Questions for subject {} and subcat Name {}",subjectId, subcatName);
+        List<Questions> questions = Optional.ofNullable(questionRepository
+                .getQuestionsBySubAndSubcat(subjectId, subcatName)).orElse(ListUtils.EMPTY_LIST);
+        log.debug("Finding Questions for subject {} and subcat Name {} = {}",subjectId, subcatName, questions.size());
+        return mapper.convertList(questions, QuestionsTO.class);
+
+    }
+
+    @Override
+    public UsersTO getUserById(Integer id){
+        log.trace("Finding user by id : {}",id);
+        return userRepository.findById(id).map(users -> mapper.convert(users, UsersTO.class)).orElse(null);
     }
 
 }

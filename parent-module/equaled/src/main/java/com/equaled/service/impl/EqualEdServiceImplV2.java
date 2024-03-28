@@ -2,11 +2,10 @@ package com.equaled.service.impl;
 
 import com.equaled.dozer.DozerUtils;
 import com.equaled.entity.Dashboard;
+import com.equaled.entity.Questions;
 import com.equaled.entity.SubjectCategories;
 import com.equaled.entity.Test;
-import com.equaled.repository.IDashboardRepository;
-import com.equaled.repository.ISubjectCategoryRepository;
-import com.equaled.repository.ITestRepository;
+import com.equaled.repository.*;
 import com.equaled.service.IEqualEdServiceV2;
 import com.equaled.to.CommonV2Response;
 import lombok.AllArgsConstructor;
@@ -29,6 +28,8 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     IDashboardRepository dashboardRepository;
     ISubjectCategoryRepository subjectCategoryRepository;
     ITestRepository testRepository;
+    IQuestionRepository questionRepository;
+    IUserRepository userRepository;
 
     DozerUtils mapper;
 
@@ -122,10 +123,54 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
             return commonV2Response;
         }).collect(Collectors.toList());
 
+        return generateResponse(commonV2Responses);
+    }
+
+    @Override
+    public Map<String,List<CommonV2Response>> getQuestionsBySubAndSubcat(Integer subjectId, String subcatName){
+        log.trace("Finding Questions for subject {} and subcat Name {}",subjectId, subcatName);
+        List<Questions> questions = Optional.ofNullable(questionRepository
+                .getQuestionsBySubAndSubcat(subjectId, subcatName)).orElse(ListUtils.EMPTY_LIST);
+        log.debug("Finding Questions for subject {} and subcat Name {} = {}",subjectId, subcatName, questions.size());
+        List<CommonV2Response> commonV2Responses = questions.stream().map(question -> {
+            CommonV2Response commonV2Response = new CommonV2Response();
+            commonV2Response.setId(question.getStringSid());
+            commonV2Response.putField("question_id", String.valueOf(question.id));
+            commonV2Response.putField("Text", question.getQuestion());
+            commonV2Response.putField("Subject_id", String.valueOf(question.getSubject().id));
+            commonV2Response.putField("year_group_id", String.valueOf(question.getYearGroupId().id));
+            commonV2Response.putField("Difficulty_level", String.valueOf(question.getDifficulty()));
+            commonV2Response.putField("category", String.valueOf(question.getCategory()));
+            commonV2Response.putField("sub_category", String.valueOf(question.getSubCategory()));
+            commonV2Response.putField("Correct_option", String.valueOf(question.getCorrectOption()));
+            commonV2Response.putField("Learn", String.valueOf(question.getLearn()));
+
+            return commonV2Response;
+        }).collect(Collectors.toList());
 
         return generateResponse(commonV2Responses);
     }
 
+    @Override
+    public Map<String,List<CommonV2Response>> getUserById(Integer id){
+        log.trace("Finding user by id : {}",id);
+        List<CommonV2Response> commonV2Responses = new ArrayList<>();
+        userRepository.findById(id).ifPresent(users -> {
+            CommonV2Response commonV2Response = new CommonV2Response();
+            commonV2Response.setId(users.getStringSid());
+            commonV2Response.putField("Username", users.getUsername());
+            commonV2Response.putField("Email", users.getEmail());
+            commonV2Response.putField("Password", users.getPassword());
+            commonV2Response.putField("User_id", String.valueOf(users.id));
+            commonV2Response.putField("year_group_id", String.valueOf(users.getYearGroup().getId()));
+            commonV2Response.putField("role", users.getRole().name());
+            commonV2Response.putField("lastlogin", LocalDateTime.ofInstant(Instant.ofEpochSecond(users.getLastLogin()),
+                    ZoneId.of("UTC")).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+            commonV2Response.putField("Username", users.getUsername());
+            commonV2Responses.add(commonV2Response);
+        });
+        return generateResponse(commonV2Responses);
+    }
 
 
     public Map<String,List<CommonV2Response>> generateResponse(List<CommonV2Response> commonV2Responses){

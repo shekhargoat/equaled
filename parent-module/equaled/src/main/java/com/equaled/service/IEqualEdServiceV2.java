@@ -14,4 +14,8 @@ public interface IEqualEdServiceV2 {
     Map<String,List<CommonV2Response>> getSubjectCategoriedByYear(Integer yearGroupId);
 
     Map<String,List<CommonV2Response>> getTestsByYearAndSubjectName(Integer yearGroupId, String subjectName);
+
+    Map<String,List<CommonV2Response>> getQuestionsBySubAndSubcat(Integer subjectId, String subcatName);
+
+    Map<String,List<CommonV2Response>> getUserById(Integer id);
 }
