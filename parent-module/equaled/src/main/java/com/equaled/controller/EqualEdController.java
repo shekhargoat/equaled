@@ -71,4 +71,16 @@ public class EqualEdController {
         return ResponseEntity.ok(service.getUserById(userId));
 
     }
+
+    @GetMapping("/setpractice/user/{userId}/practice/{practiceName}/{subjectName}")
+    public ResponseEntity<?> getSetpracticeByUserIdSubjectName(@ApiParam(value = "User id", required = true)
+                                                                   @PathVariable("userId") Integer userId,
+                                                               @PathVariable("practiceName") String practiceName,
+                                                               @PathVariable("subjecName") String subjectName){
+
+        log.info(String.format("Request received : Users %s for GET  " +
+                "/setpractice/user/{userId}/practice/{practiceName}/{subjectName}" +
+                "for particular ", userId,practiceName, subjectName));
+        return ResponseEntity.ok(service.getSetpracticeByUserIdSubjectName(userId, practiceName, subjectName));
+    }
 }

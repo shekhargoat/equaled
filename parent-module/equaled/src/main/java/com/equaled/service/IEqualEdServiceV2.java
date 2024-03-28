@@ -18,4 +18,6 @@ public interface IEqualEdServiceV2 {
     Map<String,List<CommonV2Response>> getQuestionsBySubAndSubcat(Integer subjectId, String subcatName);
 
     Map<String,List<CommonV2Response>> getUserById(Integer id);
+
+    Map<String, List<CommonV2Response>> getSetpracticeByUserIdSubjectName(Integer userId, String practiceName, String subjectName);
 }

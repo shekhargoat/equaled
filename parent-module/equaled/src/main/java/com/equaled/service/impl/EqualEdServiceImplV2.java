@@ -1,10 +1,7 @@
 package com.equaled.service.impl;
 
 import com.equaled.dozer.DozerUtils;
-import com.equaled.entity.Dashboard;
-import com.equaled.entity.Questions;
-import com.equaled.entity.SubjectCategories;
-import com.equaled.entity.Test;
+import com.equaled.entity.*;
 import com.equaled.repository.*;
 import com.equaled.service.IEqualEdServiceV2;
 import com.equaled.to.CommonV2Response;
@@ -30,6 +27,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     ITestRepository testRepository;
     IQuestionRepository questionRepository;
     IUserRepository userRepository;
+    ISetPracticeRepository setPracticeRepository;
 
     DozerUtils mapper;
 
@@ -169,6 +167,30 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
             commonV2Response.putField("Username", users.getUsername());
             commonV2Responses.add(commonV2Response);
         });
+        return generateResponse(commonV2Responses);
+    }
+
+    @Override
+    public Map<String, List<CommonV2Response>> getSetpracticeByUserIdSubjectName(Integer userId, String practiceName, String subjectName){
+        log.trace("Finding Set practice for user {} and practiceName = {}, subject = {}", userId, practiceName, subjectName);
+        List<Setpractice> setpractices = Optional.ofNullable(setPracticeRepository
+                .getSetpracticeByUserIdSubjectName(userId, practiceName, subjectName)).orElse(ListUtils.EMPTY_LIST);
+        log.debug("Set Practices found  for user id {} subject {} and practice {} = {}",userId, subjectName, practiceName, setpractices.size());
+
+        List<CommonV2Response> commonV2Responses = setpractices.stream().map(setpractice -> {
+            CommonV2Response commonV2Response = new CommonV2Response();
+            commonV2Response.setId(setpractice.getStringSid());
+            commonV2Response.putField("seq_id", String.valueOf(setpractice.id));
+            commonV2Response.putField("User_id", String.valueOf(setpractice.getUser().id));
+            commonV2Response.putField("practicename", setpractice.getPracticeName());
+            commonV2Response.putField("time_limit", String.valueOf(setpractice.getTimeLimit()));
+            commonV2Response.putField("questions", setpractice.getQuestions());
+            commonV2Response.putField("no_questions", String.valueOf(setpractice.getNoOfQ()));
+            commonV2Response.putField("subject_name", setpractice.getSubject().getName());
+            commonV2Response.putField("Status", setpractice.getStatus().name());
+            return commonV2Response;
+        }).collect(Collectors.toList());
+
         return generateResponse(commonV2Responses);
     }
 
