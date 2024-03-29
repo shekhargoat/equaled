@@ -8,6 +8,6 @@ import java.util.List;
 
 public interface ISetPracticeRepository extends JpaRepository<Setpractice, Integer> {
 
-    @Query(value = "select sp from Setpractice sp where sp.user.id = :userId and sp.practiceName = :practiceName and sp.subject.name = :sujectName")
+    @Query(value = "select sp from Setpractice sp where sp.user.id = :userId and sp.practiceName = :practiceName and sp.subject.name = :subjectName")
     List<Setpractice> getSetpracticeByUserIdSubjectName(Integer userId, String practiceName, String subjectName);
 }

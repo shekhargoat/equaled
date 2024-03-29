@@ -1,6 +1,8 @@
 package com.equaled.value;
 
 
+import java.util.Arrays;
+
 public class EqualEdEnums {
     public enum UserRole{
         STUDENT, TEACHER, PARENT

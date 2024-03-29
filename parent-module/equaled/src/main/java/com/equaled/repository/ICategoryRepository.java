@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface ICategoryRepository extends JpaRepository<Subject,Integer> {
-    @Query(value = "select s from Subject s where s. = :id")
+    @Query(value = "select s from Subject s where s.id = :id")
     List<Subject> findSubjectssByYrGroupId(Integer id);
 
 }

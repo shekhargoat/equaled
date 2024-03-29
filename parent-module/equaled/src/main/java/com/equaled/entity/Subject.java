@@ -7,6 +7,7 @@ import lombok.Setter;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -23,10 +24,10 @@ public class Subject extends BaseEntity{
     private String description;
 
     @Column(name = "created_on")
-    private long createdOn;
+    private Instant createdOn;
 
     @Column(name = "last_updated_on")
-    private long lastUpdatedOn;
+    private Instant lastUpdatedOn;
 
     @Override
     public boolean equals(Object o) {

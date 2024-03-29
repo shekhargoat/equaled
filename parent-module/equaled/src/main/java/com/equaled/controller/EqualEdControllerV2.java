@@ -2,6 +2,8 @@ package com.equaled.controller;
 
 import com.equaled.service.IEqualEdService;
 import com.equaled.service.IEqualEdServiceV2;
+import com.equaled.to.CommonV2Request;
+import com.equaled.to.CreateProfileRequest;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -9,10 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @AllArgsConstructor
@@ -79,5 +78,15 @@ public class EqualEdControllerV2 {
                 "/setpractice/user/{userId}/practice/{practiceName}/{subjectName}" +
                 "for particular ", userId,practiceName, subjectName));
         return ResponseEntity.ok(service.getSetpracticeByUserIdSubjectName(userId, practiceName, subjectName));
+    }
+
+    @PostMapping("/create/profile")
+    public ResponseEntity<?> createProfile(@RequestBody CreateProfileRequest request){
+        return ResponseEntity.ok(service.createProfile(request));
+    }
+
+    @PostMapping("/create/dashboard")
+    public ResponseEntity<?> createDashboard(@RequestBody CommonV2Request request){
+        return ResponseEntity.ok(service.createDashboard(request));
     }
 }
