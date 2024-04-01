@@ -71,7 +71,10 @@ public enum ErrorCodes {
 
 	U002("Invalid user id"),
 
-	S001("Subject not found");
+	S001("Subject not found"),
+
+	I001("Improvement not found"),
+	UA001("User answers not found");
 
 
 

@@ -33,4 +33,14 @@ public interface IEqualEdServiceV2 {
     Optional<String> saveImprovement(Map<String, String> improvement);
 
     void markSetpracticeClose(String setPracticeSid);
+
+    CommonV2Response updateUserLastLogin(Integer userId, CommonV2Request request);
+
+    Map<String,List<CommonV2Response>> getImprovementsByUser(Integer userId);
+
+    Map<String,List<CommonV2Response>> getImprovementsByExam(String examId);
+
+    Map<String, List<CommonV2Response>> getImprovementsByUserIdAndExam(Integer userId,String examId);
+
+    Map<String, List<CommonV2Response>> getUserAnswersByExamId(String examId);
 }
