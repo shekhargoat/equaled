@@ -7,6 +7,7 @@ import com.equaled.to.DashboardTO;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public interface IEqualEdServiceV2 {
 
@@ -26,4 +27,10 @@ public interface IEqualEdServiceV2 {
     Map<String, List<CommonV2Response>> createProfile(CreateProfileRequest request);
 
     Map<String, List<CommonV2Response>> createDashboard(CommonV2Request request);
+
+    Optional<String> submitAnswer(Map<String, String> answer);
+
+    Optional<String> saveImprovement(Map<String, String> improvement);
+
+    void markSetpracticeClose(String setPracticeSid);
 }

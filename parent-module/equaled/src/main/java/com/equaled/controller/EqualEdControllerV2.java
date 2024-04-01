@@ -89,4 +89,21 @@ public class EqualEdControllerV2 {
     public ResponseEntity<?> createDashboard(@RequestBody CommonV2Request request){
         return ResponseEntity.ok(service.createDashboard(request));
     }
+
+    @PostMapping("/useranswers")
+    public ResponseEntity<?> submitAnswer(@RequestBody CommonV2Request request){
+        return ResponseEntity.ok(service.submitAnswer(request.getFields()));
+    }
+
+
+    @PostMapping("/improvement")
+    public ResponseEntity<?> submitImprovement(@RequestBody CommonV2Request request){
+        return ResponseEntity.ok(service.saveImprovement(request.getFields()));
+    }
+
+    @GetMapping("/setpractice/{sid}/completed")
+    public ResponseEntity<?> markSetpracticeAsClose(@PathVariable String sid){
+        service.markSetpracticeClose(sid);
+        return ResponseEntity.ok().build();
+    }
 }
