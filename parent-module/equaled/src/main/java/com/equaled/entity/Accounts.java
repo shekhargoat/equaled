@@ -4,8 +4,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.*;
-import java.sql.Timestamp;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -25,10 +27,10 @@ public class Accounts extends BaseEntity{
     private Integer enabled;
     
     @Column(name = "created_on")
-    private long createdOn;
+    private Instant createdOn;
     
     @Column(name = "last_updated_on")
-    private long lastUpdatedOn;
+    private Instant lastUpdatedOn;
 
     @Override
     public boolean equals(Object o) {

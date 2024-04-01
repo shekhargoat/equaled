@@ -2,9 +2,15 @@ package com.equaled.service.impl;
 
 import com.equaled.dozer.DozerUtils;
 import com.equaled.entity.*;
+import com.equaled.eserve.common.exception.IncorrectArgumentException;
+import com.equaled.eserve.common.exception.RecordNotFoundException;
+import com.equaled.eserve.exception.errorcode.ErrorCodes;
 import com.equaled.repository.*;
 import com.equaled.service.IEqualEdServiceV2;
+import com.equaled.to.CommonV2Request;
 import com.equaled.to.CommonV2Response;
+import com.equaled.to.CreateProfileRequest;
+import com.equaled.value.EqualEdEnums;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.ListUtils;
@@ -28,6 +34,9 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     IQuestionRepository questionRepository;
     IUserRepository userRepository;
     ISetPracticeRepository setPracticeRepository;
+    IYearGroupRepository yearGroupRepository;
+    IAccountRepository accountRepository;
+    ISubjectRepository subjectRepository;
 
     DozerUtils mapper;
 
@@ -39,19 +48,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
                 .orElse(ListUtils.EMPTY_LIST);
         log.debug("Dashboard fetched for User {} = {}",userId, dashboardsByUserId.size());
 
-        List<CommonV2Response> commonV2Responses = dashboardsByUserId.stream().map(dashboard -> {
-            CommonV2Response commonV2Response = new CommonV2Response();
-            commonV2Response.setId(dashboard.getStringSid());
-            commonV2Response.putField("exam_id", dashboard.getExamId());
-            commonV2Response.putField("user_id",String.valueOf(dashboard.getUser().getId()));
-            commonV2Response.putField("subject_name",dashboard.getSubject().getName());
-            commonV2Response.putField("title", dashboard.getTitle());
-            commonV2Response.putField("start_time",
-                    LocalDateTime.ofInstant(Instant.ofEpochSecond(dashboard.getStartTime()),
-                            ZoneId.of("UTC")).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-            return commonV2Response;
-        }).collect(Collectors.toList());
-
+        List<CommonV2Response> commonV2Responses = dashboardsByUserId.stream().map(EqualEdServiceImplV2::createDashboardResponse).collect(Collectors.toList());
 
         return generateResponse(commonV2Responses);
     }
@@ -62,21 +59,23 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
         List<Dashboard> dashboardsByUserId = Optional.ofNullable(dashboardRepository.findDashboardsByUserSid(userId))
                 .orElse(ListUtils.EMPTY_LIST);
         log.debug("Dashboard fetched for User {} = {}",userId, dashboardsByUserId.size());
-        List<CommonV2Response> commonV2Responses = dashboardsByUserId.stream().map(dashboard -> {
-            CommonV2Response commonV2Response = new CommonV2Response();
-            commonV2Response.setId(dashboard.getStringSid());
-            commonV2Response.putField("exam_id", dashboard.getExamId());
-            commonV2Response.putField("user_id",String.valueOf(dashboard.getUser().getId()));
-            commonV2Response.putField("subject_name",dashboard.getSubject().getName());
-            commonV2Response.putField("title", dashboard.getTitle());
-            commonV2Response.putField("start_time",
-                    LocalDateTime.ofInstant(Instant.ofEpochSecond(dashboard.getStartTime()),
-                            ZoneId.of("UTC")).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-            return commonV2Response;
-        }).collect(Collectors.toList());
+        List<CommonV2Response> commonV2Responses = dashboardsByUserId.stream().map(EqualEdServiceImplV2::createDashboardResponse).collect(Collectors.toList());
 
+        return generateResponse(commonV2Responses);
+    }
 
-        return generateResponse(commonV2Responses);    }
+    private static CommonV2Response createDashboardResponse(Dashboard dashboard) {
+        CommonV2Response commonV2Response = new CommonV2Response();
+        commonV2Response.setId(dashboard.getStringSid());
+        commonV2Response.putField("exam_id", dashboard.getExamId());
+        commonV2Response.putField("user_id",String.valueOf(dashboard.getUser().getId()));
+        commonV2Response.putField("subject_name", dashboard.getSubject().getName());
+        commonV2Response.putField("title", dashboard.getTitle());
+        commonV2Response.putField("start_time",
+                LocalDateTime.ofInstant(dashboard.getStartTime(),
+                        ZoneId.of("UTC")).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+        return commonV2Response;
+    }
 
     @Override
     public Map<String,List<CommonV2Response>> getSubjectCategoriedByYear(Integer yearGroupId){
@@ -162,7 +161,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
             commonV2Response.putField("User_id", String.valueOf(users.id));
             commonV2Response.putField("year_group_id", String.valueOf(users.getYearGroup().getId()));
             commonV2Response.putField("role", users.getRole().name());
-            commonV2Response.putField("lastlogin", LocalDateTime.ofInstant(Instant.ofEpochSecond(users.getLastLogin()),
+            commonV2Response.putField("lastlogin", LocalDateTime.ofInstant(users.getLastLogin(),
                     ZoneId.of("UTC")).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
             commonV2Response.putField("Username", users.getUsername());
             commonV2Responses.add(commonV2Response);
@@ -192,6 +191,92 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
         }).collect(Collectors.toList());
 
         return generateResponse(commonV2Responses);
+    }
+
+    @Override
+    public Map<String, List<CommonV2Response>> createProfile(CreateProfileRequest request) {
+        List<Users> users = request.getRecords().stream()
+                .map(record -> {
+                    Users user = new Users();
+                    user.setSid(BaseEntity.generateByteUuid());
+                    user.setUsername(record.getFields().get("Username"));
+                    user.setEmail(record.getFields().get("Email"));
+                    user.setPassword(record.getFields().get("Password"));
+                    user.setYearGroup(getOrCreateYearGroup(Integer.parseInt(record.getFields().get("year_group_id"))));
+                    user.setRelatedAccount(getOrCreateAccount(Integer.parseInt(record.getFields().get("account_id")),record.getFields().get("Username")));
+                    user.setRole(EqualEdEnums.UserRole.valueOf(record.getFields().get("role").toUpperCase()));
+                    user.setLastLogin(Instant.now());
+                    user.setLastUpdatedOn(Instant.now());
+                    return user;
+                }).collect(Collectors.toList());
+
+        List<Users> usersCreated = userRepository.saveAll(users);
+        List<CommonV2Response> commonV2Responses = usersCreated.stream()
+                .map(user -> {
+                    CommonV2Response commonV2Response = new CommonV2Response();
+                    commonV2Response.setId(user.getStringSid());
+                    commonV2Response.setCreatedTime(Instant.now().toString());
+                    commonV2Response.putField("Username", user.getUsername());
+                    commonV2Response.putField("Email", user.getEmail());
+                    commonV2Response.putField("Password", user.getPassword());
+                    commonV2Response.putField("User_id", String.valueOf(user.getId()));
+                    commonV2Response.putField("year_group_id", String.valueOf(user.getYearGroup().getId()));
+                    commonV2Response.putField("role", user.getRole().name());
+                    commonV2Response.putField("lastlogin", LocalDateTime.ofInstant(user.getLastLogin(),
+                            ZoneId.of("UTC")).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                    commonV2Response.putField("lastupdate", LocalDateTime.ofInstant(user.getLastUpdatedOn(),
+                            ZoneId.of("UTC")).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                    return commonV2Response;
+                }).collect(Collectors.toList());
+        return generateResponse(commonV2Responses);
+    }
+
+    @Override
+    public Map<String, List<CommonV2Response>> createDashboard(CommonV2Request request) {
+        Map<String, String> fields = request.getFields();
+        Dashboard dashboard = new Dashboard();
+        dashboard.setSid(BaseEntity.generateByteUuid());
+        try {
+            int userId = Integer.parseInt(fields.get("user_id"));
+            Optional<Users> optional = userRepository.findById(userId);
+            dashboard.setUser(optional.orElseThrow(() -> new RecordNotFoundException(ErrorCodes.U001,"User not found for given id "+userId)));
+        }catch (Exception e){
+            throw new IncorrectArgumentException(ErrorCodes.U002,"Invalid user id, provide valid user id");
+        }
+
+        List<Subject> subjects = Optional.ofNullable(subjectRepository.findByName(fields.get("subject_name"))).orElse(Collections.EMPTY_LIST);
+        if(subjects.isEmpty()){
+            throw new RecordNotFoundException(ErrorCodes.S001,"Subject not found for name "+fields.get("subject_name"));
+        }
+        dashboard.setSubject(subjects.get(0));
+        dashboard.setExamId(fields.get("exam_id"));
+        dashboard.setTitle(fields.get("title"));
+        dashboard.setStartTime(Instant.now());
+
+        dashboardRepository.save(dashboard);
+        return generateResponse(Collections.singletonList(createDashboardResponse(dashboard)));
+    }
+
+    private Accounts getOrCreateAccount(int accountId,String name) {
+        return accountRepository.findById(accountId)
+                .orElseGet(() -> {
+                    Accounts accounts = new Accounts();
+                    accounts.setSid(BaseEntity.generateByteUuid());
+                    accounts.setName(name);
+                    accounts.setCreatedOn(Instant.now());
+                    accounts.setLastUpdatedOn(Instant.now());
+                    return accountRepository.save(accounts);
+                });
+    }
+
+    private YearGroup getOrCreateYearGroup(int yearGroupId) {
+        return yearGroupRepository.findById(yearGroupId)
+                .orElseGet(() -> {
+                    YearGroup yearGroup = new YearGroup();
+                    yearGroup.setSid(BaseEntity.generateByteUuid());
+                    yearGroup.setYear(yearGroupId);
+                    return yearGroupRepository.save(yearGroup);
+                });
     }
 
 

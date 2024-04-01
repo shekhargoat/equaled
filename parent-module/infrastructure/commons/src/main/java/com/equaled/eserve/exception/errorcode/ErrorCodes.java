@@ -65,7 +65,13 @@ public enum ErrorCodes {
 	SH011("Error while doing refund"),
 	SH012("Error in shopify customer payload"),
 	SH013("Existing order not found"),
-	SH014("Shopify store not integrated");
+	SH014("Shopify store not integrated"),
+
+	U001("User not found"),
+
+	U002("Invalid user id"),
+
+	S001("Subject not found");
 
 
 

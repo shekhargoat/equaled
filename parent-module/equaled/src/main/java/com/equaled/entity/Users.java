@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
@@ -27,9 +29,9 @@ public class Users extends BaseEntity{
     @Column(name = "enabled")
     private int enabled;
     @Column(name = "last_login")
-    private long lastLogin;
+    private Instant lastLogin;
     @Column(name = "last_updated_on")
-    private long lastUpdatedOn;
+    private Instant lastUpdatedOn;
 
     @ManyToOne
     @JoinColumn(name = "related_account", referencedColumnName = "id", nullable = false)

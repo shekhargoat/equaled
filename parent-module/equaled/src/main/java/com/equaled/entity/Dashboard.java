@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.time.Instant;
 import java.util.Objects;
 
 @Entity
@@ -25,7 +26,7 @@ public class Dashboard extends BaseEntity{
     private String examId;
 
     @Column(name = "start_time")
-    private long startTime;
+    private Instant startTime;
 
     @Column(name = "title")
     private String title;

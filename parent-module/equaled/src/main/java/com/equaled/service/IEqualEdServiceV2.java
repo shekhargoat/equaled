@@ -1,6 +1,8 @@
 package com.equaled.service;
 
+import com.equaled.to.CommonV2Request;
 import com.equaled.to.CommonV2Response;
+import com.equaled.to.CreateProfileRequest;
 import com.equaled.to.DashboardTO;
 
 import java.util.List;
@@ -20,4 +22,8 @@ public interface IEqualEdServiceV2 {
     Map<String,List<CommonV2Response>> getUserById(Integer id);
 
     Map<String, List<CommonV2Response>> getSetpracticeByUserIdSubjectName(Integer userId, String practiceName, String subjectName);
+
+    Map<String, List<CommonV2Response>> createProfile(CreateProfileRequest request);
+
+    Map<String, List<CommonV2Response>> createDashboard(CommonV2Request request);
 }
