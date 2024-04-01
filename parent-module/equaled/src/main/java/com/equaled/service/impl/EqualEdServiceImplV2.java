@@ -2,6 +2,7 @@ package com.equaled.service.impl;
 
 import com.equaled.dozer.DozerUtils;
 import com.equaled.entity.*;
+import com.equaled.eserve.common.DateUtils;
 import com.equaled.eserve.common.exception.IncorrectArgumentException;
 import com.equaled.eserve.common.exception.RecordNotFoundException;
 import com.equaled.eserve.exception.errorcode.ErrorCodes;
@@ -14,6 +15,8 @@ import com.equaled.value.EqualEdEnums;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.ListUtils;
+import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -37,6 +40,8 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     IYearGroupRepository yearGroupRepository;
     IAccountRepository accountRepository;
     ISubjectRepository subjectRepository;
+    IUseranswerRepository useranswerRepository;
+    IImprovementRepository improvementRepository;
 
     DozerUtils mapper;
 
@@ -284,5 +289,63 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
         Map<String,List<CommonV2Response>> response = new HashMap<>();
         response.put("records",commonV2Responses);
         return response;
+    }
+
+    @Override
+    public Optional<String> submitAnswer(Map<String, String> answer){
+        if(MapUtils.isEmpty(answer)) throw new IncorrectArgumentException("Answer information is not available");
+        log.trace("Submitting answers : {}",answer );
+        UserAnswers userAnswers = new UserAnswers();
+        userAnswers.setSid(BaseEntity.generateByteUuid());
+
+        userAnswers.setUser(userRepository.findById(MapUtils.getIntValue(answer, "User_id"))
+                .orElseThrow(()-> new IncorrectArgumentException("Invalid User Id")));
+        userAnswers.setQuestion(questionRepository.findById(MapUtils.getIntValue(answer, "question_id"))
+                .orElseThrow(()-> new IncorrectArgumentException("Invalid Question Id")));
+        userAnswers.setExamId(MapUtils.getString(answer, "exam_id"));
+
+        // get user answer date
+        userAnswers.setAnswerDate(DateUtils.getCurrentDate());
+        userAnswers.setTimeSpent(MapUtils.getIntValue(answer, "Time_Spent"));
+        userAnswers.setExplanation(MapUtils.getString(answer, "Explanation"));
+        userAnswers.setUserOption(MapUtils.getString(answer, "Explanation"));
+        userAnswers.setCorrectOption(MapUtils.getString(answer, "Correct_option"));
+        userAnswers.setExamId(MapUtils.getString(answer, "exam_id"));
+        log.trace("Submitting answer");
+        UserAnswers userAnswers1 = useranswerRepository.save(userAnswers);
+        log.debug("Users answer created : {}", userAnswers.getSid());
+        return Optional.ofNullable(userAnswers1.getStringSid());
+    }
+
+    @Override
+    public Optional<String> saveImprovement(Map<String, String> improvement){
+        if(MapUtils.isEmpty(improvement)) throw new IncorrectArgumentException("Improvement information is not available");
+        log.trace("Submitting Improvement : {}",improvement );
+
+        Improvement improvement1 = new Improvement();
+        improvement1.generateUuid();
+
+        improvement1.setUser(userRepository.findById(MapUtils.getIntValue(improvement, "User_id"))
+                .orElseThrow(()-> new IncorrectArgumentException("Invalid User Id")));
+        improvement1.setSubject(subjectRepository.findById(MapUtils.getIntValue(improvement, "Subject_id"))
+                .orElseThrow(()-> new IncorrectArgumentException("Invalid Subject Id")));
+
+        improvement1.setExamId(MapUtils.getString(improvement, "exam_id"));
+        improvement1.setScore(Integer.parseInt(MapUtils.getString(improvement, "score")));
+        improvement1.setStrongCategory(MapUtils.getString(improvement, "strong_category"));
+        improvement1.setWeakCategory(MapUtils.getString(improvement, "weak_category"));
+        improvement1.setTotalQuestions(Integer.parseInt(MapUtils.getString(improvement, "total_questions")));
+
+        log.trace("Submitting Improvement");
+        Improvement improvement2 = improvementRepository.save(improvement1);
+        log.debug("Users Improvement created : {}", improvement2.getSid());
+        return Optional.ofNullable(improvement2.getStringSid());
+
+    }
+
+    @Override
+    public void markSetpracticeClose(String setPracticeSid){
+        Optional.ofNullable(setPracticeSid).map(StringUtils::isNotEmpty).orElseThrow(() -> new IncorrectArgumentException("Record sid is missing"));
+        setPracticeRepository.markStatus(setPracticeSid, EqualEdEnums.SetpracticeStatus.COMPLETED);
     }
 }

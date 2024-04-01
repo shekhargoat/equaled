@@ -32,6 +32,10 @@ public class UserAnswers extends BaseEntity{
     @JoinColumn(name = "question_id", referencedColumnName = "id")
     private Questions question;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
+    private Users user;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
