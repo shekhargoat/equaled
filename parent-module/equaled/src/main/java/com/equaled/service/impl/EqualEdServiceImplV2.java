@@ -41,6 +41,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     ISubjectRepository subjectRepository;
     IUseranswerRepository useranswerRepository;
     IImprovementRepository improvementRepository;
+    IPracticeUseranswerRepository practiceUseranswerRepository;
 
     DozerUtils mapper;
 
@@ -416,5 +417,31 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
         commonV2Response.putField("lastlogin", LocalDateTime.ofInstant(users.getLastLogin(),
                 ZoneId.of("UTC")).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         return commonV2Response;
+    }
+
+    @Override
+    public Optional<String> submitPracticeAnswer(Map<String, String> answer){
+        if(MapUtils.isEmpty(answer)) throw new IncorrectArgumentException("Answer information is not available");
+        log.trace("Submitting answers : {}",answer );
+        PracticeUserAnswers userAnswers = new PracticeUserAnswers();
+        userAnswers.setSid(BaseEntity.generateByteUuid());
+
+        userAnswers.setUser(userRepository.findById(MapUtils.getIntValue(answer, "User_id"))
+                .orElseThrow(()-> new IncorrectArgumentException("Invalid User Id")));
+        userAnswers.setQuestion(questionRepository.findById(MapUtils.getIntValue(answer, "question_id"))
+                .orElseThrow(()-> new IncorrectArgumentException("Invalid Question Id")));
+        userAnswers.setExamId(MapUtils.getString(answer, "exam_id"));
+
+        // get user answer date
+        userAnswers.setAnswerDate(Instant.now());
+        userAnswers.setTimeSpent(MapUtils.getIntValue(answer, "Time_Spent"));
+        userAnswers.setExplanation(MapUtils.getString(answer, "Explanation"));
+        userAnswers.setUserOption(MapUtils.getString(answer, "Explanation"));
+        userAnswers.setCorrectOption(MapUtils.getString(answer, "Correct_option"));
+        userAnswers.setExamId(MapUtils.getString(answer, "exam_id"));
+        log.trace("Submitting answer");
+        PracticeUserAnswers userAnswers1 = practiceUseranswerRepository.save(userAnswers);
+        log.debug("Users answer created : {}", userAnswers.getSid());
+        return Optional.ofNullable(userAnswers1.getStringSid());
     }
 }

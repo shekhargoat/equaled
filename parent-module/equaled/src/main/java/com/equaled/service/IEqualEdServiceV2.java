@@ -43,4 +43,6 @@ public interface IEqualEdServiceV2 {
     Map<String, List<CommonV2Response>> getImprovementsByUserIdAndExam(Integer userId,String examId);
 
     Map<String, List<CommonV2Response>> getUserAnswersByExamId(String examId);
+
+    Optional<String> submitPracticeAnswer(Map<String, String> answer);
 }

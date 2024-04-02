@@ -157,4 +157,10 @@ public class EqualEdControllerV2 {
         log.info(String.format("Request received : User answers %s for GET /user/answers/exam/{examId} for particular ", examId));
         return ResponseEntity.ok(service.getUserAnswersByExamId(examId));
     }
+
+    @PostMapping("/practice/useranswers")
+    public ResponseEntity<?> submitPracticeAnswer(@RequestBody CommonV2Request request){
+        return ResponseEntity.ok(service.submitPracticeAnswer(request.getFields()));
+    }
+
 }
