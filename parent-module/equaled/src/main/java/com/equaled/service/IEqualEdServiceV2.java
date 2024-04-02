@@ -3,7 +3,6 @@ package com.equaled.service;
 import com.equaled.to.CommonV2Request;
 import com.equaled.to.CommonV2Response;
 import com.equaled.to.CreateProfileRequest;
-import com.equaled.to.DashboardTO;
 
 import java.util.List;
 import java.util.Map;
@@ -45,4 +44,10 @@ public interface IEqualEdServiceV2 {
     Map<String, List<CommonV2Response>> getUserAnswersByExamId(String examId);
 
     Optional<String> submitPracticeAnswer(Map<String, String> answer);
+
+    Map<String,List<CommonV2Response>> getQuestionsBySubAndLearnType(Integer subjectId, String learnType);
+
+    Map<String, List<CommonV2Response>> getSetpracticeByUserIdAndStatus(Integer userId, String status);
+
+    Map<String,List<CommonV2Response>> getTestsByYearGroup(Integer yearGroupId);
 }

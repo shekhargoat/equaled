@@ -1,6 +1,5 @@
 package com.equaled.controller;
 
-import com.equaled.service.IEqualEdService;
 import com.equaled.service.IEqualEdServiceV2;
 import com.equaled.to.CommonV2Request;
 import com.equaled.to.CreateProfileRequest;
@@ -9,7 +8,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -162,5 +160,34 @@ public class EqualEdControllerV2 {
     public ResponseEntity<?> submitPracticeAnswer(@RequestBody CommonV2Request request){
         return ResponseEntity.ok(service.submitPracticeAnswer(request.getFields()));
     }
+    @GetMapping("/questions/subject/{subjectId}/learn/{learnType}")
+    @ApiOperation(value = "get Questions by Subject and learn type",
+            notes = "API to get Questions by Subject and learnType(LEARN, TEST)")
+    public ResponseEntity<?> getQuestionsBySubAndLearnType(
+            @ApiParam(value = "Subject id", required = true) @PathVariable("subjectId") Integer subjectId,
+            @ApiParam(value = "Learn type", required = true) @PathVariable("learnType") String learnType){
+        log.info(String.format("Request received : User %s for GET /questions/subject/{subjectId}/learn/{learnType} " +
+                "for particular ", subjectId,learnType));
+        return ResponseEntity.ok(service.getQuestionsBySubAndLearnType(subjectId, learnType));
+    }
 
+    @GetMapping("/setpractice/user/{userId}/status/{status}")
+    public ResponseEntity<?> getSetpracticeByUserIdAndStatus(@ApiParam(value = "User id", required = true)
+                                                             @PathVariable("userId") Integer userId,
+                                                             @PathVariable("status") String status){
+
+        log.info(String.format("Request received : Users %s for GET  " +
+                "/setpractice/user/{userId}/status/{status}/" +
+                "for particular ", userId,status));
+        return ResponseEntity.ok(service.getSetpracticeByUserIdAndStatus(userId, status));
+    }
+
+    @GetMapping("/tests/year/{yearGroup}")
+    public ResponseEntity<?> getTestsByYearGroup(
+            @ApiParam(value = "Year id", required = true) @PathVariable("yearGroup") Integer yearGroup){
+        log.info(String.format("Request received : Tests %s for GET  " +
+                "/tests/year/{yearGroup}" +
+                "for particular ", yearGroup));
+        return ResponseEntity.ok(service.getTestsByYearGroup(yearGroup));
+    }
 }
