@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -22,7 +23,7 @@ public class UserAnswers extends BaseEntity{
     @Column(name = "time_spent")
     private int timeSpent;
     @Column(name = "answer_date")
-    private long answerDate;
+    private Instant answerDate;
     @Column(name = "exam_id")
     private String examId;
     @ManyToOne

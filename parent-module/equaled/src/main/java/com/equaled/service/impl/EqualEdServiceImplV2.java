@@ -2,7 +2,6 @@ package com.equaled.service.impl;
 
 import com.equaled.dozer.DozerUtils;
 import com.equaled.entity.*;
-import com.equaled.eserve.common.DateUtils;
 import com.equaled.eserve.common.exception.IncorrectArgumentException;
 import com.equaled.eserve.common.exception.RecordNotFoundException;
 import com.equaled.eserve.exception.errorcode.ErrorCodes;
@@ -156,22 +155,8 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     @Override
     public Map<String,List<CommonV2Response>> getUserById(Integer id){
         log.trace("Finding user by id : {}",id);
-        List<CommonV2Response> commonV2Responses = new ArrayList<>();
-        userRepository.findById(id).ifPresent(users -> {
-            CommonV2Response commonV2Response = new CommonV2Response();
-            commonV2Response.setId(users.getStringSid());
-            commonV2Response.putField("Username", users.getUsername());
-            commonV2Response.putField("Email", users.getEmail());
-            commonV2Response.putField("Password", users.getPassword());
-            commonV2Response.putField("User_id", String.valueOf(users.id));
-            commonV2Response.putField("year_group_id", String.valueOf(users.getYearGroup().getId()));
-            commonV2Response.putField("role", users.getRole().name());
-            commonV2Response.putField("lastlogin", LocalDateTime.ofInstant(users.getLastLogin(),
-                    ZoneId.of("UTC")).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-            commonV2Response.putField("Username", users.getUsername());
-            commonV2Responses.add(commonV2Response);
-        });
-        return generateResponse(commonV2Responses);
+        return userRepository.findById(id).map(users -> generateResponse(Collections.singletonList(createCommonUserResponse(users)))
+        ).orElseThrow(() -> new RecordNotFoundException(ErrorCodes.U001,"User not found for given id "+id));
     }
 
     @Override
@@ -217,22 +202,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
 
         List<Users> usersCreated = userRepository.saveAll(users);
         List<CommonV2Response> commonV2Responses = usersCreated.stream()
-                .map(user -> {
-                    CommonV2Response commonV2Response = new CommonV2Response();
-                    commonV2Response.setId(user.getStringSid());
-                    commonV2Response.setCreatedTime(Instant.now().toString());
-                    commonV2Response.putField("Username", user.getUsername());
-                    commonV2Response.putField("Email", user.getEmail());
-                    commonV2Response.putField("Password", user.getPassword());
-                    commonV2Response.putField("User_id", String.valueOf(user.getId()));
-                    commonV2Response.putField("year_group_id", String.valueOf(user.getYearGroup().getId()));
-                    commonV2Response.putField("role", user.getRole().name());
-                    commonV2Response.putField("lastlogin", LocalDateTime.ofInstant(user.getLastLogin(),
-                            ZoneId.of("UTC")).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    commonV2Response.putField("lastupdate", LocalDateTime.ofInstant(user.getLastUpdatedOn(),
-                            ZoneId.of("UTC")).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    return commonV2Response;
-                }).collect(Collectors.toList());
+                .map(EqualEdServiceImplV2::createCommonUserResponse).collect(Collectors.toList());
         return generateResponse(commonV2Responses);
     }
 
@@ -305,7 +275,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
         userAnswers.setExamId(MapUtils.getString(answer, "exam_id"));
 
         // get user answer date
-        userAnswers.setAnswerDate(DateUtils.getCurrentDate());
+        userAnswers.setAnswerDate(Instant.now());
         userAnswers.setTimeSpent(MapUtils.getIntValue(answer, "Time_Spent"));
         userAnswers.setExplanation(MapUtils.getString(answer, "Explanation"));
         userAnswers.setUserOption(MapUtils.getString(answer, "Explanation"));
@@ -347,5 +317,104 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     public void markSetpracticeClose(String setPracticeSid){
         Optional.ofNullable(setPracticeSid).map(StringUtils::isNotEmpty).orElseThrow(() -> new IncorrectArgumentException("Record sid is missing"));
         setPracticeRepository.markStatus(setPracticeSid, EqualEdEnums.SetpracticeStatus.COMPLETED);
+    }
+
+    @Override
+    public CommonV2Response updateUserLastLogin(Integer userId, CommonV2Request request) {
+        log.trace("Updating user last login time for id : {}",userId);
+        return userRepository.findById(userId)
+                .map(users -> {
+                    users.setLastLogin(Instant.parse(request.getFields().get("lastlogin")));
+                    return createCommonUserResponse(userRepository.saveAndFlush(users));
+                }).orElseThrow(() -> new RecordNotFoundException(ErrorCodes.U001, "User not found for given id " + userId));
+    }
+    @Override
+    public Map<String, List<CommonV2Response>> getImprovementsByUser(Integer userId) {
+        log.trace("Finding improvements for userId {}",userId);
+        List<Improvement> improvements = improvementRepository.getImprovementsByUserId(userId);
+        if(improvements.isEmpty()) throw new RecordNotFoundException(ErrorCodes.I001, "Improvements not found for given user id " + userId);
+        log.debug("Found {} improvements for userId {}",improvements.size(),userId);
+        return createImprovementResponse(improvements);
+    }
+
+    @Override
+    public Map<String, List<CommonV2Response>> getImprovementsByExam(String examId) {
+        log.trace("Finding improvements for examId {}",examId);
+        List<Improvement> improvements = improvementRepository.getImprovementsByExamId(examId);
+        if(improvements.isEmpty()) throw new RecordNotFoundException(ErrorCodes.I001, "Improvements not found for given exam id " + examId);
+        log.debug("Found {} improvements for examId {}",improvements.size(),examId);
+        return createImprovementResponse(improvements);
+    }
+
+    @Override
+    public Map<String, List<CommonV2Response>> getImprovementsByUserIdAndExam(Integer userId,String examId) {
+        log.trace("Finding improvements for userId {} and examId {}",userId,examId);
+        List<Improvement> improvements = improvementRepository.getImprovementsByUserIdAndExamId(userId,examId);
+        if(improvements.isEmpty()) throw new RecordNotFoundException(ErrorCodes.I001, "Improvements not found for given user id " + userId +" and examId "+examId);
+        log.debug("Found {} improvements for userId {} and examId {}",improvements.size(),userId,examId);
+        return createImprovementResponse(improvements);
+    }
+
+    @Override
+    public Map<String, List<CommonV2Response>> getUserAnswersByExamId(String examId) {
+        log.trace("Finding user answers for examId {}",examId);
+        List<UserAnswers> userAnswers = useranswerRepository.findByExamId(examId);
+        if(userAnswers.isEmpty()) throw new RecordNotFoundException(ErrorCodes.UA001, "User answers not found for given and examId "+examId);
+        log.debug("Found {} user answers for examId {}",userAnswers.size(),examId);
+        List<CommonV2Response> commonV2Responses = userAnswers.stream().map(answers -> {
+            CommonV2Response commonV2Response = new CommonV2Response();
+            commonV2Response.setId(answers.getStringSid());
+            commonV2Response.setCreatedTime(answers.getAnswerDate().toString());
+            commonV2Response.putField("user_exam_Id", String.valueOf(answers.id));
+            commonV2Response.putField("User_id", String.valueOf(answers.getUser().getId()));
+            commonV2Response.putField("exam_id", answers.getExamId());
+            commonV2Response.putField("text", answers.getQuestion().getQuestion());
+            commonV2Response.putField("category", answers.getQuestion().getCategory());
+            commonV2Response.putField("sub_category", answers.getQuestion().getSubCategory());
+            commonV2Response.putField("Correct_option", answers.getQuestion().getCorrectOption());
+            commonV2Response.putField("question_id", String.valueOf(answers.getQuestion().id));
+            commonV2Response.putField("Explanation", answers.getExplanation());
+            commonV2Response.putField("Time_Spent", String.valueOf(answers.getTimeSpent()));
+            commonV2Response.putField("date", answers.getAnswerDate().toString());
+            return commonV2Response;
+        }).collect(Collectors.toList());
+
+        return generateResponse(commonV2Responses);
+    }
+
+
+    private Map<String, List<CommonV2Response>> createImprovementResponse(List<Improvement> improvements) {
+        List<CommonV2Response> commonV2Responses = improvements.stream().map(improvement -> {
+            CommonV2Response commonV2Response = new CommonV2Response();
+            commonV2Response.setId(improvement.getStringSid());
+            commonV2Response.setCreatedTime(improvement.getCreatedOn().toString());
+            commonV2Response.putField("improve_id", String.valueOf(improvement.id));
+            commonV2Response.putField("user_id", String.valueOf(improvement.getUser().getId()));
+            commonV2Response.putField("exam_id", improvement.getExamId());
+            commonV2Response.putField("strong_category", improvement.getStrongCategory());
+            commonV2Response.putField("weak_category", improvement.getWeakCategory());
+            commonV2Response.putField("score", String.valueOf(improvement.getScore()));
+            commonV2Response.putField("total_questions", String.valueOf(improvement.getTotalQuestions()));
+            commonV2Response.putField("subject_name", improvement.getSubject().getName());
+
+            return commonV2Response;
+        }).collect(Collectors.toList());
+
+        return generateResponse(commonV2Responses);
+    }
+
+    private static CommonV2Response createCommonUserResponse(Users users) {
+        CommonV2Response commonV2Response = new CommonV2Response();
+        commonV2Response.setId(users.getStringSid());
+        commonV2Response.setCreatedTime(Instant.now().toString());
+        commonV2Response.putField("Username", users.getUsername());
+        commonV2Response.putField("Email", users.getEmail());
+        commonV2Response.putField("Password", users.getPassword());
+        commonV2Response.putField("User_id", String.valueOf(users.getId()));
+        commonV2Response.putField("year_group_id", String.valueOf(users.getYearGroup().getId()));
+        commonV2Response.putField("role", users.getRole().name());
+        commonV2Response.putField("lastlogin", LocalDateTime.ofInstant(users.getLastLogin(),
+                ZoneId.of("UTC")).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+        return commonV2Response;
     }
 }

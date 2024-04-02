@@ -137,3 +137,5 @@ create table user_tests
 )
     comment 'Stores all the information about the user test data ';
 
+alter table improvement add column created_on datetime;
+

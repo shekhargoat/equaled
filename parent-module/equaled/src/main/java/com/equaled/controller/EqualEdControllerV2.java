@@ -106,4 +106,55 @@ public class EqualEdControllerV2 {
         service.markSetpracticeClose(sid);
         return ResponseEntity.ok().build();
     }
+
+    @PatchMapping("/user/{userId}")
+    @ApiOperation(value = "update user last login",
+            notes = "API to update last login time for a User by userId")
+    public ResponseEntity<?> updateLastLogin(
+            @ApiParam(value = "User id", required = true) @PathVariable("userId") Integer userId,
+            @RequestBody CommonV2Request request){
+        log.info(String.format("Request received : Users %s for update last login /user/{userId} " +
+                "for particular ", userId));
+        return ResponseEntity.ok(service.updateUserLastLogin(userId,request));
+    }
+    @GetMapping("/improvement/user/{userId}")
+    @ApiOperation(value = "get improvement by userId", notes = "API to get all improvements by UserId")
+    public ResponseEntity<?> getImprovementByUser(
+            @ApiParam(value = "User id", required = true) @PathVariable("userId") Integer userId) {
+        log.info(String.format("Request received : Improvement %s for GET /improvement/user/{userId} for particular ", userId));
+        return ResponseEntity.ok(service.getImprovementsByUser(userId));
+    }
+
+    @GetMapping("/improvement/exam/{examId}")
+    @ApiOperation(value = "get improvement by examId", notes = "API to get all improvements by examId")
+    public ResponseEntity<?> getImprovementByExamId(
+            @ApiParam(value = "Exam id", required = true) @PathVariable("examId") String examId) {
+        log.info(String.format("Request received : Improvement %s for GET /improvement/exam/{examId} for particular ", examId));
+        return ResponseEntity.ok(service.getImprovementsByExam(examId));
+    }
+
+    @GetMapping("/improvement/user/{userId}/exam/{examId}")
+    @ApiOperation(value = "get improvement by userId and examId", notes = "API to get all improvements for user by examId")
+    public ResponseEntity<?> getImprovementForUserByExamId(
+            @ApiParam(value = "User id", required = true) @PathVariable("userId") Integer userId,
+            @ApiParam(value = "Exam id", required = true) @PathVariable("examId") String examId) {
+        log.info(String.format("Request received : Improvement %s %s for GET /improvement/user/{userId}/exam/{examId} for particular ", userId,examId));
+        return ResponseEntity.ok(service.getImprovementsByUserIdAndExam(userId,examId));
+    }
+
+    @GetMapping("/useranswers/exam/{examId}")
+    @ApiOperation(value = "get user answers by examId", notes = "API to get all user answers by examId")
+    public ResponseEntity<?> getUserAnswersByExamId(
+            @ApiParam(value = "Exam id", required = true) @PathVariable("examId") String examId) {
+        log.info(String.format("Request received : User answers %s for GET /user/answers/exam/{examId} for particular ", examId));
+        return ResponseEntity.ok(service.getUserAnswersByExamId(examId));
+    }
+
+    @GetMapping("/test/subject/{subjectName}}/yeargroup/{yearGroupId}")
+    @ApiOperation(value = "get user answers by examId", notes = "API to get all user answers by examId")
+    public ResponseEntity<?> getTestBySubjectAndYearGroup(
+            @ApiParam(value = "Exam id", required = true) @PathVariable("examId") String examId) {
+        log.info(String.format("Request received : User answers %s for GET /user/answers/exam/{examId} for particular ", examId));
+        return ResponseEntity.ok(service.getUserAnswersByExamId(examId));
+    }
 }

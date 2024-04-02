@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -23,6 +24,8 @@ public class Improvement extends BaseEntity{
     private int score;
     @Column(name = "total_questions")
     private int totalQuestions;
+    @Column(name = "created_on")
+    private Instant createdOn;
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private Users user;
