@@ -444,4 +444,77 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
         log.debug("Users answer created : {}", userAnswers.getSid());
         return Optional.ofNullable(userAnswers1.getStringSid());
     }
+
+    @Override
+    public Map<String, List<CommonV2Response>> getQuestionsBySubAndLearnType(Integer subjectId, String learnType) {
+        log.trace("Finding Questions for subject {} and learn type {}",subjectId, learnType);
+        List<Questions> questions = Optional.ofNullable(questionRepository
+                .getQuestionsBySubjectAndLearn(subjectId, learnType)).orElse(ListUtils.EMPTY_LIST);
+        log.debug("Finding Questions for subject {} and learn type {} = {}",subjectId, learnType, questions.size());
+        List<CommonV2Response> commonV2Responses = questions.stream().map(question -> {
+            CommonV2Response commonV2Response = new CommonV2Response();
+            commonV2Response.setId(question.getStringSid());
+            commonV2Response.putField("question_id", String.valueOf(question.id));
+            commonV2Response.putField("Text", question.getQuestion());
+            commonV2Response.putField("Subject_id", String.valueOf(question.getSubject().id));
+            commonV2Response.putField("year_group_id", String.valueOf(question.getYearGroupId().id));
+            commonV2Response.putField("Difficulty_level", String.valueOf(question.getDifficulty()));
+            commonV2Response.putField("category", String.valueOf(question.getCategory()));
+            commonV2Response.putField("sub_category", String.valueOf(question.getSubCategory()));
+            commonV2Response.putField("Correct_option", String.valueOf(question.getCorrectOption()));
+            commonV2Response.putField("Learn", String.valueOf(question.getLearn()));
+
+            return commonV2Response;
+        }).collect(Collectors.toList());
+
+        return generateResponse(commonV2Responses);
+    }
+
+    @Override
+    public Map<String, List<CommonV2Response>> getSetpracticeByUserIdAndStatus(Integer userId, String status) {
+        log.trace("Finding Set practice for user {} and status {}", userId, status);
+        List<Setpractice> setpractices = Optional.ofNullable(setPracticeRepository
+                .getSetpracticeByUserAndStatus(userId, status)).orElse(ListUtils.EMPTY_LIST);
+        log.debug("Found {} Set Practices found  for user id {} and status {}",setpractices.size(),userId,status);
+
+        List<CommonV2Response> commonV2Responses = setpractices.stream().map(setpractice -> {
+            CommonV2Response commonV2Response = new CommonV2Response();
+            commonV2Response.setId(setpractice.getStringSid());
+            commonV2Response.putField("seq_id", String.valueOf(setpractice.id));
+            commonV2Response.putField("User_id", String.valueOf(setpractice.getUser().id));
+            commonV2Response.putField("practicename", setpractice.getPracticeName());
+            commonV2Response.putField("time_limit", String.valueOf(setpractice.getTimeLimit()));
+            commonV2Response.putField("questions", setpractice.getQuestions());
+            commonV2Response.putField("no_questions", String.valueOf(setpractice.getNoOfQ()));
+            commonV2Response.putField("subject_name", setpractice.getSubject().getName());
+            commonV2Response.putField("Status", setpractice.getStatus().name());
+            return commonV2Response;
+        }).collect(Collectors.toList());
+
+        return generateResponse(commonV2Responses);
+    }
+
+    @Override
+    public Map<String, List<CommonV2Response>> getTestsByYearGroup(Integer yearGroupId) {
+        log.trace("Finding Tests for Year {}",yearGroupId);
+        List<Test> tests = Optional.ofNullable(testRepository.getTestByYearGroupId(yearGroupId))
+                .orElse(ListUtils.EMPTY_LIST);
+        log.debug("Tests fetched for year {} = {}",yearGroupId, tests.size());
+
+        List<CommonV2Response> commonV2Responses = tests.stream().map(test -> {
+            CommonV2Response commonV2Response = new CommonV2Response();
+            commonV2Response.setId(test.getStringSid());
+            commonV2Response.putField("test_id", String.valueOf(test.id));
+            commonV2Response.putField("Test Description", test.getDescription());
+            commonV2Response.putField("Time", String.valueOf(test.getTimeAllottedInMins()));
+            commonV2Response.putField("Subject", test.getSubject().getName());
+            commonV2Response.putField("Subject_id", String.valueOf(test.getSubject().id));
+            commonV2Response.putField("year_group_id", String.valueOf(test.getYearGroupId().getYear()));
+            commonV2Response.putField("No_Questions", String.valueOf(test.getNoOfQuestions()));
+            commonV2Response.putField("Learn", String.valueOf(test.getTestType()));
+            return commonV2Response;
+        }).collect(Collectors.toList());
+
+        return generateResponse(commonV2Responses);
+    }
 }
