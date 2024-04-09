@@ -449,7 +449,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     public Map<String, List<CommonV2Response>> getQuestionsBySubAndLearnType(Integer subjectId, String learnType) {
         log.trace("Finding Questions for subject {} and learn type {}",subjectId, learnType);
         List<Questions> questions = Optional.ofNullable(questionRepository
-                .getQuestionsBySubjectAndLearn(subjectId, learnType)).orElse(ListUtils.EMPTY_LIST);
+                .getQuestionsBySubjectAndLearn(subjectId, EqualEdEnums.LearnType.valueOf(learnType))).orElse(ListUtils.EMPTY_LIST);
         log.debug("Finding Questions for subject {} and learn type {} = {}",subjectId, learnType, questions.size());
         List<CommonV2Response> commonV2Responses = questions.stream().map(question -> {
             CommonV2Response commonV2Response = new CommonV2Response();
@@ -516,5 +516,64 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
         }).collect(Collectors.toList());
 
         return generateResponse(commonV2Responses);
+    }
+
+    @Override
+    public Map<String, List<CommonV2Response>> getQuestionsBySubAndYearGroup(String subjectName, Integer yearGroup) {
+        log.trace("Finding Questions for subject {} and year group {}",subjectName, yearGroup);
+        List<Questions> questions = Optional.ofNullable(questionRepository
+                .getQuestionsBySubjectAndYearGroupId(subjectName, yearGroup)).orElse(ListUtils.EMPTY_LIST);
+        log.debug("Finding Questions for subject {} and year group {} = {}",subjectName, yearGroup, questions.size());
+        List<CommonV2Response> commonV2Responses = questions.stream().map(question -> {
+            CommonV2Response commonV2Response = new CommonV2Response();
+            commonV2Response.setId(question.getStringSid());
+            commonV2Response.putField("question_id", String.valueOf(question.id));
+            commonV2Response.putField("Text", question.getQuestion());
+            commonV2Response.putField("Subject_id", String.valueOf(question.getSubject().id));
+            commonV2Response.putField("year_group_id", String.valueOf(question.getYearGroupId().id));
+            commonV2Response.putField("Difficulty_level", String.valueOf(question.getDifficulty()));
+            commonV2Response.putField("category", String.valueOf(question.getCategory()));
+            commonV2Response.putField("sub_category", String.valueOf(question.getSubCategory()));
+            commonV2Response.putField("Correct_option", String.valueOf(question.getCorrectOption()));
+            commonV2Response.putField("Learn", String.valueOf(question.getLearn()));
+
+            return commonV2Response;
+        }).collect(Collectors.toList());
+
+        return generateResponse(commonV2Responses);
+    }
+
+    @Override
+    public Map<String, List<CommonV2Response>> getUserAnswersByUserAndExamId(Integer userId, String examId) {
+        log.trace("Finding user answers for userId {} and examId {}",userId,examId);
+        List<UserAnswers> userAnswers = useranswerRepository.findByExamId(examId);
+        if(userAnswers.isEmpty()) throw new RecordNotFoundException(ErrorCodes.UA001, "User answers not found for given user "+userId +" and examId "+examId);
+        log.debug("Found {} user answers for userId {} examId {}",userAnswers.size(),userId,examId);
+        List<CommonV2Response> commonV2Responses = userAnswers.stream().map(answers -> {
+            CommonV2Response commonV2Response = new CommonV2Response();
+            commonV2Response.setId(answers.getStringSid());
+            commonV2Response.setCreatedTime(answers.getAnswerDate().toString());
+            commonV2Response.putField("user_exam_Id", String.valueOf(answers.id));
+            commonV2Response.putField("User_id", String.valueOf(answers.getUser().getId()));
+            commonV2Response.putField("exam_id", answers.getExamId());
+            commonV2Response.putField("text", answers.getQuestion().getQuestion());
+            commonV2Response.putField("category", answers.getQuestion().getCategory());
+            commonV2Response.putField("sub_category", answers.getQuestion().getSubCategory());
+            commonV2Response.putField("Correct_option", answers.getQuestion().getCorrectOption());
+            commonV2Response.putField("question_id", String.valueOf(answers.getQuestion().id));
+            commonV2Response.putField("Explanation", answers.getExplanation());
+            commonV2Response.putField("Time_Spent", String.valueOf(answers.getTimeSpent()));
+            commonV2Response.putField("date", answers.getAnswerDate().toString());
+            return commonV2Response;
+        }).collect(Collectors.toList());
+
+        return generateResponse(commonV2Responses);
+    }
+
+    @Override
+    public Map<String, List<CommonV2Response>> getUserBySid(String sid) {
+        log.trace("Finding user by sid : {}",sid);
+        return userRepository.findBySid(sid).map(users -> generateResponse(Collections.singletonList(createCommonUserResponse(users)))
+        ).orElseThrow(() -> new RecordNotFoundException(ErrorCodes.U001,"User not found for given sid "+sid));
     }
 }
