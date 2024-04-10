@@ -52,4 +52,10 @@ public interface IEqualEdServiceV2 {
     Map<String,List<CommonV2Response>> getTestsByYearGroup(Integer yearGroupId);
 
     Map<String,List<CommonV2Response>> getUserByUserName(String username);
+
+    Map<String, List<CommonV2Response>> getQuestionsBySubAndYearGroup(String subjectName, Integer yearGroup);
+
+    Map<String, List<CommonV2Response>> getUserAnswersByUserAndExamId(Integer userId,String examId);
+
+    Map<String,List<CommonV2Response>> getUserBySid(String sid);
 }
