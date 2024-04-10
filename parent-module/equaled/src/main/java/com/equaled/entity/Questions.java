@@ -41,6 +41,8 @@ public class Questions extends BaseEntity{
     @ManyToOne
     @JoinColumn(name = "subject_id", referencedColumnName = "id")
     private Subject subject;
+    @Column(name = "image_path")
+    private String imagePath;
 
     @Override
     public boolean equals(Object o) {

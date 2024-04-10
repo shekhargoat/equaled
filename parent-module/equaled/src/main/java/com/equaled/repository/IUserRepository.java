@@ -11,4 +11,5 @@ public interface IUserRepository extends JpaRepository<Users, Integer> {
 
     @Override
     Optional<Users> findById(Integer integer);
+    Optional<Users> findByUsernameIs(String username);
 }

@@ -48,9 +48,9 @@ public class EqualEdControllerV2 {
     @ApiOperation(value = "get Questions by Subject and Sub category",
             notes = "API to get Questions by Subject and Sub category")
     public ResponseEntity<?> getQuestionsBySubAndSubcat(
-            @ApiParam(value = "Year id", required = true) @PathVariable("yearId") Integer subjectId,
-            @ApiParam(value = "Subject Name", required = true) @PathVariable("subjectName") String subcat){
-        log.info(String.format("Request received : User %s for GET /questions/subject/{subjectId}/subcate/{subcat} " +
+            @ApiParam(value = "Year id", required = true) @PathVariable("subjectId") Integer subjectId,
+            @ApiParam(value = "Subject Name", required = true) @PathVariable("subcat") String subcat){
+        log.info(String.format("Request received : User %s for GET /questions/subject/{subjectId}/subcat/{subcat} " +
                 "for particular ", subjectId,subcat));
         return ResponseEntity.ok(service.getQuestionsBySubAndSubcat(subjectId, subcat));
     }
@@ -148,12 +148,13 @@ public class EqualEdControllerV2 {
         return ResponseEntity.ok(service.getUserAnswersByExamId(examId));
     }
 
-    @GetMapping("/test/subject/{subjectName}}/yeargroup/{yearGroupId}")
+    @GetMapping("/test/subject/{subjectName}/yeargroup/{yearGroupId}")
     @ApiOperation(value = "get user answers by examId", notes = "API to get all user answers by examId")
     public ResponseEntity<?> getTestBySubjectAndYearGroup(
-            @ApiParam(value = "Exam id", required = true) @PathVariable("examId") String examId) {
-        log.info(String.format("Request received : User answers %s for GET /user/answers/exam/{examId} for particular ", examId));
-        return ResponseEntity.ok(service.getUserAnswersByExamId(examId));
+            @PathVariable("subjectName") String subjectName, @PathVariable("yearGroupId") Integer yearGroupId) {
+        log.info(String.format("Request received : User answers %s for GET /test/subject/{subjectName}/yeargroup/{yearGroupId}" +
+                " for particular ", subjectName));
+        return ResponseEntity.ok(service.getTestsByYearAndSubjectName(yearGroupId, subjectName));
     }
 
     @PostMapping("/practice/useranswers")
@@ -190,4 +191,16 @@ public class EqualEdControllerV2 {
                 "for particular ", yearGroup));
         return ResponseEntity.ok(service.getTestsByYearGroup(yearGroup));
     }
+
+    @GetMapping("/username/{username}")
+    @ApiOperation(value = "get User by username",
+            notes = "API to get User by userId")
+    public ResponseEntity<?> getUserById(
+            @ApiParam(value = "User id", required = true) @PathVariable("username") String userName){
+        log.info(String.format("Request received : Users %s for GET /user/{userId} " +
+                "for particular ", userName));
+        return ResponseEntity.ok(service.getUserByUserName(userName));
+
+    }
+
 }

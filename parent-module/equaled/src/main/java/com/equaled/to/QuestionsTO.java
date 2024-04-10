@@ -20,4 +20,5 @@ public class QuestionsTO extends BaseTO {
     private EqualEdEnums.LearnType learn;
     private YearGroupTO yearGroup;
     private SubjectTO subject;
+    private String imagePath;
 }

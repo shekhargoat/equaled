@@ -194,7 +194,10 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
                     user.setEmail(record.getFields().get("Email"));
                     user.setPassword(record.getFields().get("Password"));
                     user.setYearGroup(getOrCreateYearGroup(Integer.parseInt(record.getFields().get("year_group_id"))));
-                    user.setRelatedAccount(getOrCreateAccount(Integer.parseInt(record.getFields().get("account_id")),record.getFields().get("Username")));
+                    Accounts accounts= Optional.ofNullable(record.getFields().get("account_id")).filter(StringUtils::isNumeric)
+                                    .map(Integer::parseInt).map(ids -> getOrCreateAccount(ids, record.getFields().get("Username")))
+                            .orElse(accountRepository.findById(1).get());
+                    user.setRelatedAccount(accounts);
                     user.setRole(EqualEdEnums.UserRole.valueOf(record.getFields().get("role").toUpperCase()));
                     user.setLastLogin(Instant.now());
                     user.setLastUpdatedOn(Instant.now());
@@ -449,7 +452,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     public Map<String, List<CommonV2Response>> getQuestionsBySubAndLearnType(Integer subjectId, String learnType) {
         log.trace("Finding Questions for subject {} and learn type {}",subjectId, learnType);
         List<Questions> questions = Optional.ofNullable(questionRepository
-                .getQuestionsBySubjectAndLearn(subjectId, learnType)).orElse(ListUtils.EMPTY_LIST);
+                .getQuestionsBySubjectAndLearn(subjectId, EqualEdEnums.LearnType.valueOf(learnType))).orElse(ListUtils.EMPTY_LIST);
         log.debug("Finding Questions for subject {} and learn type {} = {}",subjectId, learnType, questions.size());
         List<CommonV2Response> commonV2Responses = questions.stream().map(question -> {
             CommonV2Response commonV2Response = new CommonV2Response();
@@ -517,4 +520,12 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
 
         return generateResponse(commonV2Responses);
     }
+
+    @Override
+    public Map<String,List<CommonV2Response>> getUserByUserName(String username){
+        log.trace("Finding user by username : {}",username);
+        return userRepository.findByUsernameIs(username).map(users -> generateResponse(Collections.singletonList(createCommonUserResponse(users)))
+        ).orElseThrow(() -> new RecordNotFoundException(ErrorCodes.U001,"User not found for given username "+username));
+    }
+
 }
