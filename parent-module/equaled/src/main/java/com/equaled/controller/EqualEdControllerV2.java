@@ -11,6 +11,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Map;
+
 @Slf4j
 @AllArgsConstructor
 @RestController
@@ -50,9 +53,6 @@ public class EqualEdControllerV2 {
     public ResponseEntity<?> getQuestionsBySubAndSubcat(
             @ApiParam(value = "Year id", required = true) @PathVariable("subjectId") Integer subjectId,
             @ApiParam(value = "Subject Name", required = true) @PathVariable("subcat") String subcat){
-        log.info(String.format("Request received : User %s for GET /questions/subject/{subjectId}/subcat/{subcat} " +
-            @ApiParam(value = "Subject id", required = true) @PathVariable("subjectId") Integer subjectId,
-            @ApiParam(value = "Sub category", required = true) @PathVariable("subcat") String subcat){
         log.info(String.format("Request received : User %s for GET /questions/subject/{subjectId}/subcat/{subcat} " +
                 "for particular ", subjectId,subcat));
         return ResponseEntity.ok(service.getQuestionsBySubAndSubcat(subjectId, subcat));
@@ -236,6 +236,11 @@ public class EqualEdControllerV2 {
                 "for particular ", sid));
         return ResponseEntity.ok(service.getUserBySid(sid));
 
+    }
+
+    @PostMapping("/setpractice")
+    public ResponseEntity<?> submitSetpractice(@RequestBody Map<String, List<CommonV2Request>> request){
+        return ResponseEntity.ok(service.submitSetpractice(request));
     }
 
 }

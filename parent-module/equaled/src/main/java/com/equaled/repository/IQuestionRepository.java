@@ -12,10 +12,7 @@ public interface IQuestionRepository extends JpaRepository<Questions, Integer> {
 
     @Query(value = "select q from Questions q where q.subject.id = :subjectId and q.subCategory = :subcatName")
     List<Questions> getQuestionsBySubAndSubcat(Integer subjectId, String subcatName);
-    @Query(value = "select q from Questions q where q.subject.id = :subjectId and q.learn = :learnType")
     List<Questions> getQuestionsBySubjectAndLearn(Integer subjectId, EqualEdEnums.LearnType learnType);
-    List<Questions> getQuestionsBySubjectAndLearn(Integer subjectId, EqualEdEnums.LearnType learnType);
-
     @Query(value = "select q from Questions q where q.subject.name = :subjectName and q.yearGroupId.id = :yearGroup")
     List<Questions> getQuestionsBySubjectAndYearGroupId(String subjectName, Integer yearGroup);
 }
