@@ -2,6 +2,7 @@ package com.equaled.service.impl;
 
 import com.equaled.dozer.DozerUtils;
 import com.equaled.entity.*;
+import com.equaled.eserve.common.CommonUtils;
 import com.equaled.eserve.common.exception.IncorrectArgumentException;
 import com.equaled.eserve.common.exception.RecordNotFoundException;
 import com.equaled.eserve.exception.errorcode.ErrorCodes;
@@ -13,6 +14,7 @@ import com.equaled.to.CreateProfileRequest;
 import com.equaled.value.EqualEdEnums;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.ListUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -194,7 +196,10 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
                     user.setEmail(record.getFields().get("Email"));
                     user.setPassword(record.getFields().get("Password"));
                     user.setYearGroup(getOrCreateYearGroup(Integer.parseInt(record.getFields().get("year_group_id"))));
-                    user.setRelatedAccount(getOrCreateAccount(Integer.parseInt(record.getFields().get("account_id")),record.getFields().get("Username")));
+                    Accounts accounts= Optional.ofNullable(record.getFields().get("account_id")).filter(StringUtils::isNumeric)
+                                    .map(Integer::parseInt).map(ids -> getOrCreateAccount(ids, record.getFields().get("Username")))
+                            .orElse(accountRepository.findById(1).get());
+                    user.setRelatedAccount(accounts);
                     user.setRole(EqualEdEnums.UserRole.valueOf(record.getFields().get("role").toUpperCase()));
                     user.setLastLogin(Instant.now());
                     user.setLastUpdatedOn(Instant.now());
@@ -263,7 +268,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     }
 
     @Override
-    public Optional<String> submitAnswer(Map<String, String> answer){
+    public Map<String, List<CommonV2Response>> submitAnswer(Map<String, String> answer){
         if(MapUtils.isEmpty(answer)) throw new IncorrectArgumentException("Answer information is not available");
         log.trace("Submitting answers : {}",answer );
         UserAnswers userAnswers = new UserAnswers();
@@ -279,44 +284,62 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
         userAnswers.setAnswerDate(Instant.now());
         userAnswers.setTimeSpent(MapUtils.getIntValue(answer, "Time_Spent"));
         userAnswers.setExplanation(MapUtils.getString(answer, "Explanation"));
-        userAnswers.setUserOption(MapUtils.getString(answer, "Explanation"));
-        userAnswers.setCorrectOption(MapUtils.getString(answer, "Correct_option"));
+        userAnswers.setUserOption(MapUtils.getString(answer, "User_option"));
+        userAnswers.setCorrectOption(MapUtils.getString(answer, "Correct_option","a"));
         userAnswers.setExamId(MapUtils.getString(answer, "exam_id"));
+        userAnswers.setAnswerDate(Instant.now());
         log.trace("Submitting answer");
         UserAnswers userAnswers1 = useranswerRepository.save(userAnswers);
         log.debug("Users answer created : {}", userAnswers.getSid());
-        return Optional.ofNullable(userAnswers1.getStringSid());
+        CommonV2Response commonV2Response = new CommonV2Response();
+        commonV2Response.setId(userAnswers1.getStringSid());
+        commonV2Response.setCreatedTime(userAnswers1.getAnswerDate().toString());
+        commonV2Response.putField("user_exam_Id", String.valueOf(userAnswers1.id));
+        commonV2Response.putField("User_id", String.valueOf(userAnswers1.getUser().getId()));
+        commonV2Response.putField("exam_id", userAnswers1.getExamId());
+        commonV2Response.putField("text", userAnswers1.getQuestion().getQuestion());
+        commonV2Response.putField("category", userAnswers1.getQuestion().getCategory());
+        commonV2Response.putField("sub_category", userAnswers1.getQuestion().getSubCategory());
+        commonV2Response.putField("Correct_option", userAnswers1.getQuestion().getCorrectOption());
+        commonV2Response.putField("question_id", String.valueOf(userAnswers1.getQuestion().id));
+        commonV2Response.putField("Explanation", userAnswers1.getExplanation());
+        commonV2Response.putField("Time_Spent", String.valueOf(userAnswers1.getTimeSpent()));
+        commonV2Response.putField("date", userAnswers1.getAnswerDate().toString());
+        return generateResponse(Collections.singletonList(commonV2Response));
     }
 
     @Override
-    public Optional<String> saveImprovement(Map<String, String> improvement){
+    public CommonV2Response saveImprovement(Map<String, String> improvement){
         if(MapUtils.isEmpty(improvement)) throw new IncorrectArgumentException("Improvement information is not available");
         log.trace("Submitting Improvement : {}",improvement );
 
         Improvement improvement1 = new Improvement();
         improvement1.generateUuid();
 
-        improvement1.setUser(userRepository.findById(MapUtils.getIntValue(improvement, "User_id"))
+        improvement1.setUser(userRepository.findById(MapUtils.getIntValue(improvement, "user_id"))
                 .orElseThrow(()-> new IncorrectArgumentException("Invalid User Id")));
-        improvement1.setSubject(subjectRepository.findById(MapUtils.getIntValue(improvement, "Subject_id"))
-                .orElseThrow(()-> new IncorrectArgumentException("Invalid Subject Id")));
+        Subject subject = Optional.ofNullable(subjectRepository.findByName(MapUtils.getString(improvement, "subject_name")))
+                        .filter(CollectionUtils::isNotEmpty).map(lst -> lst.get(0))
+                .orElseThrow(()-> new IncorrectArgumentException("Invalid Subject Name"));
+        improvement1.setSubject(subject);
 
         improvement1.setExamId(MapUtils.getString(improvement, "exam_id"));
         improvement1.setScore(Integer.parseInt(MapUtils.getString(improvement, "score")));
         improvement1.setStrongCategory(MapUtils.getString(improvement, "strong_category"));
         improvement1.setWeakCategory(MapUtils.getString(improvement, "weak_category"));
         improvement1.setTotalQuestions(Integer.parseInt(MapUtils.getString(improvement, "total_questions")));
+        improvement1.setCreatedOn(Instant.now());
 
         log.trace("Submitting Improvement");
         Improvement improvement2 = improvementRepository.save(improvement1);
         log.debug("Users Improvement created : {}", improvement2.getSid());
-        return Optional.ofNullable(improvement2.getStringSid());
-
+        return createImprovementResponse(improvement2);
     }
 
     @Override
     public void markSetpracticeClose(String setPracticeSid){
-        Optional.ofNullable(setPracticeSid).map(StringUtils::isNotEmpty).orElseThrow(() -> new IncorrectArgumentException("Record sid is missing"));
+        Optional.ofNullable(setPracticeSid).map(StringUtils::isNotEmpty)
+                .orElseThrow(() -> new IncorrectArgumentException("Record sid is missing"));
         setPracticeRepository.markStatus(setPracticeSid, EqualEdEnums.SetpracticeStatus.COMPLETED);
     }
 
@@ -404,6 +427,22 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
         return generateResponse(commonV2Responses);
     }
 
+    private CommonV2Response createImprovementResponse(Improvement improvement) {
+        CommonV2Response commonV2Response = new CommonV2Response();
+        commonV2Response.setId(improvement.getStringSid());
+        commonV2Response.setCreatedTime(improvement.getCreatedOn().toString());
+        commonV2Response.putField("improve_id", String.valueOf(improvement.id));
+        commonV2Response.putField("user_id", String.valueOf(improvement.getUser().getId()));
+        commonV2Response.putField("exam_id", improvement.getExamId());
+        commonV2Response.putField("strong_category", improvement.getStrongCategory());
+        commonV2Response.putField("weak_category", improvement.getWeakCategory());
+        commonV2Response.putField("score", String.valueOf(improvement.getScore()));
+        commonV2Response.putField("total_questions", String.valueOf(improvement.getTotalQuestions()));
+        commonV2Response.putField("subject_name", improvement.getSubject().getName());
+
+        return commonV2Response;
+    }
+
     private static CommonV2Response createCommonUserResponse(Users users) {
         CommonV2Response commonV2Response = new CommonV2Response();
         commonV2Response.setId(users.getStringSid());
@@ -420,7 +459,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     }
 
     @Override
-    public Optional<String> submitPracticeAnswer(Map<String, String> answer){
+    public Map<String, List<CommonV2Response>> submitPracticeAnswer(Map<String, String> answer){
         if(MapUtils.isEmpty(answer)) throw new IncorrectArgumentException("Answer information is not available");
         log.trace("Submitting answers : {}",answer );
         PracticeUserAnswers userAnswers = new PracticeUserAnswers();
@@ -431,18 +470,31 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
         userAnswers.setQuestion(questionRepository.findById(MapUtils.getIntValue(answer, "question_id"))
                 .orElseThrow(()-> new IncorrectArgumentException("Invalid Question Id")));
         userAnswers.setExamId(MapUtils.getString(answer, "exam_id"));
-
         // get user answer date
         userAnswers.setAnswerDate(Instant.now());
         userAnswers.setTimeSpent(MapUtils.getIntValue(answer, "Time_Spent"));
         userAnswers.setExplanation(MapUtils.getString(answer, "Explanation"));
-        userAnswers.setUserOption(MapUtils.getString(answer, "Explanation"));
+        userAnswers.setUserOption(MapUtils.getString(answer, "User_option"));
         userAnswers.setCorrectOption(MapUtils.getString(answer, "Correct_option"));
-        userAnswers.setExamId(MapUtils.getString(answer, "exam_id"));
+
         log.trace("Submitting answer");
         PracticeUserAnswers userAnswers1 = practiceUseranswerRepository.save(userAnswers);
         log.debug("Users answer created : {}", userAnswers.getSid());
-        return Optional.ofNullable(userAnswers1.getStringSid());
+        CommonV2Response commonV2Response = new CommonV2Response();
+        commonV2Response.setId(userAnswers1.getStringSid());
+        commonV2Response.setCreatedTime(userAnswers1.getAnswerDate().toString());
+        commonV2Response.putField("user_exam_Id", String.valueOf(userAnswers1.id));
+        commonV2Response.putField("User_id", String.valueOf(userAnswers1.getUser().getId()));
+        commonV2Response.putField("exam_id", userAnswers1.getExamId());
+        commonV2Response.putField("text", userAnswers1.getQuestion().getQuestion());
+        commonV2Response.putField("category", userAnswers1.getQuestion().getCategory());
+        commonV2Response.putField("sub_category", userAnswers1.getQuestion().getSubCategory());
+        commonV2Response.putField("Correct_option", userAnswers1.getQuestion().getCorrectOption());
+        commonV2Response.putField("question_id", String.valueOf(userAnswers1.getQuestion().id));
+        commonV2Response.putField("Explanation", userAnswers1.getExplanation());
+        commonV2Response.putField("Time_Spent", String.valueOf(userAnswers1.getTimeSpent()));
+        commonV2Response.putField("date", userAnswers1.getAnswerDate().toString());
+        return generateResponse(Collections.singletonList(commonV2Response));
     }
 
     @Override
@@ -519,6 +571,14 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     }
 
     @Override
+    public Map<String,List<CommonV2Response>> getUserByUserName(String username){
+        log.trace("Finding user by username : {}",username);
+        return userRepository.findByUsernameIs(username).map(users -> generateResponse(Collections.singletonList(createCommonUserResponse(users)))
+        ).orElseThrow(() -> new RecordNotFoundException(ErrorCodes.U001,"User not found for given username "+username));
+    }
+
+
+    @Override
     public Map<String, List<CommonV2Response>> getQuestionsBySubAndYearGroup(String subjectName, Integer yearGroup) {
         log.trace("Finding Questions for subject {} and year group {}",subjectName, yearGroup);
         List<Questions> questions = Optional.ofNullable(questionRepository
@@ -576,4 +636,53 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
         return userRepository.findBySid(sid).map(users -> generateResponse(Collections.singletonList(createCommonUserResponse(users)))
         ).orElseThrow(() -> new RecordNotFoundException(ErrorCodes.U001,"User not found for given sid "+sid));
     }
+
+    @Override
+    public Map<String, List<CommonV2Response>> submitSetpractice(Map<String, List<CommonV2Request>> practiceRequest){
+        log.trace("Saving practice set : {}", CommonUtils.toJsonFunction.apply(practiceRequest));
+
+        List<Setpractice> setpractices = new ArrayList<>();
+        List<CommonV2Request> practiceList = practiceRequest.get("records");
+        practiceList.forEach(setpractice -> {
+            Setpractice setpractice1 = new Setpractice();
+            setpractice1.generateUuid();
+
+            setpractice1.setUser(userRepository.findById(MapUtils.getIntValue(setpractice.getFields(), "User_id"))
+                    .orElseThrow(()-> new IncorrectArgumentException("Invalid User Id")));
+            Subject subject = Optional.ofNullable(subjectRepository.findByName(MapUtils.getString(setpractice.getFields()
+                            , "subject_name")))
+                    .filter(CollectionUtils::isNotEmpty).map(lst -> lst.get(0))
+                    .orElseThrow(()-> new IncorrectArgumentException("Invalid Subject Name"));
+            setpractice1.setSubject(subject);
+
+            setpractice1.setStatus(EqualEdEnums.SetpracticeStatus.PENDING);
+            setpractice1.setQuestions(MapUtils.getString(setpractice.getFields(), "questions"));
+            setpractice1.setPracticeName(MapUtils.getString(setpractice.getFields(), "practicename"));
+            setpractice1.setNoOfQ(MapUtils.getInteger(setpractice.getFields(), "no_questions"));
+            setpractice1.setTimeLimit(MapUtils.getInteger(setpractice.getFields(), "time_limit"));
+
+            setpractices.add(setpractice1);
+        });
+
+        if(CollectionUtils.isNotEmpty(setpractices)){
+            List<Setpractice> setpractices1 = setPracticeRepository.saveAll(setpractices);
+            List<CommonV2Response> commonV2Responses = setpractices1.stream().map(setpractice -> {
+                CommonV2Response commonV2Response = new CommonV2Response();
+                commonV2Response.setId(setpractice.getStringSid());
+                commonV2Response.putField("seq_id", String.valueOf(setpractice.id));
+                commonV2Response.putField("User_id", String.valueOf(setpractice.getUser().id));
+                commonV2Response.putField("practicename", setpractice.getPracticeName());
+                commonV2Response.putField("time_limit", String.valueOf(setpractice.getTimeLimit()));
+                commonV2Response.putField("questions", setpractice.getQuestions());
+                commonV2Response.putField("no_questions", String.valueOf(setpractice.getNoOfQ()));
+                commonV2Response.putField("subject_name", setpractice.getSubject().getName());
+                commonV2Response.putField("Status", setpractice.getStatus().name());
+                return commonV2Response;
+            }).collect(Collectors.toList());
+            return generateResponse(commonV2Responses);
+
+        }else return null;
+    }
+
 }
+

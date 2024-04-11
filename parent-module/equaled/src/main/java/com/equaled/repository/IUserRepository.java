@@ -12,6 +12,7 @@ public interface IUserRepository extends JpaRepository<Users, Integer> {
 
     @Override
     Optional<Users> findById(Integer integer);
+    Optional<Users> findByUsernameIs(String username);
 
     @Query(value = "select u from Users u where hex(u.sid) = :sid")
     Optional<Users> findBySid(String sid);

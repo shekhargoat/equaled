@@ -6,7 +6,6 @@ import com.equaled.to.CreateProfileRequest;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 public interface IEqualEdServiceV2 {
 
@@ -27,9 +26,9 @@ public interface IEqualEdServiceV2 {
 
     Map<String, List<CommonV2Response>> createDashboard(CommonV2Request request);
 
-    Optional<String> submitAnswer(Map<String, String> answer);
+    Map<String, List<CommonV2Response>> submitAnswer(Map<String, String> answer);
 
-    Optional<String> saveImprovement(Map<String, String> improvement);
+    CommonV2Response saveImprovement(Map<String, String> improvement);
 
     void markSetpracticeClose(String setPracticeSid);
 
@@ -43,7 +42,7 @@ public interface IEqualEdServiceV2 {
 
     Map<String, List<CommonV2Response>> getUserAnswersByExamId(String examId);
 
-    Optional<String> submitPracticeAnswer(Map<String, String> answer);
+    Map<String, List<CommonV2Response>> submitPracticeAnswer(Map<String, String> answer);
 
     Map<String,List<CommonV2Response>> getQuestionsBySubAndLearnType(Integer subjectId, String learnType);
 
@@ -51,9 +50,13 @@ public interface IEqualEdServiceV2 {
 
     Map<String,List<CommonV2Response>> getTestsByYearGroup(Integer yearGroupId);
 
+    Map<String,List<CommonV2Response>> getUserByUserName(String username);
+
     Map<String, List<CommonV2Response>> getQuestionsBySubAndYearGroup(String subjectName, Integer yearGroup);
 
     Map<String, List<CommonV2Response>> getUserAnswersByUserAndExamId(Integer userId,String examId);
 
     Map<String,List<CommonV2Response>> getUserBySid(String sid);
+
+    Map<String, List<CommonV2Response>> submitSetpractice(Map<String, List<CommonV2Request>> practiceRequest);
 }

@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -26,7 +27,7 @@ public class Test extends BaseEntity{
     @Column(name = "enabled")
     private int enabled;
     @Column(name = "last_updated_on")
-    private long lastUpdatedOn;
+    private Instant lastUpdatedOn;
     @ManyToOne
     @JoinColumn(name = "year_group_id", referencedColumnName = "id")
     private YearGroup yearGroupId;
