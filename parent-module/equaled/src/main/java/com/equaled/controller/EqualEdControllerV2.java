@@ -73,7 +73,7 @@ public class EqualEdControllerV2 {
     public ResponseEntity<?> getSetpracticeByUserIdSubjectName(@ApiParam(value = "User id", required = true)
                                                                @PathVariable("userId") Integer userId,
                                                                @PathVariable("practiceName") String practiceName,
-                                                               @PathVariable("subjecName") String subjectName){
+                                                               @PathVariable("subjectName") String subjectName){
 
         log.info(String.format("Request received : Users %s for GET  " +
                 "/setpractice/user/{userId}/practice/{practiceName}/{subjectName}" +
@@ -195,10 +195,10 @@ public class EqualEdControllerV2 {
         return ResponseEntity.ok(service.getTestsByYearGroup(yearGroup));
     }
 
-    @GetMapping("/username/{username}")
+    @GetMapping("/user/name/{username}")
     @ApiOperation(value = "get User by username",
             notes = "API to get User by userId")
-    public ResponseEntity<?> getUserById(
+    public ResponseEntity<?> getUserByUsername(
             @ApiParam(value = "User id", required = true) @PathVariable("username") String userName){
         log.info(String.format("Request received : Users %s for GET /user/{userId} " +
                 "for particular ", userName));
@@ -241,6 +241,46 @@ public class EqualEdControllerV2 {
     @PostMapping("/setpractice")
     public ResponseEntity<?> submitSetpractice(@RequestBody Map<String, List<CommonV2Request>> request){
         return ResponseEntity.ok(service.submitSetpractice(request));
+    }
+
+    @GetMapping("/user/email/{email}")
+    @ApiOperation(value = "get User by username",
+            notes = "API to get User by userId")
+    public ResponseEntity<?> getUserByEmail(
+            @ApiParam(value = "User id", required = true) @PathVariable("email") String email){
+        log.info(String.format("Request received : Users %s for GET /user/{userId} " +
+                "for particular ", email));
+        return ResponseEntity.ok(service.getUserByEmail(email));
+
+    }
+
+    @GetMapping("/dashboard/suggested/{userId}")
+    public ResponseEntity<?> getSuggestedDashboardByUserId(@PathVariable("userId") Integer userId){
+        return ResponseEntity.ok(service.getSuggedtedDashboardsByUser(userId));
+    }
+
+    @GetMapping("/useranswers/user/{userId}")
+    public ResponseEntity<?> getUserAnswersByUserId(@PathVariable("userId") Integer userId){
+        return ResponseEntity.ok(service.getImprovementsByUser(userId));
+    }
+
+    @GetMapping("/practice/answers/{userId}")
+    public ResponseEntity<?> getPracticeAnswersByUserId(@PathVariable("userId")Integer userId){
+        return ResponseEntity.ok(service.getPracticeAnswersByUserId(userId));
+    }
+
+    @GetMapping("/improvement/user/{userId}/nonweak")
+    public ResponseEntity<?> getImprovementByUserNonWeakCat(
+            @ApiParam(value = "User id", required = true) @PathVariable("userId") Integer userId) {
+        log.info(String.format("Request received : Improvement %s for GET /improvement/user/{userId} for particular ", userId));
+        return ResponseEntity.ok(service.getNonWeakCategoryImprovementsByUserId(userId));
+    }
+
+    @GetMapping("/improvement/user/{userId}/nonstrong")
+    public ResponseEntity<?> getImprovementByUserNonStrongCat(
+            @ApiParam(value = "User id", required = true) @PathVariable("userId") Integer userId) {
+        log.info(String.format("Request received : Improvement %s for GET /improvement/user/{userId} for particular ", userId));
+        return ResponseEntity.ok(service.getNonStrongCategoryImprovementsByUserId(userId));
     }
 
 }

@@ -15,4 +15,11 @@ public interface IImprovementRepository extends JpaRepository<Improvement, Integ
 
     @Query(value = "select i from Improvement i where i.user.id= :userId AND i.examId= :examId")
     List<Improvement> getImprovementsByUserIdAndExamId(Integer userId,String examId);
+
+    @Query(value = "select i from Improvement i where i.weakCategory <> 'N/A' and i.user.id = :userId")
+    List<Improvement> getNonWeakCatImprovementByUserId(Integer userId);
+
+    @Query(value = "select i from Improvement i where i.strongCategory <> 'N/A' and i.user.id = :userId")
+    List<Improvement> getNonStrongCatImprovementByUserId(Integer userId);
+
 }

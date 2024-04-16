@@ -11,4 +11,7 @@ public interface IUseranswerRepository extends JpaRepository<UserAnswers, Intege
 
     @Query(value = "select ua from UserAnswers ua where ua.user.id = :userId and ua.examId = :examId")
     List<UserAnswers> findByUserAndExamId(Integer userId,String examId);
+
+    @Query(value = "select ua from UserAnswers ua where ua.user.id = :userId")
+    List<UserAnswers> findByUserId(Integer userId);
 }
