@@ -606,7 +606,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     @Override
     public Map<String, List<CommonV2Response>> getUserAnswersByUserAndExamId(Integer userId, String examId) {
         log.trace("Finding user answers for userId {} and examId {}",userId,examId);
-        List<UserAnswers> userAnswers = useranswerRepository.findByExamId(examId);
+        List<UserAnswers> userAnswers = useranswerRepository.findByUserAndExamId(userId, examId);
         if(userAnswers.isEmpty()) throw new RecordNotFoundException(ErrorCodes.UA001, "User answers not found for given user "+userId +" and examId "+examId);
         log.debug("Found {} user answers for userId {} examId {}",userAnswers.size(),userId,examId);
         List<CommonV2Response> commonV2Responses = userAnswers.stream().map(answers -> {
@@ -682,6 +682,100 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
             return generateResponse(commonV2Responses);
 
         }else return null;
+    }
+
+    @Override
+    public Map<String,List<CommonV2Response>> getUserByEmail(String email){
+        log.trace("Finding user by email : {}",email);
+        return userRepository.findByEmailIs(email).map(users -> generateResponse(Collections.singletonList(createCommonUserResponse(users)))
+        ).orElseThrow(() -> new RecordNotFoundException(ErrorCodes.U001,"User not found for given email "+email));
+    }
+
+    @Override
+    public Map<String,List<CommonV2Response>> getSuggedtedDashboardsByUser(Integer userId) {
+        log.trace("Finding Dashboard By User: {}",userId);
+
+        List<Dashboard> dashboardsByUserId = Optional.ofNullable(dashboardRepository.findSuggestedDashboardsByUserId(userId))
+                .orElse(ListUtils.EMPTY_LIST);
+        log.debug("Dashboard fetched for User {} = {}",userId, dashboardsByUserId.size());
+
+        List<CommonV2Response> commonV2Responses = dashboardsByUserId.stream()
+                .map(EqualEdServiceImplV2::createDashboardResponse).collect(Collectors.toList());
+
+        return generateResponse(commonV2Responses);
+    }
+
+    @Override
+    public Map<String, List<CommonV2Response>> getUserAnswersByUserId(Integer userId) {
+        log.trace("Finding user answers for userId {} ",userId);
+        List<UserAnswers> userAnswers = useranswerRepository.findByUserId(userId);
+        if(userAnswers.isEmpty()) throw new RecordNotFoundException(ErrorCodes.UA001,
+                "User answers not found for given user "+userId );
+        log.debug("Found {} user answers for userId {} ",userAnswers.size(),userId);
+        List<CommonV2Response> commonV2Responses = userAnswers.stream().map(answers -> {
+            CommonV2Response commonV2Response = new CommonV2Response();
+            commonV2Response.setId(answers.getStringSid());
+            commonV2Response.setCreatedTime(answers.getAnswerDate().toString());
+            commonV2Response.putField("user_exam_Id", String.valueOf(answers.id));
+            commonV2Response.putField("User_id", String.valueOf(answers.getUser().getId()));
+            commonV2Response.putField("exam_id", answers.getExamId());
+            commonV2Response.putField("text", answers.getQuestion().getQuestion());
+            commonV2Response.putField("category", answers.getQuestion().getCategory());
+            commonV2Response.putField("sub_category", answers.getQuestion().getSubCategory());
+            commonV2Response.putField("Correct_option", answers.getQuestion().getCorrectOption());
+            commonV2Response.putField("question_id", String.valueOf(answers.getQuestion().id));
+            commonV2Response.putField("Explanation", answers.getExplanation());
+            commonV2Response.putField("Time_Spent", String.valueOf(answers.getTimeSpent()));
+            commonV2Response.putField("date", answers.getAnswerDate().toString());
+            return commonV2Response;
+        }).collect(Collectors.toList());
+
+        return generateResponse(commonV2Responses);
+    }
+
+    @Override
+    public Map<String, List<CommonV2Response>> getPracticeAnswersByUserId(Integer userId) {
+        log.trace("Finding user answers for userId {} ",userId);
+        List<PracticeUserAnswers> practiceUserAnswers = practiceUseranswerRepository.findByUserId(userId);
+        if(practiceUserAnswers.isEmpty()) throw new RecordNotFoundException(ErrorCodes.UA001,
+                "User answers not found for given user "+userId );
+        log.debug("Found {} user answers for userId {} ",practiceUserAnswers.size(),userId);
+        List<CommonV2Response> commonV2Responses = practiceUserAnswers.stream().map(answers -> {
+            CommonV2Response commonV2Response = new CommonV2Response();
+            commonV2Response.setId(answers.getStringSid());
+            commonV2Response.setCreatedTime(answers.getAnswerDate().toString());
+            commonV2Response.putField("user_exam_Id", String.valueOf(answers.id));
+            commonV2Response.putField("User_id", String.valueOf(answers.getUser().getId()));
+            commonV2Response.putField("exam_id", answers.getExamId());
+            commonV2Response.putField("text", answers.getQuestion().getQuestion());
+            commonV2Response.putField("category", answers.getQuestion().getCategory());
+            commonV2Response.putField("sub_category", answers.getQuestion().getSubCategory());
+            commonV2Response.putField("Correct_option", answers.getQuestion().getCorrectOption());
+            commonV2Response.putField("question_id", String.valueOf(answers.getQuestion().id));
+            commonV2Response.putField("Explanation", answers.getExplanation());
+            commonV2Response.putField("Time_Spent", String.valueOf(answers.getTimeSpent()));
+            commonV2Response.putField("date", answers.getAnswerDate().toString());
+            return commonV2Response;
+        }).collect(Collectors.toList());
+
+        return generateResponse(commonV2Responses);
+    }
+
+    @Override
+    public Map<String, List<CommonV2Response>> getNonWeakCategoryImprovementsByUserId(Integer userId) {
+        log.trace("Finding improvements for userid {}",userId);
+        List<Improvement> improvements = improvementRepository.getNonWeakCatImprovementByUserId(userId);
+        if(improvements.isEmpty()) throw new RecordNotFoundException(ErrorCodes.I001, "Improvements not found for given user id " + userId);
+        log.debug("Found {} improvements for userId {}",improvements.size(),userId);
+        return createImprovementResponse(improvements);
+    }
+    @Override
+    public Map<String, List<CommonV2Response>> getNonStrongCategoryImprovementsByUserId(Integer userId) {
+        log.trace("Finding improvements for userid {}",userId);
+        List<Improvement> improvements = improvementRepository.getNonStrongCatImprovementByUserId(userId);
+        if(improvements.isEmpty()) throw new RecordNotFoundException(ErrorCodes.I001, "Improvements not found for given user id " + userId);
+        log.debug("Found {} improvements for userId {}",improvements.size(),userId);
+        return createImprovementResponse(improvements);
     }
 
 }

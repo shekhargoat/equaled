@@ -59,4 +59,16 @@ public interface IEqualEdServiceV2 {
     Map<String,List<CommonV2Response>> getUserBySid(String sid);
 
     Map<String, List<CommonV2Response>> submitSetpractice(Map<String, List<CommonV2Request>> practiceRequest);
+
+    Map<String,List<CommonV2Response>> getUserByEmail(String email);
+
+    Map<String,List<CommonV2Response>> getSuggedtedDashboardsByUser(Integer userId);
+
+    Map<String, List<CommonV2Response>> getUserAnswersByUserId(Integer userId);
+
+    Map<String, List<CommonV2Response>> getPracticeAnswersByUserId(Integer userId);
+
+    Map<String, List<CommonV2Response>> getNonWeakCategoryImprovementsByUserId(Integer userId);
+
+    Map<String, List<CommonV2Response>> getNonStrongCategoryImprovementsByUserId(Integer userId);
 }
