@@ -18,6 +18,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.ListUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.WordUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -356,7 +357,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     public Map<String, List<CommonV2Response>> getImprovementsByUser(Integer userId) {
         log.trace("Finding improvements for userId {}",userId);
         List<Improvement> improvements = improvementRepository.getImprovementsByUserId(userId);
-        if(improvements.isEmpty()) throw new RecordNotFoundException(ErrorCodes.I001, "Improvements not found for given user id " + userId);
+//        if(improvements.isEmpty()) throw new RecordNotFoundException(ErrorCodes.I001, "Improvements not found for given user id " + userId);
         log.debug("Found {} improvements for userId {}",improvements.size(),userId);
         return createImprovementResponse(improvements);
     }
@@ -411,7 +412,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
         List<CommonV2Response> commonV2Responses = improvements.stream().map(improvement -> {
             CommonV2Response commonV2Response = new CommonV2Response();
             commonV2Response.setId(improvement.getStringSid());
-            commonV2Response.setCreatedTime(improvement.getCreatedOn().toString());
+            commonV2Response.setCreatedTime(Optional.ofNullable(improvement.getCreatedOn()).map(Instant::toString).orElse(Instant.now().toString()));
             commonV2Response.putField("improve_id", String.valueOf(improvement.id));
             commonV2Response.putField("user_id", String.valueOf(improvement.getUser().getId()));
             commonV2Response.putField("exam_id", improvement.getExamId());
@@ -452,7 +453,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
         commonV2Response.putField("Password", users.getPassword());
         commonV2Response.putField("User_id", String.valueOf(users.getId()));
         commonV2Response.putField("year_group_id", String.valueOf(users.getYearGroup().getId()));
-        commonV2Response.putField("role", users.getRole().name());
+        commonV2Response.putField("role", WordUtils.capitalizeFully(users.getRole().name().toLowerCase()));
         commonV2Response.putField("lastlogin", LocalDateTime.ofInstant(users.getLastLogin(),
                 ZoneId.of("UTC")).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         return commonV2Response;
@@ -510,7 +511,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     public Map<String, List<CommonV2Response>> getSetpracticeByUserIdAndStatus(Integer userId, String status) {
         log.trace("Finding Set practice for user {} and status {}", userId, status);
         List<Setpractice> setpractices = Optional.ofNullable(setPracticeRepository
-                .getSetpracticeByUserAndStatus(userId, status)).orElse(ListUtils.EMPTY_LIST);
+                .getSetpracticeByUserAndStatus(userId, EqualEdEnums.SetpracticeStatus.valueOf(status))).orElse(ListUtils.EMPTY_LIST);
         log.debug("Found {} Set Practices found  for user id {} and status {}",setpractices.size(),userId,status);
 
         List<CommonV2Response> commonV2Responses = setpractices.stream().map(setpractice -> {
@@ -677,8 +678,6 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     public Map<String, List<CommonV2Response>> getUserAnswersByUserId(Integer userId) {
         log.trace("Finding user answers for userId {} ",userId);
         List<UserAnswers> userAnswers = useranswerRepository.findByUserId(userId);
-        if(userAnswers.isEmpty()) throw new RecordNotFoundException(ErrorCodes.UA001,
-                "User answers not found for given user "+userId );
         log.debug("Found {} user answers for userId {} ",userAnswers.size(),userId);
         List<CommonV2Response> commonV2Responses = userAnswers.stream().map(answers -> {
             CommonV2Response commonV2Response = new CommonV2Response();
@@ -705,8 +704,6 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     public Map<String, List<CommonV2Response>> getPracticeAnswersByUserId(Integer userId) {
         log.trace("Finding user answers for userId {} ",userId);
         List<PracticeUserAnswers> practiceUserAnswers = practiceUseranswerRepository.findByUserId(userId);
-        if(practiceUserAnswers.isEmpty()) throw new RecordNotFoundException(ErrorCodes.UA001,
-                "User answers not found for given user "+userId );
         log.debug("Found {} user answers for userId {} ",practiceUserAnswers.size(),userId);
         List<CommonV2Response> commonV2Responses = practiceUserAnswers.stream().map(answers -> {
             CommonV2Response commonV2Response = new CommonV2Response();
@@ -733,7 +730,6 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     public Map<String, List<CommonV2Response>> getNonWeakCategoryImprovementsByUserId(Integer userId) {
         log.trace("Finding improvements for userid {}",userId);
         List<Improvement> improvements = improvementRepository.getNonWeakCatImprovementByUserId(userId);
-        if(improvements.isEmpty()) throw new RecordNotFoundException(ErrorCodes.I001, "Improvements not found for given user id " + userId);
         log.debug("Found {} improvements for userId {}",improvements.size(),userId);
         return createImprovementResponse(improvements);
     }
@@ -741,10 +737,37 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     public Map<String, List<CommonV2Response>> getNonStrongCategoryImprovementsByUserId(Integer userId) {
         log.trace("Finding improvements for userid {}",userId);
         List<Improvement> improvements = improvementRepository.getNonStrongCatImprovementByUserId(userId);
-        if(improvements.isEmpty()) throw new RecordNotFoundException(ErrorCodes.I001, "Improvements not found for given user id " + userId);
         log.debug("Found {} improvements for userId {}",improvements.size(),userId);
         return createImprovementResponse(improvements);
     }
+
+    @Override
+    public Map<String,List<CommonV2Response>> getAllUsers(){
+        List<Users> users = userRepository.findAll();
+        if(CollectionUtils.isNotEmpty(users)){
+            return generateResponse(users.stream().map(EqualEdServiceImplV2::createCommonUserResponse)
+                    .collect(Collectors.toList()));
+        }else throw new RecordNotFoundException(ErrorCodes.U001,"User not found");
+    }
+
+    @Override
+    public Map<String, List<CommonV2Response>> addStudentsForTeacher(Integer teacherId, List<Integer> students){
+        Users teacher = userRepository.findById(teacherId)
+                .orElseThrow(() -> new RecordNotFoundException(ErrorCodes.U003,ErrorCodes.U003.getMsg()));
+
+        log.trace("Adding teacher {} for students {}",teacherId, students);
+        List<Users> studentUsers = userRepository.findAllById(students);
+        if(CollectionUtils.isEmpty(studentUsers)) new RecordNotFoundException(ErrorCodes.U004,ErrorCodes.U004.getMsg());
+        log.trace("Adding teacher {} for students {}",teacherId, studentUsers.stream().map(Users::getId)
+                .collect(Collectors.toList()));
+
+        teacher.getStudents().addAll(studentUsers);
+        userRepository.save(teacher);
+
+        return generateResponse(Collections.singletonList(createCommonUserResponse(teacher)));
+    }
+
+
 
     @Override
     public Map<String, List<CommonV2Response>> getQuestionsByUser(Integer userId) {
