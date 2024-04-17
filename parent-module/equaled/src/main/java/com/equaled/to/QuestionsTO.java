@@ -21,4 +21,5 @@ public class QuestionsTO extends BaseTO {
     private YearGroupTO yearGroup;
     private SubjectTO subject;
     private String imagePath;
+    private UsersTO user;
 }

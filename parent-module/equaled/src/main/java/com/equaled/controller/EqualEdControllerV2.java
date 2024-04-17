@@ -293,4 +293,13 @@ public class EqualEdControllerV2 {
         return ResponseEntity.ok(service.addStudentsForTeacher(teacher_id, students));
     }
 
+    @GetMapping("/questions/users/{userId}")
+    @ApiOperation(value = "get Questions by user id",
+            notes = "API to get Questions by user id")
+    public ResponseEntity<?> getQuestionsByUser(
+            @ApiParam(value = "User id", required = true) @PathVariable("userId") Integer userId){
+        log.info(String.format("Request received : User %s for GET /questions/users/{userId} " +
+                "for particular ", userId));
+        return ResponseEntity.ok(service.getQuestionsByUser(userId));
+    }
 }
