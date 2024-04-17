@@ -503,23 +503,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
         List<Questions> questions = Optional.ofNullable(questionRepository
                 .getQuestionsBySubjectAndLearn(subjectId, EqualEdEnums.LearnType.valueOf(learnType))).orElse(ListUtils.EMPTY_LIST);
         log.debug("Finding Questions for subject {} and learn type {} = {}",subjectId, learnType, questions.size());
-        List<CommonV2Response> commonV2Responses = questions.stream().map(question -> {
-            CommonV2Response commonV2Response = new CommonV2Response();
-            commonV2Response.setId(question.getStringSid());
-            commonV2Response.putField("question_id", String.valueOf(question.id));
-            commonV2Response.putField("Text", question.getQuestion());
-            commonV2Response.putField("Subject_id", String.valueOf(question.getSubject().id));
-            commonV2Response.putField("year_group_id", String.valueOf(question.getYearGroupId().id));
-            commonV2Response.putField("Difficulty_level", String.valueOf(question.getDifficulty()));
-            commonV2Response.putField("category", String.valueOf(question.getCategory()));
-            commonV2Response.putField("sub_category", String.valueOf(question.getSubCategory()));
-            commonV2Response.putField("Correct_option", String.valueOf(question.getCorrectOption()));
-            commonV2Response.putField("Learn", String.valueOf(question.getLearn()));
-
-            return commonV2Response;
-        }).collect(Collectors.toList());
-
-        return generateResponse(commonV2Responses);
+        return createQuestionsResponse(questions);
     }
 
     @Override
@@ -584,23 +568,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
         List<Questions> questions = Optional.ofNullable(questionRepository
                 .getQuestionsBySubjectAndYearGroupId(subjectName, yearGroup)).orElse(ListUtils.EMPTY_LIST);
         log.debug("Finding Questions for subject {} and year group {} = {}",subjectName, yearGroup, questions.size());
-        List<CommonV2Response> commonV2Responses = questions.stream().map(question -> {
-            CommonV2Response commonV2Response = new CommonV2Response();
-            commonV2Response.setId(question.getStringSid());
-            commonV2Response.putField("question_id", String.valueOf(question.id));
-            commonV2Response.putField("Text", question.getQuestion());
-            commonV2Response.putField("Subject_id", String.valueOf(question.getSubject().id));
-            commonV2Response.putField("year_group_id", String.valueOf(question.getYearGroupId().id));
-            commonV2Response.putField("Difficulty_level", String.valueOf(question.getDifficulty()));
-            commonV2Response.putField("category", String.valueOf(question.getCategory()));
-            commonV2Response.putField("sub_category", String.valueOf(question.getSubCategory()));
-            commonV2Response.putField("Correct_option", String.valueOf(question.getCorrectOption()));
-            commonV2Response.putField("Learn", String.valueOf(question.getLearn()));
-
-            return commonV2Response;
-        }).collect(Collectors.toList());
-
-        return generateResponse(commonV2Responses);
+        return createQuestionsResponse(questions);
     }
 
     @Override
@@ -778,5 +746,33 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
         return createImprovementResponse(improvements);
     }
 
+    @Override
+    public Map<String, List<CommonV2Response>> getQuestionsByUser(Integer userId) {
+        log.trace("Finding Questions for user {}",userId);
+        List<Questions> questions = Optional.ofNullable(questionRepository
+                .getQuestionsByUserId(userId)).orElse(ListUtils.EMPTY_LIST);
+        log.debug("Finding Questions for user {} = {}",userId, questions.size());
+        return createQuestionsResponse(questions);
+    }
+
+    private Map<String, List<CommonV2Response>> createQuestionsResponse(List<Questions> questions){
+        List<CommonV2Response> commonV2Responses = questions.stream().map(question -> {
+            CommonV2Response commonV2Response = new CommonV2Response();
+            commonV2Response.setId(question.getStringSid());
+            commonV2Response.putField("question_id", String.valueOf(question.id));
+            commonV2Response.putField("Text", question.getQuestion());
+            commonV2Response.putField("Subject_id", String.valueOf(question.getSubject().id));
+            commonV2Response.putField("year_group_id", String.valueOf(question.getYearGroupId().id));
+            commonV2Response.putField("Difficulty_level", String.valueOf(question.getDifficulty()));
+            commonV2Response.putField("category", String.valueOf(question.getCategory()));
+            commonV2Response.putField("sub_category", String.valueOf(question.getSubCategory()));
+            commonV2Response.putField("Correct_option", String.valueOf(question.getCorrectOption()));
+            commonV2Response.putField("Learn", String.valueOf(question.getLearn()));
+
+            return commonV2Response;
+        }).collect(Collectors.toList());
+
+        return generateResponse(commonV2Responses);
+    }
 }
 
