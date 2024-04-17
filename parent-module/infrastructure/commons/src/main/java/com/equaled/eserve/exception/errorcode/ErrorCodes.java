@@ -70,11 +70,14 @@ public enum ErrorCodes {
 	U001("User not found"),
 
 	U002("Invalid user id"),
+	U003("Teacher not found"),
+	U004("Students not found"),
 
 	S001("Subject not found"),
 
 	I001("Improvement not found"),
 	UA001("User answers not found");
+
 
 
 

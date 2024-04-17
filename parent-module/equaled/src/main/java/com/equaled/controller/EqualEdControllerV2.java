@@ -27,14 +27,14 @@ public class EqualEdControllerV2 {
     @ApiOperation(value = "get dashboard by userId", notes = "API to get all dashboards by UserId")
     public ResponseEntity<?> getDashboardByUser(
             @ApiParam(value = "User id", required = true) @PathVariable("userId") Integer userId) {
-        log.info(String.format("Request received : User %s for GET /dashboard/user/{userId} for particular ", userId));
+        log.debug(String.format("Request received : User %s for GET /dashboard/user/{userId} for particular ", userId));
         return ResponseEntity.ok(service.getDashboardsByUser(userId));
     }
 
     @GetMapping("/category/year/{yearId}")
     public ResponseEntity<?> getSubjectCategoryByYearGroup(
             @ApiParam(value = "Year id", required = true) @PathVariable("yearId") Integer yearId){
-        log.info(String.format("Request received : User %s for GET /category/year/{yearId} for particular ", yearId));
+        log.debug(String.format("Request received : User %s for GET /category/year/{yearId} for particular ", yearId));
         return ResponseEntity.ok(service.getSubjectCategoriedByYear(yearId));
     }
 
@@ -42,7 +42,7 @@ public class EqualEdControllerV2 {
     public ResponseEntity<?> getTestsByYearGroupAndSubject(
             @ApiParam(value = "Year id", required = true) @PathVariable("yearId") Integer yearId,
             @ApiParam(value = "Subject Name", required = true) @PathVariable("subjectName") String subjectName){
-        log.info(String.format("Request received : User %s for GET /tests/year/{yearId}/subject/{subjectName} " +
+        log.debug(String.format("Request received : User %s for GET /tests/year/{yearId}/subject/{subjectName} " +
                 "for particular ", yearId,subjectName));
         return ResponseEntity.ok(service.getTestsByYearAndSubjectName(yearId,subjectName));
     }
@@ -53,7 +53,7 @@ public class EqualEdControllerV2 {
     public ResponseEntity<?> getQuestionsBySubAndSubcat(
             @ApiParam(value = "Year id", required = true) @PathVariable("subjectId") Integer subjectId,
             @ApiParam(value = "Subject Name", required = true) @PathVariable("subcat") String subcat){
-        log.info(String.format("Request received : User %s for GET /questions/subject/{subjectId}/subcat/{subcat} " +
+        log.debug(String.format("Request received : User %s for GET /questions/subject/{subjectId}/subcat/{subcat} " +
                 "for particular ", subjectId,subcat));
         return ResponseEntity.ok(service.getQuestionsBySubAndSubcat(subjectId, subcat));
     }
@@ -63,7 +63,7 @@ public class EqualEdControllerV2 {
             notes = "API to get User by userId")
     public ResponseEntity<?> getUserById(
             @ApiParam(value = "User id", required = true) @PathVariable("userId") Integer userId){
-        log.info(String.format("Request received : Users %s for GET /user/{userId} " +
+        log.debug(String.format("Request received : Users %s for GET /user/{userId} " +
                 "for particular ", userId));
         return ResponseEntity.ok(service.getUserById(userId));
 
@@ -75,7 +75,7 @@ public class EqualEdControllerV2 {
                                                                @PathVariable("practiceName") String practiceName,
                                                                @PathVariable("subjectName") String subjectName){
 
-        log.info(String.format("Request received : Users %s for GET  " +
+        log.debug(String.format("Request received : Users %s for GET  " +
                 "/setpractice/user/{userId}/practice/{practiceName}/{subjectName}" +
                 "for particular ", userId,practiceName, subjectName));
         return ResponseEntity.ok(service.getSetpracticeByUserIdSubjectName(userId, practiceName, subjectName));
@@ -114,7 +114,7 @@ public class EqualEdControllerV2 {
     public ResponseEntity<?> updateLastLogin(
             @ApiParam(value = "User id", required = true) @PathVariable("userId") Integer userId,
             @RequestBody CommonV2Request request){
-        log.info(String.format("Request received : Users %s for update last login /user/{userId} " +
+        log.debug(String.format("Request received : Users %s for update last login /user/{userId} " +
                 "for particular ", userId));
         return ResponseEntity.ok(service.updateUserLastLogin(userId,request));
     }
@@ -122,7 +122,7 @@ public class EqualEdControllerV2 {
     @ApiOperation(value = "get improvement by userId", notes = "API to get all improvements by UserId")
     public ResponseEntity<?> getImprovementByUser(
             @ApiParam(value = "User id", required = true) @PathVariable("userId") Integer userId) {
-        log.info(String.format("Request received : Improvement %s for GET /improvement/user/{userId} for particular ", userId));
+        log.debug(String.format("Request received : Improvement %s for GET /improvement/user/{userId} for particular ", userId));
         return ResponseEntity.ok(service.getImprovementsByUser(userId));
     }
 
@@ -130,7 +130,7 @@ public class EqualEdControllerV2 {
     @ApiOperation(value = "get improvement by examId", notes = "API to get all improvements by examId")
     public ResponseEntity<?> getImprovementByExamId(
             @ApiParam(value = "Exam id", required = true) @PathVariable("examId") String examId) {
-        log.info(String.format("Request received : Improvement %s for GET /improvement/exam/{examId} for particular ", examId));
+        log.debug(String.format("Request received : Improvement %s for GET /improvement/exam/{examId} for particular ", examId));
         return ResponseEntity.ok(service.getImprovementsByExam(examId));
     }
 
@@ -139,7 +139,7 @@ public class EqualEdControllerV2 {
     public ResponseEntity<?> getImprovementForUserByExamId(
             @ApiParam(value = "User id", required = true) @PathVariable("userId") Integer userId,
             @ApiParam(value = "Exam id", required = true) @PathVariable("examId") String examId) {
-        log.info(String.format("Request received : Improvement %s %s for GET /improvement/user/{userId}/exam/{examId} for particular ", userId,examId));
+        log.debug(String.format("Request received : Improvement %s %s for GET /improvement/user/{userId}/exam/{examId} for particular ", userId,examId));
         return ResponseEntity.ok(service.getImprovementsByUserIdAndExam(userId,examId));
     }
 
@@ -147,7 +147,7 @@ public class EqualEdControllerV2 {
     @ApiOperation(value = "get user answers by examId", notes = "API to get all user answers by examId")
     public ResponseEntity<?> getUserAnswersByExamId(
             @ApiParam(value = "Exam id", required = true) @PathVariable("examId") String examId) {
-        log.info(String.format("Request received : User answers %s for GET /user/answers/exam/{examId} for particular ", examId));
+        log.debug(String.format("Request received : User answers %s for GET /user/answers/exam/{examId} for particular ", examId));
         return ResponseEntity.ok(service.getUserAnswersByExamId(examId));
     }
 
@@ -155,7 +155,7 @@ public class EqualEdControllerV2 {
     @ApiOperation(value = "get user answers by examId", notes = "API to get all user answers by examId")
     public ResponseEntity<?> getTestBySubjectAndYearGroup(
             @PathVariable("subjectName") String subjectName, @PathVariable("yearGroupId") Integer yearGroupId) {
-        log.info(String.format("Request received : User answers %s for GET /test/subject/{subjectName}/yeargroup/{yearGroupId}" +
+        log.debug(String.format("Request received : User answers %s for GET /test/subject/{subjectName}/yeargroup/{yearGroupId}" +
                 " for particular ", subjectName));
         return ResponseEntity.ok(service.getTestsByYearAndSubjectName(yearGroupId, subjectName));
     }
@@ -170,7 +170,7 @@ public class EqualEdControllerV2 {
     public ResponseEntity<?> getQuestionsBySubAndLearnType(
             @ApiParam(value = "Subject id", required = true) @PathVariable("subjectId") Integer subjectId,
             @ApiParam(value = "Learn type", required = true) @PathVariable("learnType") String learnType){
-        log.info(String.format("Request received : User %s for GET /questions/subject/{subjectId}/learn/{learnType} " +
+        log.debug(String.format("Request received : User %s for GET /questions/subject/{subjectId}/learn/{learnType} " +
                 "for particular ", subjectId,learnType));
         return ResponseEntity.ok(service.getQuestionsBySubAndLearnType(subjectId, learnType));
     }
@@ -180,7 +180,7 @@ public class EqualEdControllerV2 {
                                                              @PathVariable("userId") Integer userId,
                                                              @PathVariable("status") String status){
 
-        log.info(String.format("Request received : Users %s for GET  " +
+        log.debug(String.format("Request received : Users %s for GET  " +
                 "/setpractice/user/{userId}/status/{status}/" +
                 "for particular ", userId,status));
         return ResponseEntity.ok(service.getSetpracticeByUserIdAndStatus(userId, status));
@@ -189,7 +189,7 @@ public class EqualEdControllerV2 {
     @GetMapping("/tests/year/{yearGroup}")
     public ResponseEntity<?> getTestsByYearGroup(
             @ApiParam(value = "Year id", required = true) @PathVariable("yearGroup") Integer yearGroup){
-        log.info(String.format("Request received : Tests %s for GET  " +
+        log.debug(String.format("Request received : Tests %s for GET  " +
                 "/tests/year/{yearGroup}" +
                 "for particular ", yearGroup));
         return ResponseEntity.ok(service.getTestsByYearGroup(yearGroup));
@@ -200,7 +200,7 @@ public class EqualEdControllerV2 {
             notes = "API to get User by userId")
     public ResponseEntity<?> getUserByUsername(
             @ApiParam(value = "User id", required = true) @PathVariable("username") String userName){
-        log.info(String.format("Request received : Users %s for GET /user/{userId} " +
+        log.debug(String.format("Request received : Users %s for GET /user/{userId} " +
                 "for particular ", userName));
         return ResponseEntity.ok(service.getUserByUserName(userName));
 
@@ -213,7 +213,7 @@ public class EqualEdControllerV2 {
     public ResponseEntity<?> getQuestionsBySubAndYearGroupId(
             @ApiParam(value = "Subject Name", required = true) @PathVariable("subjectName") String subjectName,
             @ApiParam(value = "Learn type", required = true) @PathVariable("yearGroupId") Integer yearGroupId){
-        log.info(String.format("Request received : User %s for GET /questions/subject/{subjectName}/yeargroup/{yearGroupId} " +
+        log.debug(String.format("Request received : User %s for GET /questions/subject/{subjectName}/yeargroup/{yearGroupId} " +
                 "for particular ", subjectName,yearGroupId));
         return ResponseEntity.ok(service.getQuestionsBySubAndYearGroup(subjectName, yearGroupId));
     }
@@ -223,7 +223,7 @@ public class EqualEdControllerV2 {
     public ResponseEntity<?> getUserAnswersByUserAndExamId(
             @ApiParam(value = "User id", required = true) @PathVariable("userId") Integer userId,
             @ApiParam(value = "Exam id", required = true) @PathVariable("examId") String examId) {
-        log.info(String.format("Request received : User answers %s for GET /user/answers/user/{userId}/exam/{examId} for particular ", userId,examId));
+        log.debug(String.format("Request received : User answers %s for GET /user/answers/user/{userId}/exam/{examId} for particular ", userId,examId));
         return ResponseEntity.ok(service.getUserAnswersByUserAndExamId(userId,examId));
     }
 
@@ -232,7 +232,7 @@ public class EqualEdControllerV2 {
             notes = "API to get User by sid")
     public ResponseEntity<?> getUserBySid(
             @ApiParam(value = "User sid", required = true) @PathVariable("sid") String sid){
-        log.info(String.format("Request received : Users %s for GET /user/sid/{sid} " +
+        log.debug(String.format("Request received : Users %s for GET /user/sid/{sid} " +
                 "for particular ", sid));
         return ResponseEntity.ok(service.getUserBySid(sid));
 
@@ -248,7 +248,7 @@ public class EqualEdControllerV2 {
             notes = "API to get User by userId")
     public ResponseEntity<?> getUserByEmail(
             @ApiParam(value = "User id", required = true) @PathVariable("email") String email){
-        log.info(String.format("Request received : Users %s for GET /user/{userId} " +
+        log.debug(String.format("Request received : Users %s for GET /user/{userId} " +
                 "for particular ", email));
         return ResponseEntity.ok(service.getUserByEmail(email));
 
@@ -261,7 +261,7 @@ public class EqualEdControllerV2 {
 
     @GetMapping("/useranswers/user/{userId}")
     public ResponseEntity<?> getUserAnswersByUserId(@PathVariable("userId") Integer userId){
-        return ResponseEntity.ok(service.getImprovementsByUser(userId));
+        return ResponseEntity.ok(service.getUserAnswersByUserId(userId));
     }
 
     @GetMapping("/practice/answers/{userId}")
@@ -272,15 +272,25 @@ public class EqualEdControllerV2 {
     @GetMapping("/improvement/user/{userId}/nonweak")
     public ResponseEntity<?> getImprovementByUserNonWeakCat(
             @ApiParam(value = "User id", required = true) @PathVariable("userId") Integer userId) {
-        log.info(String.format("Request received : Improvement %s for GET /improvement/user/{userId} for particular ", userId));
+        log.debug(String.format("Request received : Improvement %s for GET /improvement/user/{userId} for particular ", userId));
         return ResponseEntity.ok(service.getNonWeakCategoryImprovementsByUserId(userId));
     }
 
     @GetMapping("/improvement/user/{userId}/nonstrong")
     public ResponseEntity<?> getImprovementByUserNonStrongCat(
             @ApiParam(value = "User id", required = true) @PathVariable("userId") Integer userId) {
-        log.info(String.format("Request received : Improvement %s for GET /improvement/user/{userId} for particular ", userId));
+        log.debug(String.format("Request received : Improvement %s for GET /improvement/user/{userId} for particular ", userId));
         return ResponseEntity.ok(service.getNonStrongCategoryImprovementsByUserId(userId));
+    }
+
+    @GetMapping("/users")
+    public ResponseEntity<?> getAllUsers(){
+        return ResponseEntity.ok(service.getAllUsers());
+    }
+
+    @PostMapping("/users/teacher/{teacherId}/students")
+    public ResponseEntity<?> updateTeacherRelation(@PathVariable("teacherId") Integer teacher_id,@RequestBody List<Integer> students){
+        return ResponseEntity.ok(service.addStudentsForTeacher(teacher_id, students));
     }
 
 }

@@ -71,4 +71,8 @@ public interface IEqualEdServiceV2 {
     Map<String, List<CommonV2Response>> getNonWeakCategoryImprovementsByUserId(Integer userId);
 
     Map<String, List<CommonV2Response>> getNonStrongCategoryImprovementsByUserId(Integer userId);
+
+    Map<String,List<CommonV2Response>> getAllUsers();
+
+    Map<String, List<CommonV2Response>> addStudentsForTeacher(Integer teacherId, List<Integer> students);
 }

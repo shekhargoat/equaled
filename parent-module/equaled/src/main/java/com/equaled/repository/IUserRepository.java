@@ -18,4 +18,5 @@ public interface IUserRepository extends JpaRepository<Users, Integer> {
     Optional<Users> findBySid(String sid);
 
     Optional<Users> findByEmailIs(String email);
+
 }

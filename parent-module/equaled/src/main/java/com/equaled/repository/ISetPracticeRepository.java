@@ -20,5 +20,5 @@ public interface ISetPracticeRepository extends JpaRepository<Setpractice, Integ
     void markStatus(String sid, EqualEdEnums.SetpracticeStatus status);
 
     @Query(value = "select sp from Setpractice sp where sp.user.id = :userId and sp.status = :status")
-    List<Setpractice> getSetpracticeByUserAndStatus(Integer userId,String status);
+    List<Setpractice> getSetpracticeByUserAndStatus(Integer userId,EqualEdEnums.SetpracticeStatus status);
 }
