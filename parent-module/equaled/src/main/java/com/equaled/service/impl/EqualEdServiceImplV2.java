@@ -576,7 +576,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     public Map<String, List<CommonV2Response>> getUserAnswersByUserAndExamId(Integer userId, String examId) {
         log.trace("Finding user answers for userId {} and examId {}",userId,examId);
         List<UserAnswers> userAnswers = useranswerRepository.findByUserAndExamId(userId, examId);
-        if(userAnswers.isEmpty()) throw new RecordNotFoundException(ErrorCodes.UA001, "User answers not found for given user "+userId +" and examId "+examId);
+//        if(userAnswers.isEmpty()) throw new RecordNotFoundException(ErrorCodes.UA001, "User answers not found for given user "+userId +" and examId "+examId);
         log.debug("Found {} user answers for userId {} examId {}",userAnswers.size(),userId,examId);
         List<CommonV2Response> commonV2Responses = userAnswers.stream().map(answers -> {
             CommonV2Response commonV2Response = new CommonV2Response();
