@@ -386,6 +386,10 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
         List<UserAnswers> userAnswers = useranswerRepository.findByExamId(examId);
 //        if(userAnswers.isEmpty()) throw new RecordNotFoundException(ErrorCodes.UA001, "User answers not found for given and examId "+examId);
         log.debug("Found {} user answers for examId {}",userAnswers.size(),examId);
+        return createUseranswerResponse(userAnswers);
+    }
+
+    private Map<String, List<CommonV2Response>> createUseranswerResponse(List<UserAnswers> userAnswers) {
         List<CommonV2Response> commonV2Responses = userAnswers.stream().map(answers -> {
             CommonV2Response commonV2Response = new CommonV2Response();
             commonV2Response.setId(answers.getStringSid());
@@ -401,6 +405,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
             commonV2Response.putField("Explanation", answers.getExplanation());
             commonV2Response.putField("Time_Spent", String.valueOf(answers.getTimeSpent()));
             commonV2Response.putField("date", answers.getAnswerDate().toString());
+            commonV2Response.putField("User_option", Optional.ofNullable(answers.getUserOption()).orElse(StringUtils.EMPTY));
             return commonV2Response;
         }).collect(Collectors.toList());
 
@@ -578,25 +583,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
         List<UserAnswers> userAnswers = useranswerRepository.findByUserAndExamId(userId, examId);
 //        if(userAnswers.isEmpty()) throw new RecordNotFoundException(ErrorCodes.UA001, "User answers not found for given user "+userId +" and examId "+examId);
         log.debug("Found {} user answers for userId {} examId {}",userAnswers.size(),userId,examId);
-        List<CommonV2Response> commonV2Responses = userAnswers.stream().map(answers -> {
-            CommonV2Response commonV2Response = new CommonV2Response();
-            commonV2Response.setId(answers.getStringSid());
-            commonV2Response.setCreatedTime(answers.getAnswerDate().toString());
-            commonV2Response.putField("user_exam_Id", String.valueOf(answers.id));
-            commonV2Response.putField("User_id", String.valueOf(answers.getUser().getId()));
-            commonV2Response.putField("exam_id", answers.getExamId());
-            commonV2Response.putField("text", answers.getQuestion().getQuestion());
-            commonV2Response.putField("category", answers.getQuestion().getCategory());
-            commonV2Response.putField("sub_category", answers.getQuestion().getSubCategory());
-            commonV2Response.putField("Correct_option", answers.getQuestion().getCorrectOption());
-            commonV2Response.putField("question_id", String.valueOf(answers.getQuestion().id));
-            commonV2Response.putField("Explanation", answers.getExplanation());
-            commonV2Response.putField("Time_Spent", String.valueOf(answers.getTimeSpent()));
-            commonV2Response.putField("date", answers.getAnswerDate().toString());
-            return commonV2Response;
-        }).collect(Collectors.toList());
-
-        return generateResponse(commonV2Responses);
+        return createUseranswerResponse(userAnswers);
     }
 
     @Override
@@ -679,25 +666,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
         log.trace("Finding user answers for userId {} ",userId);
         List<UserAnswers> userAnswers = useranswerRepository.findByUserId(userId);
         log.debug("Found {} user answers for userId {} ",userAnswers.size(),userId);
-        List<CommonV2Response> commonV2Responses = userAnswers.stream().map(answers -> {
-            CommonV2Response commonV2Response = new CommonV2Response();
-            commonV2Response.setId(answers.getStringSid());
-            commonV2Response.setCreatedTime(answers.getAnswerDate().toString());
-            commonV2Response.putField("user_exam_Id", String.valueOf(answers.id));
-            commonV2Response.putField("User_id", String.valueOf(answers.getUser().getId()));
-            commonV2Response.putField("exam_id", answers.getExamId());
-            commonV2Response.putField("text", answers.getQuestion().getQuestion());
-            commonV2Response.putField("category", answers.getQuestion().getCategory());
-            commonV2Response.putField("sub_category", answers.getQuestion().getSubCategory());
-            commonV2Response.putField("Correct_option", answers.getQuestion().getCorrectOption());
-            commonV2Response.putField("question_id", String.valueOf(answers.getQuestion().id));
-            commonV2Response.putField("Explanation", answers.getExplanation());
-            commonV2Response.putField("Time_Spent", String.valueOf(answers.getTimeSpent()));
-            commonV2Response.putField("date", answers.getAnswerDate().toString());
-            return commonV2Response;
-        }).collect(Collectors.toList());
-
-        return generateResponse(commonV2Responses);
+        return createUseranswerResponse(userAnswers);
     }
 
     @Override
@@ -791,6 +760,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
             commonV2Response.putField("sub_category", String.valueOf(question.getSubCategory()));
             commonV2Response.putField("Correct_option", String.valueOf(question.getCorrectOption()));
             commonV2Response.putField("Learn", String.valueOf(question.getLearn()));
+            commonV2Response.putField("Image_path", Optional.ofNullable(question.getImagePath()).orElse(StringUtils.EMPTY));
 
             return commonV2Response;
         }).collect(Collectors.toList());
