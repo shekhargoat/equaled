@@ -302,4 +302,15 @@ public class EqualEdControllerV2 {
                 "for particular ", userId));
         return ResponseEntity.ok(service.getQuestionsByUser(userId));
     }
+
+    @PostMapping("/questions/subcategories")
+    @ApiOperation(value = "get Questions by user id",
+            notes = "API to get Questions by user id")
+    public ResponseEntity<?> getQuestionsBySubcategories(@RequestBody List<String> subcategories){
+        log.info(String.format("Request received : User %s for GET /questions/subcategories " +
+                "for subcategories {}", subcategories));
+        return ResponseEntity.ok(service.getQuestionsBySubcategories(subcategories));
+    }
+
+
 }

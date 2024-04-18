@@ -797,5 +797,14 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
 
         return generateResponse(commonV2Responses);
     }
+
+    @Override
+    public Map<String, List<CommonV2Response>> getQuestionsBySubcategories(List<String> subcategories) {
+        log.trace("Finding Questions for subcategories {}",subcategories);
+        List<Questions> questions = Optional.ofNullable(questionRepository
+                .getQuestionsBySubCategoryIn(subcategories)).orElse(ListUtils.EMPTY_LIST);
+        log.debug("Finding Questions for subcategories {} = {}",subcategories, questions.size());
+        return createQuestionsResponse(questions);
+    }
 }
 
