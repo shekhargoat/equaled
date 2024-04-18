@@ -366,7 +366,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     public Map<String, List<CommonV2Response>> getImprovementsByExam(String examId) {
         log.trace("Finding improvements for examId {}",examId);
         List<Improvement> improvements = improvementRepository.getImprovementsByExamId(examId);
-        if(improvements.isEmpty()) throw new RecordNotFoundException(ErrorCodes.I001, "Improvements not found for given exam id " + examId);
+//        if(improvements.isEmpty()) throw new RecordNotFoundException(ErrorCodes.I001, "Improvements not found for given exam id " + examId);
         log.debug("Found {} improvements for examId {}",improvements.size(),examId);
         return createImprovementResponse(improvements);
     }
@@ -375,7 +375,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     public Map<String, List<CommonV2Response>> getImprovementsByUserIdAndExam(Integer userId,String examId) {
         log.trace("Finding improvements for userId {} and examId {}",userId,examId);
         List<Improvement> improvements = improvementRepository.getImprovementsByUserIdAndExamId(userId,examId);
-        if(improvements.isEmpty()) throw new RecordNotFoundException(ErrorCodes.I001, "Improvements not found for given user id " + userId +" and examId "+examId);
+//        if(improvements.isEmpty()) throw new RecordNotFoundException(ErrorCodes.I001, "Improvements not found for given user id " + userId +" and examId "+examId);
         log.debug("Found {} improvements for userId {} and examId {}",improvements.size(),userId,examId);
         return createImprovementResponse(improvements);
     }
@@ -384,7 +384,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     public Map<String, List<CommonV2Response>> getUserAnswersByExamId(String examId) {
         log.trace("Finding user answers for examId {}",examId);
         List<UserAnswers> userAnswers = useranswerRepository.findByExamId(examId);
-        if(userAnswers.isEmpty()) throw new RecordNotFoundException(ErrorCodes.UA001, "User answers not found for given and examId "+examId);
+//        if(userAnswers.isEmpty()) throw new RecordNotFoundException(ErrorCodes.UA001, "User answers not found for given and examId "+examId);
         log.debug("Found {} user answers for examId {}",userAnswers.size(),examId);
         List<CommonV2Response> commonV2Responses = userAnswers.stream().map(answers -> {
             CommonV2Response commonV2Response = new CommonV2Response();
