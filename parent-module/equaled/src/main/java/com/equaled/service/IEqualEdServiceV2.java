@@ -77,4 +77,6 @@ public interface IEqualEdServiceV2 {
     Map<String, List<CommonV2Response>> addStudentsForTeacher(Integer teacherId, List<Integer> students);
 
     Map<String, List<CommonV2Response>> getQuestionsByUser(Integer userId);
+
+    Map<String, List<CommonV2Response>> getQuestionsBySubcategories(List<String> subcategories);
 }

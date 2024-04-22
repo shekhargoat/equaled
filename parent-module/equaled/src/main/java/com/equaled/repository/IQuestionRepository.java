@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface IQuestionRepository extends JpaRepository<Questions, Integer> {
 
@@ -19,4 +20,7 @@ public interface IQuestionRepository extends JpaRepository<Questions, Integer> {
 
     @Query(value = "select q from Questions q where q.user.id = :userId")
     List<Questions> getQuestionsByUserId(Integer userId);
+
+//    @Query(value = "select q from Questions q where q.subCategory IN (:subacts)")
+    List<Questions> getQuestionsBySubCategoryIn(List<String> subcats);
 }
