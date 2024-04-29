@@ -8,15 +8,14 @@ import com.equaled.eserve.common.exception.RecordNotFoundException;
 import com.equaled.eserve.exception.errorcode.ErrorCodes;
 import com.equaled.repository.*;
 import com.equaled.service.IEqualEdServiceV2;
-import com.equaled.to.CommonV2Request;
-import com.equaled.to.CommonV2Response;
-import com.equaled.to.CreateProfileRequest;
+import com.equaled.to.*;
 import com.equaled.value.EqualEdEnums;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.ListUtils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 import org.springframework.stereotype.Service;
@@ -45,6 +44,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     IUseranswerRepository useranswerRepository;
     IImprovementRepository improvementRepository;
     IPracticeUseranswerRepository practiceUseranswerRepository;
+    IExamScoreRepository examScoreRepository;
 
     DozerUtils mapper;
 
@@ -775,6 +775,69 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
                 .getQuestionsBySubCategoryIn(subcategories)).orElse(ListUtils.EMPTY_LIST);
         log.debug("Finding Questions for subcategories {} = {}",subcategories, questions.size());
         return createQuestionsResponse(questions);
+    }
+
+    @Override
+    public UserAnswerAITO submitUserAnswerAI(UserAnswerAITO userAnswerAITO) {
+        if(ObjectUtils.isEmpty(userAnswerAITO) || ObjectUtils.isEmpty(userAnswerAITO.getAnswers())) throw new IncorrectArgumentException("Answer information is not available");
+        log.trace("Submitting user answers AI : {}",userAnswerAITO );
+        userAnswerAITO.getAnswers()
+                .forEach(userAnswersTO -> {
+                    UserAnswers userAnswers = new UserAnswers();
+                    userAnswers.setSid(BaseEntity.generateByteUuid());
+                    Users user = userRepository.findById(userAnswerAITO.getUserId())
+                            .orElseThrow(() -> new IncorrectArgumentException("Invalid User Id"));
+                    userAnswers.setUser(user);
+                    Questions orCreateQuestion = getOrCreateQuestion(userAnswersTO.getQuestion());
+                    userAnswersTO.getQuestion().setSid(orCreateQuestion.getStringSid());
+                    userAnswers.setQuestion(orCreateQuestion);
+                    userAnswers.setExamScore(createExamScore(userAnswerAITO, user));
+                    userAnswers.setExamId(userAnswerAITO.getExamId());
+                    // get user answer date
+                    userAnswers.setAnswerDate(Instant.now());
+                    userAnswers.setTimeSpent(userAnswersTO.getTimeSpent());
+                    userAnswers.setExplanation(userAnswersTO.getExplanation());
+                    userAnswers.setUserOption(userAnswersTO.getUserOption());
+                    userAnswers.setCorrectOption(userAnswersTO.getCorrectOption().isEmpty() ? "a" : userAnswersTO.getCorrectOption());
+                    log.trace("Submitting answer");
+                    UserAnswers userAnswers1 = useranswerRepository.save(userAnswers);
+                    log.debug("Users answer created : {}", userAnswers.getSid());
+                    userAnswersTO.setSid(userAnswers1.getStringSid());
+                });
+        return userAnswerAITO;
+    }
+
+    private ExamScore createExamScore(UserAnswerAITO userAnswerAITO, Users user) {
+        ExamScore examScore = new ExamScore();
+        examScore.setSid(BaseEntity.generateByteUuid());
+        examScore.setUser(user);
+        examScore.setExamId(userAnswerAITO.getExamId());
+        examScore.setCreatedOn(Instant.now());
+        examScore.setExamScore(userAnswerAITO.getExamScore());
+        return examScoreRepository.save(examScore);
+    }
+
+    private Questions getOrCreateQuestion(QuestionsTO questionsTO) {
+        List<Questions> question = questionRepository.getQuestionsByQuestion(questionsTO.getQuestion());
+        if(CollectionUtils.isEmpty(question)){
+            Questions questions = new Questions();
+            questions.setSid(BaseEntity.generateByteUuid());
+            questions.setQuestion(questionsTO.getQuestion());
+            questions.setOption1(questionsTO.getOption1());
+            questions.setOption2(questionsTO.getOption2());
+            questions.setOption3(questionsTO.getOption3());
+            questions.setOption4(questionsTO.getOption4());
+            questions.setCorrectOption(questionsTO.getCorrectOption());
+            questions.setImagePath(questionsTO.getImagePath());
+            questions.setQuestionAiId(questionsTO.getQuestionAiId());
+            questions.setSubject(subjectRepository.findById(questionsTO.getSubjectId()).orElseThrow(()-> new IncorrectArgumentException("Invalid Subject Id")));
+            questions.setYearGroupId(yearGroupRepository.findById(questionsTO.getYear_group_id()).orElseThrow(()-> new IncorrectArgumentException("Invalid Year Group Id")));
+            Questions saved = questionRepository.save(questions);
+            log.trace("Questions not found by question {} create new question for questionAiID {}",saved.getQuestion(),saved.getQuestionAiId());
+            return saved;
+        }else{
+            return question.get(0);
+        }
     }
 }
 

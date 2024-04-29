@@ -37,17 +37,21 @@ public class UserAnswers extends BaseEntity{
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     private Users user;
 
+    @ManyToOne
+    @JoinColumn(name = "exam_score_id", referencedColumnName = "id", nullable = false)
+    private ExamScore examScore;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UserAnswers that = (UserAnswers) o;
-        return id == that.id && Arrays.equals(sid,that.sid) && timeSpent == that.timeSpent && answerDate == that.answerDate && Objects.equals(correctOption, that.correctOption) && Objects.equals(userOption, that.userOption) && Objects.equals(explanation, that.explanation) && Objects.equals(examId, that.examId) && Objects.equals(subject, that.subject) && Objects.equals(question, that.question);
+        return id == that.id && Arrays.equals(sid,that.sid) && timeSpent == that.timeSpent && answerDate == that.answerDate && Objects.equals(correctOption, that.correctOption) && Objects.equals(userOption, that.userOption) && Objects.equals(explanation, that.explanation) && Objects.equals(examId, that.examId) && Objects.equals(subject, that.subject) && Objects.equals(question, that.question) && Objects.equals(examScore,that.examScore);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(correctOption, userOption, explanation, timeSpent, answerDate, examId, subject, question);
+        int result = Objects.hash(correctOption, userOption, explanation, timeSpent, answerDate, examId, subject, question,examScore);
         result = 31 * result + Arrays.hashCode(sid);
         return result;
     }

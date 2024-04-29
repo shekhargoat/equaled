@@ -23,4 +23,6 @@ public interface IQuestionRepository extends JpaRepository<Questions, Integer> {
 
 //    @Query(value = "select q from Questions q where q.subCategory IN (:subacts)")
     List<Questions> getQuestionsBySubCategoryIn(List<String> subcats);
+
+    List<Questions> getQuestionsByQuestion(String question);
 }

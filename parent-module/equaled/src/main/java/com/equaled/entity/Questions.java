@@ -46,6 +46,8 @@ public class Questions extends BaseEntity{
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private Users user;
+    @Column(name = "question_ai_id")
+    private String questionAiId;
 
     @Override
     public boolean equals(Object o) {

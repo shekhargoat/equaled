@@ -139,3 +139,23 @@ create table user_tests
 
 alter table improvement add column created_on datetime;
 
+create table exam_score
+(
+    id                 int auto_increment primary key,
+    sid                binary(32)       not null,
+    user_id            int              not null,
+    exam_id            varchar(32)          not null,
+    exam_score         json             not null comment 'stores all the exam score data i.e. ques, answers from the ai model in a JSON',
+    created_on         datetime         not null,
+    constraint exam_score_pk_2
+        unique (sid),
+    constraint exam_score_user_id_fk
+        foreign key (user_id) references users (id)
+)
+    comment 'Stores all the information about the exam score data ';
+
+alter table user_answers add column exam_score_id int;
+alter table questions add column question_ai_id varchar(32);
+alter table questions add unique(question_ai_id);
+ALTER TABLE user_answers ADD FOREIGN KEY (exam_score_id) REFERENCES exam_score(id);
+
