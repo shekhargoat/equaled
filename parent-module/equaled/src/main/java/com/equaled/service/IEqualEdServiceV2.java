@@ -3,6 +3,7 @@ package com.equaled.service;
 import com.equaled.to.CommonV2Request;
 import com.equaled.to.CommonV2Response;
 import com.equaled.to.CreateProfileRequest;
+import com.equaled.to.UserAnswerAITO;
 
 import java.util.List;
 import java.util.Map;
@@ -79,4 +80,6 @@ public interface IEqualEdServiceV2 {
     Map<String, List<CommonV2Response>> getQuestionsByUser(Integer userId);
 
     Map<String, List<CommonV2Response>> getQuestionsBySubcategories(List<String> subcategories);
+
+    UserAnswerAITO submitUserAnswerAI(UserAnswerAITO request);
 }
