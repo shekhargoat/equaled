@@ -83,5 +83,5 @@ public interface IEqualEdServiceV2 {
 
     UserAnswerAITO submitUserAnswerAI(UserAnswerAITO request);
 
-    Map<String,Object> getExamScore(Integer examScoreId);
+    List<Map<String,Object>> getExamScore(String examId);
 }

@@ -3,6 +3,7 @@ package com.equaled.service.impl;
 import com.equaled.dozer.DozerUtils;
 import com.equaled.entity.*;
 import com.equaled.eserve.common.CommonUtils;
+import com.equaled.eserve.common.JsonUtils;
 import com.equaled.eserve.common.exception.ApplicationException;
 import com.equaled.eserve.common.exception.IncorrectArgumentException;
 import com.equaled.eserve.common.exception.RecordNotFoundException;
@@ -11,7 +12,6 @@ import com.equaled.repository.*;
 import com.equaled.service.IEqualEdServiceV2;
 import com.equaled.to.*;
 import com.equaled.value.EqualEdEnums;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -49,8 +49,6 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     IExamScoreRepository examScoreRepository;
 
     DozerUtils mapper;
-
-    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public Map<String,List<CommonV2Response>> getDashboardsByUser(Integer userId) {
@@ -812,18 +810,15 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     }
 
     @Override
-    public Map<String, Object> getExamScore(Integer examScoreId) {
-        if(CommonUtils.isEmpty(examScoreId)) throw new ApplicationException("Invalid exam score Id");
-        return Optional.ofNullable(examScoreRepository.getOne(examScoreId))
-                .map(examScore -> {
-                    try {
-                        return objectMapper.readValue(examScore.getExamScore(), HashMap.class);
-                    }catch (Exception e){
-                        log.error("Error when converting exam score json string to map {}",e.getMessage());
-                        throw new ApplicationException(e.getMessage());
-                    }
-                })
-                .orElseThrow(() -> new RecordNotFoundException("Invalid exam score Id"));
+    public List<Map<String,Object>> getExamScore(String examId) {
+        if(CommonUtils.isEmpty(examId)) throw new ApplicationException("Invalid exam score Id");
+        log.trace("Finding exam scores for exam Id {}",examId);
+        List<ExamScore> examScores = Optional.ofNullable(examScoreRepository.getExamScoreByExamId(examId)).orElse(ListUtils.EMPTY_LIST);
+        log.debug("Found {} exam scores for exam Id {}",examScores.size(), examId);
+
+        return examScores.stream().map(examScore ->
+            JsonUtils.convertStringToMap(examScore.getExamScore())
+        ).collect(Collectors.toList());
     }
 
     private ExamScore createExamScore(UserAnswerAITO userAnswerAITO, Users user) {
