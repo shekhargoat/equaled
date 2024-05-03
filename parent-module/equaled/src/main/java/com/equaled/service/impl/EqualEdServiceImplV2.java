@@ -3,6 +3,7 @@ package com.equaled.service.impl;
 import com.equaled.dozer.DozerUtils;
 import com.equaled.entity.*;
 import com.equaled.eserve.common.CommonUtils;
+import com.equaled.eserve.common.exception.ApplicationException;
 import com.equaled.eserve.common.exception.IncorrectArgumentException;
 import com.equaled.eserve.common.exception.RecordNotFoundException;
 import com.equaled.eserve.exception.errorcode.ErrorCodes;
@@ -10,6 +11,7 @@ import com.equaled.repository.*;
 import com.equaled.service.IEqualEdServiceV2;
 import com.equaled.to.*;
 import com.equaled.value.EqualEdEnums;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -47,6 +49,8 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     IExamScoreRepository examScoreRepository;
 
     DozerUtils mapper;
+
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public Map<String,List<CommonV2Response>> getDashboardsByUser(Integer userId) {
@@ -805,6 +809,21 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
                     userAnswersTO.setSid(userAnswers1.getStringSid());
                 });
         return userAnswerAITO;
+    }
+
+    @Override
+    public Map<String, Object> getExamScore(Integer examScoreId) {
+        if(CommonUtils.isEmpty(examScoreId)) throw new ApplicationException("Invalid exam score Id");
+        return Optional.ofNullable(examScoreRepository.getOne(examScoreId))
+                .map(examScore -> {
+                    try {
+                        return objectMapper.readValue(examScore.getExamScore(), HashMap.class);
+                    }catch (Exception e){
+                        log.error("Error when converting exam score json string to map {}",e.getMessage());
+                        throw new ApplicationException(e.getMessage());
+                    }
+                })
+                .orElseThrow(() -> new RecordNotFoundException("Invalid exam score Id"));
     }
 
     private ExamScore createExamScore(UserAnswerAITO userAnswerAITO, Users user) {

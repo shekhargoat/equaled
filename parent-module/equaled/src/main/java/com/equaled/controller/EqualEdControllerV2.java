@@ -321,4 +321,14 @@ public class EqualEdControllerV2 {
                 "for request {}", request));
         return ResponseEntity.ok(service.submitUserAnswerAI(request));
     }
+
+    @GetMapping("/examscore/{examScoreId}")
+    @ApiOperation(value = "get exam score json by exam score id",
+            notes = "API to get exam score json by exam score id")
+    public ResponseEntity<?> getExamScore(
+            @ApiParam(value = "Exam score id", required = true) @PathVariable("examScoreId") Integer examScoreId){
+        log.info(String.format("Request received : Exam score %s for GET /examscore/{examScoreId} " +
+                "for particular ", examScoreId));
+        return ResponseEntity.ok(service.getExamScore(examScoreId));
+    }
 }

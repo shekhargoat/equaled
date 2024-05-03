@@ -82,4 +82,6 @@ public interface IEqualEdServiceV2 {
     Map<String, List<CommonV2Response>> getQuestionsBySubcategories(List<String> subcategories);
 
     UserAnswerAITO submitUserAnswerAI(UserAnswerAITO request);
+
+    Map<String,Object> getExamScore(Integer examScoreId);
 }
