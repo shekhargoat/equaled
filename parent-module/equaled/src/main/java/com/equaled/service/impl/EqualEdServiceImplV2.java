@@ -379,7 +379,12 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
         List<Improvement> improvements = improvementRepository.getImprovementsByUserIdAndExamId(userId,examId);
 //        if(improvements.isEmpty()) throw new RecordNotFoundException(ErrorCodes.I001, "Improvements not found for given user id " + userId +" and examId "+examId);
         log.debug("Found {} improvements for userId {} and examId {}",improvements.size(),userId,examId);
-        return createImprovementResponse(improvements);
+        // finding sas and stanine data
+        List<Map<String, Object>> examScores = getExamScore(examId);
+        if(CollectionUtils.isNotEmpty(examScores)){
+            return createImprovementResponse(improvements,examScores.get(0));
+        }else
+            return createImprovementResponse(improvements);
     }
 
     @Override
@@ -400,7 +405,8 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
             commonV2Response.putField("User_id", String.valueOf(answers.getUser().getId()));
             commonV2Response.putField("exam_id", answers.getExamId());
             commonV2Response.putField("text", answers.getQuestion().getQuestion());
-            commonV2Response.putField("category", answers.getQuestion().getCategory());
+            commonV2Response.putField("category", Optional.ofNullable(answers.getQuestion().getCategory())
+                    .orElse(answers.getSubject().getName()));
             commonV2Response.putField("sub_category", answers.getQuestion().getSubCategory());
             commonV2Response.putField("Correct_option", answers.getQuestion().getCorrectOption());
             commonV2Response.putField("question_id", String.valueOf(answers.getQuestion().id));
@@ -428,6 +434,28 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
             commonV2Response.putField("score", String.valueOf(improvement.getScore()));
             commonV2Response.putField("total_questions", String.valueOf(improvement.getTotalQuestions()));
             commonV2Response.putField("subject_name", improvement.getSubject().getName());
+
+            return commonV2Response;
+        }).collect(Collectors.toList());
+
+        return generateResponse(commonV2Responses);
+    }
+
+    private Map<String, List<CommonV2Response>> createImprovementResponse(List<Improvement> improvements,Map<String,Object> examscore) {
+        List<CommonV2Response> commonV2Responses = improvements.stream().map(improvement -> {
+            CommonV2Response commonV2Response = new CommonV2Response();
+            commonV2Response.setId(improvement.getStringSid());
+            commonV2Response.setCreatedTime(Optional.ofNullable(improvement.getCreatedOn()).map(Instant::toString).orElse(Instant.now().toString()));
+            commonV2Response.putField("improve_id", String.valueOf(improvement.id));
+            commonV2Response.putField("user_id", String.valueOf(improvement.getUser().getId()));
+            commonV2Response.putField("exam_id", improvement.getExamId());
+            commonV2Response.putField("strong_category", improvement.getStrongCategory());
+            commonV2Response.putField("weak_category", improvement.getWeakCategory());
+            commonV2Response.putField("score", String.valueOf(improvement.getScore()));
+            commonV2Response.putField("total_questions", String.valueOf(improvement.getTotalQuestions()));
+            commonV2Response.putField("subject_name", improvement.getSubject().getName());
+            commonV2Response.putField("sas",String.valueOf(examscore.get("sas_score")));
+            commonV2Response.putField("stanineScore",String.valueOf(examscore.get("stanine_score")));
 
             return commonV2Response;
         }).collect(Collectors.toList());
@@ -783,17 +811,19 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     public UserAnswerAITO submitUserAnswerAI(UserAnswerAITO userAnswerAITO) {
         if(ObjectUtils.isEmpty(userAnswerAITO) || ObjectUtils.isEmpty(userAnswerAITO.getAnswers())) throw new IncorrectArgumentException("Answer information is not available");
         log.trace("Submitting user answers AI : {}",userAnswerAITO );
+        // creating the exam_score record
+        Users user = userRepository.findById(userAnswerAITO.getUserId())
+                .orElseThrow(() -> new IncorrectArgumentException("Invalid User Id"));
+        ExamScore examScore = createExamScore(userAnswerAITO, user);
         userAnswerAITO.getAnswers()
                 .forEach(userAnswersTO -> {
                     UserAnswers userAnswers = new UserAnswers();
                     userAnswers.setSid(BaseEntity.generateByteUuid());
-                    Users user = userRepository.findById(userAnswerAITO.getUserId())
-                            .orElseThrow(() -> new IncorrectArgumentException("Invalid User Id"));
                     userAnswers.setUser(user);
                     Questions orCreateQuestion = getOrCreateQuestion(userAnswersTO.getQuestion());
                     userAnswersTO.getQuestion().setSid(orCreateQuestion.getStringSid());
                     userAnswers.setQuestion(orCreateQuestion);
-                    userAnswers.setExamScore(createExamScore(userAnswerAITO, user));
+                    userAnswers.setExamScore(examScore);
                     userAnswers.setExamId(userAnswerAITO.getExamId());
                     // get user answer date
                     userAnswers.setAnswerDate(Instant.now());
@@ -832,8 +862,10 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     }
 
     private Questions getOrCreateQuestion(QuestionsTO questionsTO) {
-        List<Questions> question = questionRepository.getQuestionsByQuestion(questionsTO.getQuestion());
-        if(CollectionUtils.isEmpty(question)){
+//        List<Questions> question = questionRepository.getQuestionsByQuestion(questionsTO.getQuestion());
+        if(StringUtils.isEmpty(questionsTO.getQuestionAiId()))throw new IncorrectArgumentException("AI Question ID is not available.");
+        Questions question = questionRepository.findQuestionsByQuestionAiId(questionsTO.getQuestionAiId()).get();
+        if(ObjectUtils.isEmpty(question)){
             Questions questions = new Questions();
             questions.setSid(BaseEntity.generateByteUuid());
             questions.setQuestion(questionsTO.getQuestion());
@@ -846,11 +878,14 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
             questions.setQuestionAiId(questionsTO.getQuestionAiId());
             questions.setSubject(subjectRepository.findById(questionsTO.getSubjectId()).orElseThrow(()-> new IncorrectArgumentException("Invalid Subject Id")));
             questions.setYearGroupId(yearGroupRepository.findById(questionsTO.getYear_group_id()).orElseThrow(()-> new IncorrectArgumentException("Invalid Year Group Id")));
+            questions.setDifficulty(questionsTO.getDifficulty());
+            questions.setCategory(questionsTO.getCategory());
+            questions.setSubCategory(questionsTO.getSubCategory());
             Questions saved = questionRepository.save(questions);
             log.trace("Questions not found by question {} create new question for questionAiID {}",saved.getQuestion(),saved.getQuestionAiId());
             return saved;
         }else{
-            return question.get(0);
+            return question;
         }
     }
 }

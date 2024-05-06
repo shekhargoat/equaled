@@ -25,4 +25,6 @@ public interface IQuestionRepository extends JpaRepository<Questions, Integer> {
     List<Questions> getQuestionsBySubCategoryIn(List<String> subcats);
 
     List<Questions> getQuestionsByQuestion(String question);
+
+    Optional<Questions> findQuestionsByQuestionAiId(String questionAiId);
 }
