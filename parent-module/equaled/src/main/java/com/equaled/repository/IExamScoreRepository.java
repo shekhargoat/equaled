@@ -12,4 +12,6 @@ import java.util.Optional;
 public interface IExamScoreRepository extends JpaRepository<ExamScore, Integer> {
     @Query(value = "select e from ExamScore e where e.user.id = :userId and e.examId = :examId")
     List<ExamScore> getExamScoreByUserAndExamId(Integer userId, String examId);
+
+    List<ExamScore> getExamScoreByExamId(String examId);
 }

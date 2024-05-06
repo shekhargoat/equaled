@@ -75,7 +75,7 @@ public class JsonUtils {
 	}
 
 	@SneakyThrows
-	public static Map<String,String> convertStringToMap(String json){
+	public static Map<String,Object> convertStringToMap(String json){
 		return new ObjectMapper().readValue(json, HashMap.class);
 	}
 	@SneakyThrows

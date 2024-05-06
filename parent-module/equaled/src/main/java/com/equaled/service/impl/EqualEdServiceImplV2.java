@@ -3,6 +3,8 @@ package com.equaled.service.impl;
 import com.equaled.dozer.DozerUtils;
 import com.equaled.entity.*;
 import com.equaled.eserve.common.CommonUtils;
+import com.equaled.eserve.common.JsonUtils;
+import com.equaled.eserve.common.exception.ApplicationException;
 import com.equaled.eserve.common.exception.IncorrectArgumentException;
 import com.equaled.eserve.common.exception.RecordNotFoundException;
 import com.equaled.eserve.exception.errorcode.ErrorCodes;
@@ -805,6 +807,18 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
                     userAnswersTO.setSid(userAnswers1.getStringSid());
                 });
         return userAnswerAITO;
+    }
+
+    @Override
+    public List<Map<String,Object>> getExamScore(String examId) {
+        if(CommonUtils.isEmpty(examId)) throw new ApplicationException("Invalid exam score Id");
+        log.trace("Finding exam scores for exam Id {}",examId);
+        List<ExamScore> examScores = Optional.ofNullable(examScoreRepository.getExamScoreByExamId(examId)).orElse(ListUtils.EMPTY_LIST);
+        log.debug("Found {} exam scores for exam Id {}",examScores.size(), examId);
+
+        return examScores.stream().map(examScore ->
+            JsonUtils.convertStringToMap(examScore.getExamScore())
+        ).collect(Collectors.toList());
     }
 
     private ExamScore createExamScore(UserAnswerAITO userAnswerAITO, Users user) {
