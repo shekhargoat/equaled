@@ -1,0 +1,5 @@
+package com.equaled.eserve.common.to;
+
+public enum TimeFrame {
+    TODAY,YESTERDAY,THIS_WEEK,LAST_WEEK,THIS_MONTH,LAST_MONTH,LAST_THREE_MONTH,LAST_SIX_MONTH,THIS_YEAR,LAST_YEAR
+}
