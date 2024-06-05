@@ -36,6 +36,11 @@ public class Setpractice extends BaseEntity{
     @Enumerated(EnumType.STRING)
     private EqualEdEnums.SetpracticeStatus status;
 
+    @ManyToOne
+    @JoinColumn(name = "year_group_id", referencedColumnName = "id", nullable = false)
+    private YearGroup yearGroup;
+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

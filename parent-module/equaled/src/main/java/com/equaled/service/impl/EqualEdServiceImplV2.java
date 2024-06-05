@@ -1,5 +1,6 @@
 package com.equaled.service.impl;
 
+import com.equaled.common.config.RestTemplateConfig;
 import com.equaled.dozer.DozerUtils;
 import com.equaled.entity.*;
 import com.equaled.eserve.common.CommonUtils;
@@ -34,6 +35,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
 
+    private final RestTemplateConfig restTemplateConfig;
     IDashboardRepository dashboardRepository;
     ISubjectCategoryRepository subjectCategoryRepository;
     ITestRepository testRepository;
@@ -406,7 +408,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
             commonV2Response.putField("exam_id", answers.getExamId());
             commonV2Response.putField("text", answers.getQuestion().getQuestion());
             commonV2Response.putField("category", Optional.ofNullable(answers.getQuestion().getCategory())
-                    .orElse(answers.getSubject().getName()));
+                    .orElse(answers.getQuestion().getSubject().getName()));
             commonV2Response.putField("sub_category", answers.getQuestion().getSubCategory());
             commonV2Response.putField("Correct_option", answers.getQuestion().getCorrectOption());
             commonV2Response.putField("question_id", String.valueOf(answers.getQuestion().id));
@@ -640,6 +642,8 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
                     .filter(CollectionUtils::isNotEmpty).map(lst -> lst.get(0))
                     .orElseThrow(()-> new IncorrectArgumentException("Invalid Subject Name"));
             setpractice1.setSubject(subject);
+            setpractice1.setYearGroup(yearGroupRepository.findById(MapUtils.getIntValue(setpractice.getFields(), "year_group_id"))
+                    .orElseThrow(()-> new IncorrectArgumentException("Invalid Year Group Id")));
 
             setpractice1.setStatus(EqualEdEnums.SetpracticeStatus.PENDING);
             setpractice1.setQuestions(MapUtils.getString(setpractice.getFields(), "questions"));
@@ -663,6 +667,9 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
                 commonV2Response.putField("no_questions", String.valueOf(setpractice.getNoOfQ()));
                 commonV2Response.putField("subject_name", setpractice.getSubject().getName());
                 commonV2Response.putField("Status", setpractice.getStatus().name());
+                // TODO need to save the following additional information
+                // year_group_id
+                // JSON list of all topics and subtopics
                 return commonV2Response;
             }).collect(Collectors.toList());
             return generateResponse(commonV2Responses);
@@ -809,8 +816,12 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
 
     @Override
     public UserAnswerAITO submitUserAnswerAI(UserAnswerAITO userAnswerAITO) {
-        if(ObjectUtils.isEmpty(userAnswerAITO) || ObjectUtils.isEmpty(userAnswerAITO.getAnswers())) throw new IncorrectArgumentException("Answer information is not available");
-        log.trace("Submitting user answers AI : {}",userAnswerAITO );
+        if(ObjectUtils.isEmpty(userAnswerAITO) || ObjectUtils.isEmpty(userAnswerAITO.getAnswers()))
+            throw new IncorrectArgumentException("Answer information is not available");
+        if(log.isTraceEnabled())
+            log.trace("Submitting user answers AI : {}",CommonUtils.toJsonFunction.apply(userAnswerAITO));
+        else
+            log.debug("Submitting user answers AI : {}",userAnswerAITO);
         // creating the exam_score record
         Users user = userRepository.findById(userAnswerAITO.getUserId())
                 .orElseThrow(() -> new IncorrectArgumentException("Invalid User Id"));
@@ -862,9 +873,8 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     }
 
     private Questions getOrCreateQuestion(QuestionsTO questionsTO) {
-//        List<Questions> question = questionRepository.getQuestionsByQuestion(questionsTO.getQuestion());
         if(StringUtils.isEmpty(questionsTO.getQuestionAiId()))throw new IncorrectArgumentException("AI Question ID is not available.");
-        Questions question = questionRepository.findQuestionsByQuestionAiId(questionsTO.getQuestionAiId()).get();
+        Questions question = questionRepository.findQuestionsByQuestionAiId(questionsTO.getQuestionAiId()).orElse(null);
         if(ObjectUtils.isEmpty(question)){
             Questions questions = new Questions();
             questions.setSid(BaseEntity.generateByteUuid());
