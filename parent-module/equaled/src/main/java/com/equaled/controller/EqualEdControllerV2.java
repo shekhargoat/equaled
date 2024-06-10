@@ -9,11 +9,13 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.MapUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @AllArgsConstructor
@@ -83,9 +85,14 @@ public class EqualEdControllerV2 {
     }
 
     @PostMapping("/create/profile")
-    public ResponseEntity<?> createProfile(@RequestBody CreateProfileRequest request){
-        return ResponseEntity.ok(service.createProfile(request));
+    public ResponseEntity<?> createProfile(@RequestBody CreateProfileRequest request, @RequestHeader Map<String, String> headers){
+        Integer guardianId = Optional.ofNullable(headers)
+                .map(map->MapUtils.getString(map, "guardian_id", "0")).map(Integer::parseInt).orElse(0);
+        if(guardianId == 0)
+            return ResponseEntity.ok(service.createProfile(request));
+        else return ResponseEntity.ok(service.createProfile(request, guardianId));
     }
+
 
     @PostMapping("/create/dashboard")
     public ResponseEntity<?> createDashboard(@RequestBody CommonV2Request request){

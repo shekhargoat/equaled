@@ -28,6 +28,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @Service
@@ -897,6 +898,40 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
         }else{
             return question;
         }
+    }
+
+    @Override
+    public Map<String, List<CommonV2Response>> createProfile(CreateProfileRequest request, Integer guardianProfile) {
+        Users guardian = userRepository.findById(guardianProfile).orElseThrow(()-> new IncorrectArgumentException("Invalid Guardian Id"));
+        AtomicReference<Accounts> accounts = new AtomicReference<>();
+
+        List<Users> users = request.getRecords().stream()
+                .map(record -> {
+                    Users user = new Users();
+                    user.setSid(BaseEntity.generateByteUuid());
+                    user.setUsername(record.getFields().get("Username"));
+                    user.setEmail(record.getFields().get("Email"));
+                    user.setPassword(record.getFields().get("Password"));
+                    user.setYearGroup(getOrCreateYearGroup(Integer.parseInt(record.getFields().get("year_group_id"))));
+                    if(accounts.get() == null){
+                        accounts.set(Optional.ofNullable(record.getFields().get("account_id")).filter(StringUtils::isNumeric)
+                                .map(Integer::parseInt).map(ids -> getOrCreateAccount(ids, record.getFields().get("Username")))
+                                .orElse(accountRepository.findById(1).get()));
+                    }
+                    user.setRelatedAccount(accounts.get());
+                    user.setRole(EqualEdEnums.UserRole.valueOf(record.getFields().get("role").toUpperCase()));
+                    user.setLastLogin(Instant.now());
+                    user.setLastUpdatedOn(Instant.now());
+                    return user;
+                }).collect(Collectors.toList());
+
+        List<Users> usersCreated = userRepository.saveAll(users);
+        guardian.setStudents(new HashSet<>(usersCreated));
+        // saving into teacher_has_students table
+        userRepository.save(guardian);
+        List<CommonV2Response> commonV2Responses = usersCreated.stream()
+                .map(EqualEdServiceImplV2::createCommonUserResponse).collect(Collectors.toList());
+        return generateResponse(commonV2Responses);
     }
 }
 
