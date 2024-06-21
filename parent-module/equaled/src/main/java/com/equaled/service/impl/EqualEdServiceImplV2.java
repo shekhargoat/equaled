@@ -175,21 +175,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
                 .getSetpracticeByUserIdSubjectName(userId, practiceName, subjectName)).orElse(ListUtils.EMPTY_LIST);
         log.debug("Set Practices found  for user id {} subject {} and practice {} = {}",userId, subjectName, practiceName, setpractices.size());
 
-        List<CommonV2Response> commonV2Responses = setpractices.stream().map(setpractice -> {
-            CommonV2Response commonV2Response = new CommonV2Response();
-            commonV2Response.setId(setpractice.getStringSid());
-            commonV2Response.putField("seq_id", String.valueOf(setpractice.id));
-            commonV2Response.putField("User_id", String.valueOf(setpractice.getUser().id));
-            commonV2Response.putField("practicename", setpractice.getPracticeName());
-            commonV2Response.putField("time_limit", String.valueOf(setpractice.getTimeLimit()));
-            commonV2Response.putField("questions", setpractice.getQuestions());
-            commonV2Response.putField("no_questions", String.valueOf(setpractice.getNoOfQ()));
-            commonV2Response.putField("subject_name", setpractice.getSubject().getName());
-            commonV2Response.putField("Status", setpractice.getStatus().name());
-            return commonV2Response;
-        }).collect(Collectors.toList());
-
-        return generateResponse(commonV2Responses);
+        return getSetPractices(setpractices);
     }
 
     @Override
@@ -494,6 +480,14 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
         commonV2Response.putField("role", WordUtils.capitalizeFully(users.getRole().name().toLowerCase()));
         commonV2Response.putField("lastlogin", LocalDateTime.ofInstant(users.getLastLogin(),
                 ZoneId.of("UTC")).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+        if(CollectionUtils.isNotEmpty(users.getStudents())){
+            Set<Integer> studentIds = users.getStudents().stream().map(Users::getId).collect(Collectors.toSet());
+            commonV2Response.putField("students",studentIds.toString());
+        }
+        if(CollectionUtils.isNotEmpty(users.getTeachers())){
+            Set<Integer> studentIds = users.getTeachers().stream().map(Users::getId).collect(Collectors.toSet());
+            commonV2Response.putField("teachers",studentIds.toString());
+        }
         return commonV2Response;
     }
 
@@ -552,21 +546,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
                 .getSetpracticeByUserAndStatus(userId, EqualEdEnums.SetpracticeStatus.valueOf(status))).orElse(ListUtils.EMPTY_LIST);
         log.debug("Found {} Set Practices found  for user id {} and status {}",setpractices.size(),userId,status);
 
-        List<CommonV2Response> commonV2Responses = setpractices.stream().map(setpractice -> {
-            CommonV2Response commonV2Response = new CommonV2Response();
-            commonV2Response.setId(setpractice.getStringSid());
-            commonV2Response.putField("seq_id", String.valueOf(setpractice.id));
-            commonV2Response.putField("User_id", String.valueOf(setpractice.getUser().id));
-            commonV2Response.putField("practicename", setpractice.getPracticeName());
-            commonV2Response.putField("time_limit", String.valueOf(setpractice.getTimeLimit()));
-            commonV2Response.putField("questions", setpractice.getQuestions());
-            commonV2Response.putField("no_questions", String.valueOf(setpractice.getNoOfQ()));
-            commonV2Response.putField("subject_name", setpractice.getSubject().getName());
-            commonV2Response.putField("Status", setpractice.getStatus().name());
-            return commonV2Response;
-        }).collect(Collectors.toList());
-
-        return generateResponse(commonV2Responses);
+        return getSetPractices(setpractices);
     }
 
     @Override
@@ -657,25 +637,31 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
 
         if(CollectionUtils.isNotEmpty(setpractices)){
             List<Setpractice> setpractices1 = setPracticeRepository.saveAll(setpractices);
-            List<CommonV2Response> commonV2Responses = setpractices1.stream().map(setpractice -> {
-                CommonV2Response commonV2Response = new CommonV2Response();
-                commonV2Response.setId(setpractice.getStringSid());
-                commonV2Response.putField("seq_id", String.valueOf(setpractice.id));
-                commonV2Response.putField("User_id", String.valueOf(setpractice.getUser().id));
-                commonV2Response.putField("practicename", setpractice.getPracticeName());
-                commonV2Response.putField("time_limit", String.valueOf(setpractice.getTimeLimit()));
-                commonV2Response.putField("questions", setpractice.getQuestions());
-                commonV2Response.putField("no_questions", String.valueOf(setpractice.getNoOfQ()));
-                commonV2Response.putField("subject_name", setpractice.getSubject().getName());
-                commonV2Response.putField("Status", setpractice.getStatus().name());
-                // TODO need to save the following additional information
-                // year_group_id
-                // JSON list of all topics and subtopics
-                return commonV2Response;
-            }).collect(Collectors.toList());
-            return generateResponse(commonV2Responses);
+            return getSetPractices(setpractices1);
 
         }else return null;
+    }
+
+    private Map<String, List<CommonV2Response>> getSetPractices(List<Setpractice> setpractices1) {
+        List<CommonV2Response> commonV2Responses = setpractices1.stream().map(setpractice -> {
+            CommonV2Response commonV2Response = new CommonV2Response();
+            commonV2Response.setId(setpractice.getStringSid());
+            commonV2Response.putField("seq_id", String.valueOf(setpractice.id));
+            commonV2Response.putField("User_id", String.valueOf(setpractice.getUser().id));
+            commonV2Response.putField("practicename", setpractice.getPracticeName());
+            commonV2Response.putField("time_limit", String.valueOf(setpractice.getTimeLimit()));
+            commonV2Response.putField("questions", setpractice.getQuestions());
+            commonV2Response.putField("no_questions", String.valueOf(setpractice.getNoOfQ()));
+            commonV2Response.putField("subject_name", setpractice.getSubject().getName());
+            commonV2Response.putField("Status", setpractice.getStatus().name());
+            commonV2Response.putField("Subject_id", Optional.ofNullable(setpractice.getSubject())
+                    .map(Subject::getId).map(String::valueOf).orElse(StringUtils.EMPTY));
+            commonV2Response.putField("year_group_id", Optional.ofNullable(setpractice.getYearGroup())
+                    .map(YearGroup::getId).map(String::valueOf).orElse(StringUtils.EMPTY));
+
+            return commonV2Response;
+        }).collect(Collectors.toList());
+        return generateResponse(commonV2Responses);
     }
 
     @Override
