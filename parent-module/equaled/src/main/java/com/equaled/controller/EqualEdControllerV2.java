@@ -2,6 +2,7 @@ package com.equaled.controller;
 
 import com.equaled.service.IEqualEdServiceV2;
 import com.equaled.to.CommonV2Request;
+import com.equaled.to.CommonV2Response;
 import com.equaled.to.CreateProfileRequest;
 import com.equaled.to.UserAnswerAITO;
 import io.swagger.annotations.Api;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
 @AllArgsConstructor
@@ -337,5 +339,18 @@ public class EqualEdControllerV2 {
         log.info(String.format("Request received : Exam score %s for GET /examscore/{examId} " +
                 "for particular ", examId));
         return ResponseEntity.ok(service.getExamScore(examId));
+    }
+
+    @GetMapping("/subject/{name}")
+    @ApiOperation(value = "Get subject ID by Name",
+            notes = "Get subject ID by Name")
+    public ResponseEntity<?> getSubjectIdByName(
+            @ApiParam(value = "Exam id", required = true) @PathVariable("name") String subjectName){
+        log.info(String.format("Request received : getting subject name for %s " +
+                "for particular ", subjectName));
+        CommonV2Response commonV2Response = new CommonV2Response();
+        commonV2Response.setId(UUID.randomUUID().toString());
+        commonV2Response.putField("Subject_Id",String.valueOf(service.getSubjectIdByName(subjectName)));
+        return ResponseEntity.ok(commonV2Response);
     }
 }

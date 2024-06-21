@@ -86,4 +86,6 @@ public interface IEqualEdServiceV2 {
     List<Map<String,Object>> getExamScore(String examId);
 
     Map<String, List<CommonV2Response>> createProfile(CreateProfileRequest request, Integer guardianProfile);
+
+    Integer getSubjectIdByName(String subjectName);
 }

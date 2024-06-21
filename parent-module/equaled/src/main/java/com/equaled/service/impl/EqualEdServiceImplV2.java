@@ -919,5 +919,13 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
                 .map(EqualEdServiceImplV2::createCommonUserResponse).collect(Collectors.toList());
         return generateResponse(commonV2Responses);
     }
+
+
+    @Override
+    public Integer getSubjectIdByName(String subjectName){
+        return Optional.ofNullable(subjectName).filter(StringUtils::isNotEmpty).map(subjectRepository::findByName)
+                .filter(CollectionUtils::isNotEmpty).map(subjects -> subjects.get(0)).map(Subject::getId)
+                .orElseThrow(() -> new RecordNotFoundException(ErrorCodes.U001,"No Subject Found for "+subjectName));
+    }
 }
 
