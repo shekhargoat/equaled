@@ -137,7 +137,29 @@ create table user_tests
 )
     comment 'Stores all the information about the user test data ';
 
-alter table improvement add column created_on datetime;
+create table improvement
+(
+    id              int primary key auto_increment,
+    sid             binary(32)                         null,
+    exam_id         varchar(200)                       null,
+    strong_category varchar(500)                       null,
+    weak_column     varchar(500)                       null,
+    score           int                                null,
+    total_questions int                                null,
+    user_id         int                                not null,
+    subject_id      int                                not null,
+    created_on      datetime default current_timestamp not null,
+    constraint improvement_pk
+        unique (sid),
+    constraint improvement_user_fk
+        foreign key (user_id) references users (id),
+    constraint improvement_subject__fk
+        foreign key (subject_id) references subject (id)
+);
+
+alter table improvement
+    change weak_column weak_category varchar(500) null;
+
 
 create table exam_score
 (
@@ -154,8 +176,138 @@ create table exam_score
 )
     comment 'Stores all the information about the exam score data ';
 
-alter table user_answers add column exam_score_id int;
+create table user_answers
+(
+    id              int auto_increment,
+    sid             binary(32)  not null,
+    correct_option text        null,
+    user_option     text        null,
+    explanation     text        null,
+    time_spent      int         null,
+    answer_date     datetime    null,
+    exam_score_id   int         null,
+    subject_id      int         null,
+    question_id     int         null,
+    user_id         int         null,
+    exam_id         varchar(32) null,
+    constraint user_answers_pk
+        primary key (id),
+    constraint user_answers_exam_score_fk
+        foreign key (exam_score_id) references exam_score (id),
+    constraint user_answers_question_fk
+        foreign key (question_id) references questions (id),
+    constraint user_answers_subject_fk
+        foreign key (subject_id) references subject (id)
+);
+
+alter table user_answers
+    add constraint user_answers_sid_pk
+        unique (sid);
+
+alter table user_answers
+    add constraint user_answers_user__fk
+        foreign key (user_id) references users (id);
+
+
+
+
 alter table questions add column question_ai_id varchar(32);
 alter table questions add unique(question_ai_id);
-ALTER TABLE user_answers ADD FOREIGN KEY (exam_score_id) REFERENCES exam_score(id);
+
+create table dashboard
+(
+    id         int auto_increment,
+    sid        binary(32)                         not null,
+    subject_id int                                null,
+    exam_id    varchar(200)                       null,
+    start_time datetime default current_timestamp null,
+    user_id    int                                null,
+    title      text                               null,
+    constraint dashboard_pk
+        primary key (id),
+    constraint dashboard_pk_2
+        unique (sid),
+    constraint dashboard_subject__fk
+        foreign key (subject_id) references subject (id),
+    constraint dashboard_user__fk
+        foreign key (user_id) references users (id)
+);
+
+create table practice_user_answers
+(
+    id              int auto_increment,
+    sid             binary(32)  not null,
+    correct_option text        null,
+    user_option     text        null,
+    explanation     text        null,
+    time_spent      int         null,
+    answer_date     datetime    null,
+    question_id     int         null,
+    user_id         int         null,
+    exam_id         varchar(32) null,
+    constraint practice_user_answers_pk
+        primary key (id),
+    constraint practice_user_answers_question_fk
+        foreign key (question_id) references questions (id)
+);
+
+alter table practice_user_answers
+    add constraint practice_user_answers_sid_pk
+        unique (sid);
+
+alter table practice_user_answers
+    add constraint practice_user_answers_user__fk
+        foreign key (user_id) references users (id);
+
+create table setpractice
+(
+    id            int auto_increment,
+    sid           binary(32)                  null,
+    user_id       int                         null,
+    practice_name varchar(200)                null,
+    time_limit    int                         null,
+    no_of_q       int                         null,
+    subject_id    int                         null,
+    status        ENUM ('ACTIVE', 'INACTIVE') null,
+    year_group_id int                         null,
+    constraint setpractice_pk
+        primary key (id),
+    constraint setpractice_pk_2
+        unique (sid),
+    constraint setpractice_subject_fk
+        foreign key (subject_id) references subject (id),
+    constraint setpractice_user_fk
+        foreign key (user_id) references users (id),
+    constraint setpractice_year_group_fk
+        foreign key (year_group_id) references year_group (id)
+);
+
+alter table setpractice
+    modify status enum ('COMPLETED', 'PENDING') null;
+
+create table subject_categories
+(
+    id             int auto_increment,
+    sid            binary(32)   null,
+    subject_id     int          null,
+    sub_category   varchar(200) null,
+    sub_category_1 varchar(200) null,
+    year_group_id  int          null,
+    constraint subject_categories_pk
+        primary key (id),
+    constraint subject_categories_pk_2
+        unique (sid),
+    constraint subject_categories_subject__fk
+        foreign key (subject_id) references subject (id),
+    constraint subject_categories_year_group_fk
+        foreign key (year_group_id) references year_group (id)
+);
+
+alter table questions
+    add image_path longtext null;
+
+
+
+
+
 
