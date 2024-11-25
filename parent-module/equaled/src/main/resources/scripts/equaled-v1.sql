@@ -307,6 +307,152 @@ alter table questions
     add image_path longtext null;
 
 
+alter table passages
+    change PassageID id int auto_increment;
+
+alter table passages
+    auto_increment = 1;
+
+alter table passages
+    change Content content longtext null;
+
+alter table passages
+    change Title title longtext null;
+
+alter table passages
+    change Author author int null;
+
+alter table passages
+    change PublicationDate publication_date datetime default CURRENT_TIMESTAMP null;
+
+alter table passages
+    change Passagequestions passage_questions json null;
+
+alter table passages
+    change Passageanswer passage_answer longtext null;
+
+alter table passages
+    add sid binary(32) not null;
+
+alter table passages
+    add constraint passages_pk
+        unique (sid);
+
+rename table passageanswer to passage_answer;
+rename table equaled.passagequestions to passage_questions;
+
+alter table passages
+    drop column passage_questions;
+
+alter table passages
+    drop column passage_answer;
+
+alter table passages
+    add constraint passages_user__fk
+        foreign key (author) references users (id);
+
+alter table passage_questions
+    change QuestionID id int auto_increment;
+
+alter table passage_questions
+    change PassageID passage_id int not null;
+
+alter table passage_questions
+    change Text text longtext null;
+
+alter table passage_questions
+    change Option_1_text option_1_text varchar(255) null;
+
+alter table passage_questions
+    change Option_2_text option_2_text varchar(255) null;
+
+alter table passage_questions
+    change Option_3_text option_3_text varchar(255) null;
+
+alter table passage_questions
+    change Option_4_text option_4_text varchar(255) null;
+
+alter table passage_questions
+    change Option_5_text option_5_text varchar(255) null;
+
+alter table passage_questions
+    change Explanation explanation longtext null;
+
+alter table passage_questions
+    add sid binary(32) not null;
+
+alter table passage_questions
+    add constraint passage_questions_unq
+        unique (sid);
+
+alter table passage_questions
+    add constraint passage_questions_id__fk
+        foreign key (passage_id) references passages (id);
+
+
+alter table passage_answer
+    change SeqNo id int auto_increment;
+
+alter table passage_answer
+    change User_answer user_answer longtext null;
+
+alter table passage_answer
+    change User_id user_id int null;
+
+alter table passage_answer
+    drop column Passage;
+
+alter table passage_answer
+    drop column Passagetext;
+
+alter table passage_answer
+    drop column Text;
+
+alter table passage_answer
+    drop column Option_1_text;
+
+alter table passage_answer
+    drop column Option_2_text;
+
+alter table passage_answer
+    drop column Option_3_text;
+
+alter table passage_answer
+    drop column Option_4_text;
+
+alter table passage_answer
+    change User_option user_option varchar(255) null;
+
+alter table passage_answer
+    change User_explanation user_explanation longtext null;
+
+alter table passage_answer
+    change Date date datetime default CURRENT_TIMESTAMP null;
+
+alter table passage_answer
+    change Status status varchar(255) null;
+
+alter table passage_answer
+    change Difficulty difficulty varchar(255) null;
+
+alter table passage_answer
+    change Score score int null;
+
+alter table passage_answer
+    add passage_question_id int not null;
+
+alter table passage_answer
+    add sid binary(32) not null;
+
+alter table passage_answer
+    add constraint passage_answer_pk
+        unique (sid);
+
+alter table passage_answer
+    add constraint passage_answer_quesiton__fk
+        foreign key (passage_question_id) references passage_questions (id);
+
+
 
 
 
