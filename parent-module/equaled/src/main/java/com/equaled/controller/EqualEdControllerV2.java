@@ -367,4 +367,12 @@ public class EqualEdControllerV2 {
         log.trace("Request received : create passage questions: {}", commonV2Request);
         return ResponseEntity.ok(service.createPassageQuestions(commonV2Request.getFields()));
     }
+
+    @PostMapping("/passage/answer")
+    @ApiOperation(value = "Create passageAnswer")
+    public ResponseEntity<?> createPassageAnswers(@RequestBody CommonV2Request commonV2Request){
+        log.trace("Request received : create passage answer: {}", commonV2Request);
+        return ResponseEntity.ok(service.createPassageQuestions(commonV2Request.getFields()));
+    }
+
 }

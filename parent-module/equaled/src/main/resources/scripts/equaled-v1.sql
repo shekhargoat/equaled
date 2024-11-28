@@ -467,6 +467,24 @@ alter table passage_answers
     add constraint passage_answers_user__fk
         foreign key (user_id) references users (id);
 
+alter table passage_answers
+    add column user_exam_id varchar(64) not null;
+
+alter table passage_answers
+    add constraint passage_answers_exam_id
+        unique (user_exam_id);
+
+alter table passage_answers
+    change date answer_date datetime not null;
+
+alter table passage_answers
+    alter column answer_date set default (current_timestamp);
+
+alter table passage_answers
+    drop column difficulty;
+
+alter table passage_answers
+    drop column score;
 
 
 
