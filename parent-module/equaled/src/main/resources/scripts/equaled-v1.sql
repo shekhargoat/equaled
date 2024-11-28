@@ -452,6 +452,21 @@ alter table passage_answer
     add constraint passage_answer_quesiton__fk
         foreign key (passage_question_id) references passage_questions (id);
 
+alter table passage_questions
+    add score int null;
+
+alter table passage_questions
+    add difficulty varchar(15) null;
+
+rename table passage_answer to passage_answers;
+
+alter table passage_answers
+    modify user_id int not null;
+
+alter table passage_answers
+    add constraint passage_answers_user__fk
+        foreign key (user_id) references users (id);
+
 
 
 

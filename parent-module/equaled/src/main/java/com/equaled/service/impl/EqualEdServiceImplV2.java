@@ -1,6 +1,7 @@
 package com.equaled.service.impl;
 
 import com.equaled.common.config.RestTemplateConfig;
+import com.equaled.customrepository.impl.CustomRepositoyImpl;
 import com.equaled.dozer.DozerUtils;
 import com.equaled.entity.*;
 import com.equaled.eserve.common.CommonUtils;
@@ -37,6 +38,7 @@ import java.util.stream.Collectors;
 public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
 
     private final RestTemplateConfig restTemplateConfig;
+    private final CustomRepositoyImpl customRepositoyImpl;
     IDashboardRepository dashboardRepository;
     ISubjectCategoryRepository subjectCategoryRepository;
     ITestRepository testRepository;
@@ -50,6 +52,8 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     IImprovementRepository improvementRepository;
     IPracticeUseranswerRepository practiceUseranswerRepository;
     IExamScoreRepository examScoreRepository;
+    IPassageRepository passageRepository;
+    IPassageQuestionsRepository passageQuestionsRepository;
 
     DozerUtils mapper;
 
@@ -926,6 +930,64 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
         return Optional.ofNullable(subjectName).filter(StringUtils::isNotEmpty).map(subjectRepository::findByName)
                 .filter(CollectionUtils::isNotEmpty).map(subjects -> subjects.get(0)).map(Subject::getId)
                 .orElseThrow(() -> new RecordNotFoundException(ErrorCodes.U001,"No Subject Found for "+subjectName));
+    }
+
+    @Override
+    public Map<String, List<CommonV2Response>> createPassage(Map<String,String> request){
+        Passage passage = new Passage();
+        passage.setSid(BaseEntity.generateByteUuid());
+        passage.setTitle(request.getOrDefault("Title",""));
+        passage.setContent(request.getOrDefault("Content",""));
+        Optional.ofNullable(request.get("Author")).map(Integer::parseInt)
+                .map(userRepository::findById).orElseThrow(()-> new IncorrectArgumentException("Invalid User Id"));
+
+        log.trace("Submitting Passage");
+        Passage passage1 = passageRepository.save(passage);
+        log.debug("Passage created : {}", passage1.getStringSid());
+
+
+        CommonV2Response commonV2Response = new CommonV2Response();
+        commonV2Response.setId(passage1.getStringSid());
+        commonV2Response.putField("Title", passage1.getTitle());
+        commonV2Response.putField("Content", passage1.getContent());
+        commonV2Response.putField("Author", String.valueOf(passage1.getAuthor().getId()));
+        commonV2Response.putField("PublicationDate", passage1.getPublicationDate().toString());
+        return generateResponse(Collections.singletonList(commonV2Response));
+    }
+
+    @Override
+    public Map<String, List<CommonV2Response>> createPassageQuestions(Map<String, String> request){
+        PassageQuestions passageQuestions = new PassageQuestions();
+        passageQuestions.setSid(BaseEntity.generateByteUuid());
+        passageQuestions.setText(request.getOrDefault("Text",""));
+        passageQuestions.setScore(Integer.parseInt(request.getOrDefault("Score","0")));
+        passageQuestions.setDifficulty(request.getOrDefault("Difficulty",""));
+        passageQuestions.setOption1Text(request.getOrDefault("Option_1_text",""));
+        passageQuestions.setOption2Text(request.getOrDefault("Option_2_text",""));
+        passageQuestions.setOption3Text(request.getOrDefault("Option_3_text",""));
+        passageQuestions.setOption4Text(request.getOrDefault("Option_4_text",""));
+        passageQuestions.setOption5Text(request.getOrDefault("Option_5_text",""));
+        Optional.ofNullable(request.get("PassageID")).map(Integer::parseInt)
+                .map(passageRepository::findById).orElseThrow(()-> new IncorrectArgumentException("Invalid User Id"));
+
+        log.trace("Submitting Passage");
+        PassageQuestions passageQuestions1 = passageQuestionsRepository.save(passageQuestions);
+        log.debug("Passage created : {}", passageQuestions1.getStringSid());
+
+
+        CommonV2Response commonV2Response = new CommonV2Response();
+        commonV2Response.setId(passageQuestions1.getStringSid());
+        commonV2Response.putField("Text", passageQuestions1.getText());
+        commonV2Response.putField("Score", String.valueOf(passageQuestions1.getScore()));
+        commonV2Response.putField("Difficulty", passageQuestions1.getDifficulty());
+        commonV2Response.putField("Option_1_Text", passageQuestions1.getOption1Text());
+        commonV2Response.putField("Option_2_Text", passageQuestions1.getOption2Text());
+        commonV2Response.putField("Option_3_Text", passageQuestions1.getOption3Text());
+        commonV2Response.putField("Option_4_Text", passageQuestions1.getOption4Text());
+        commonV2Response.putField("Option_5_Text", passageQuestions1.getOption5Text());
+        commonV2Response.putField("PassageID", Optional.ofNullable(passageQuestions1.getPassage()).map(Passage::getId)
+                .map(String::valueOf).orElse(""));
+        return generateResponse(Collections.singletonList(commonV2Response));
     }
 }
 

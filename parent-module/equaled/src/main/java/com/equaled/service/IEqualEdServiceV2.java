@@ -88,4 +88,8 @@ public interface IEqualEdServiceV2 {
     Map<String, List<CommonV2Response>> createProfile(CreateProfileRequest request, Integer guardianProfile);
 
     Integer getSubjectIdByName(String subjectName);
+
+    Map<String, List<CommonV2Response>> createPassage(Map<String, String> request);
+
+    Map<String, List<CommonV2Response>> createPassageQuestions(Map<String, String> request);
 }
