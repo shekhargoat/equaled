@@ -40,8 +40,6 @@ public class CustomRepositoyImpl implements ICustomRepository {
 		String customQuery = "SELECT a.id from "+classz+" a where hex(a.sid)='"+sid+"'";
 		Query query = entitymangager.createQuery(customQuery);
 		return (Integer)query.getSingleResult();	
-	}	
-	
-
+	}
 
 }

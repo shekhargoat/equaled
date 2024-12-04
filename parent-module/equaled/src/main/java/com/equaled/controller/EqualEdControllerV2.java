@@ -1,6 +1,7 @@
 package com.equaled.controller;
 
 import com.equaled.service.IEqualEdServiceV2;
+import com.equaled.service.IPassageV2;
 import com.equaled.to.CommonV2Request;
 import com.equaled.to.CommonV2Response;
 import com.equaled.to.CreateProfileRequest;
@@ -27,6 +28,7 @@ import java.util.UUID;
 public class EqualEdControllerV2 {
 
     private final IEqualEdServiceV2 service;
+    private final IPassageV2 passage;
 
     @GetMapping("/dashboard/user/{userId}")
     @ApiOperation(value = "get dashboard by userId", notes = "API to get all dashboards by UserId")
@@ -358,21 +360,45 @@ public class EqualEdControllerV2 {
     @ApiOperation(value = "Update passage by Id")
     public ResponseEntity<?> createPassage(@RequestBody CommonV2Request commonV2Request){
         log.trace("Request received : create passage: {}", commonV2Request);
-        return ResponseEntity.ok(service.createPassage(commonV2Request.getFields()));
+        return ResponseEntity.ok(passage.createPassage(commonV2Request.getFields()));
     }
 
     @PostMapping("/passage/questions")
     @ApiOperation(value = "Create passageQuestions")
     public ResponseEntity<?> createPassageQuestions(@RequestBody CommonV2Request commonV2Request){
         log.trace("Request received : create passage questions: {}", commonV2Request);
-        return ResponseEntity.ok(service.createPassageQuestions(commonV2Request.getFields()));
+        return ResponseEntity.ok(passage.createPassageQuestions(commonV2Request.getFields()));
     }
 
     @PostMapping("/passage/answer")
     @ApiOperation(value = "Create passageAnswer")
     public ResponseEntity<?> createPassageAnswers(@RequestBody CommonV2Request commonV2Request){
         log.trace("Request received : create passage answer: {}", commonV2Request);
-        return ResponseEntity.ok(service.createPassageQuestions(commonV2Request.getFields()));
+        return ResponseEntity.ok(passage.createPassageAnswer(commonV2Request.getFields()));
     }
 
+    @GetMapping("/passage/answers/{status}")
+    public ResponseEntity<?> getPassageAnswersByStatus(String status){
+        log.trace("Request received : get Passage Answers by status: {}", status);
+        return ResponseEntity.ok(passage.getPassageAnswersByStatus(status));
+    }
+
+    @GetMapping("/passage/answers/{status}/user/{userId}")
+    public ResponseEntity<?> getPassageAnswersByStatusAndUserId(@PathVariable String status,@PathVariable Integer userId){
+        log.trace("Request received : get Passage Answers by status: {} an userId : {}", status, userId);
+        return ResponseEntity.ok(passage.getPassageAnswersByStatusAndUserId(status,userId));
+    }
+
+    @GetMapping("/passage/answers/user/{userId}/exam/{examId}")
+    public ResponseEntity<?> getPassageAnswersByStatusAndExamId(@PathVariable Integer userId,@PathVariable String examId){
+        log.trace("Request received : get Passage Answers by examId: {} an userId : {}", examId, userId);
+        return ResponseEntity.ok(passage.getPassageAnswersByUserIdAndExamId(userId, examId));
+
+    }
+
+    @PutMapping("/passage/answer/{answerId}")
+    public ResponseEntity<?> updatePassageAnswers(@PathVariable String answerId,@RequestBody CommonV2Request commonV2Request){
+        log.trace("Request received : create passage: {}", commonV2Request);
+        return ResponseEntity.ok(passage.updatePassageAnswers(answerId,commonV2Request.getFields()));
+    }
 }

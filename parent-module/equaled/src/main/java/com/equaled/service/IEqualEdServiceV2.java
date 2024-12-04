@@ -89,9 +89,4 @@ public interface IEqualEdServiceV2 {
 
     Integer getSubjectIdByName(String subjectName);
 
-    Map<String, List<CommonV2Response>> createPassage(Map<String, String> request);
-
-    Map<String, List<CommonV2Response>> createPassageQuestions(Map<String, String> request);
-
-    Map<String, List<CommonV2Response>> createPassageAnswers(Map<String, String> request);
 }

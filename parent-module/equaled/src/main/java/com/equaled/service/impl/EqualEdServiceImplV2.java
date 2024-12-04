@@ -52,9 +52,6 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     IImprovementRepository improvementRepository;
     IPracticeUseranswerRepository practiceUseranswerRepository;
     IExamScoreRepository examScoreRepository;
-    IPassageRepository passageRepository;
-    IPassageQuestionsRepository passageQuestionsRepository;
-    IPassageAnswersRepository passageAnswersRepository;
 
     DozerUtils mapper;
 
@@ -933,98 +930,6 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
                 .orElseThrow(() -> new RecordNotFoundException(ErrorCodes.U001,"No Subject Found for "+subjectName));
     }
 
-    @Override
-    public Map<String, List<CommonV2Response>> createPassage(Map<String,String> request){
-        Passage passage = new Passage();
-        passage.setSid(BaseEntity.generateByteUuid());
-        passage.setTitle(request.getOrDefault("Title",""));
-        passage.setContent(request.getOrDefault("Content",""));
-        Optional<Users> author = Optional.ofNullable(request.get("Author")).map(Integer::parseInt)
-                .flatMap(userRepository::findById);
-        passage.setAuthor(author.orElseThrow(() -> new IncorrectArgumentException("Invalid User Id")));
 
-        log.trace("Submitting Passage");
-        Passage passage1 = passageRepository.save(passage);
-        log.debug("Passage created : {}", passage1.getStringSid());
-
-
-        CommonV2Response commonV2Response = new CommonV2Response();
-        commonV2Response.setId(passage1.getStringSid());
-        commonV2Response.putField("Title", passage1.getTitle());
-        commonV2Response.putField("Content", passage1.getContent());
-        commonV2Response.putField("Author", String.valueOf(passage1.getAuthor().getId()));
-        commonV2Response.putField("PublicationDate", passage1.getPublicationDate().toString());
-        return generateResponse(Collections.singletonList(commonV2Response));
-    }
-
-    @Override
-    public Map<String, List<CommonV2Response>> createPassageQuestions(Map<String, String> request){
-        PassageQuestions passageQuestions = new PassageQuestions();
-        passageQuestions.setSid(BaseEntity.generateByteUuid());
-        passageQuestions.setText(request.getOrDefault("Text",""));
-        passageQuestions.setScore(Integer.parseInt(request.getOrDefault("Score","0")));
-        passageQuestions.setDifficulty(request.getOrDefault("Difficulty",""));
-        passageQuestions.setOption1Text(request.getOrDefault("Option_1_text",""));
-        passageQuestions.setOption2Text(request.getOrDefault("Option_2_text",""));
-        passageQuestions.setOption3Text(request.getOrDefault("Option_3_text",""));
-        passageQuestions.setOption4Text(request.getOrDefault("Option_4_text",""));
-        passageQuestions.setOption5Text(request.getOrDefault("Option_5_text",""));
-        Optional.ofNullable(request.get("PassageID")).map(Integer::parseInt)
-                .flatMap(passageRepository::findById).ifPresent(passageQuestions::setPassage);
-
-        log.trace("Submitting Passage question");
-        PassageQuestions passageQuestions1 = passageQuestionsRepository.save(passageQuestions);
-        log.debug("Passage created : {}", passageQuestions1.getStringSid());
-
-
-        CommonV2Response commonV2Response = new CommonV2Response();
-        commonV2Response.setId(passageQuestions1.getStringSid());
-        commonV2Response.putField("Text", passageQuestions1.getText());
-        commonV2Response.putField("Score", String.valueOf(passageQuestions1.getScore()));
-        commonV2Response.putField("Difficulty", passageQuestions1.getDifficulty());
-        commonV2Response.putField("Option_1_Text", passageQuestions1.getOption1Text());
-        commonV2Response.putField("Option_2_Text", passageQuestions1.getOption2Text());
-        commonV2Response.putField("Option_3_Text", passageQuestions1.getOption3Text());
-        commonV2Response.putField("Option_4_Text", passageQuestions1.getOption4Text());
-        commonV2Response.putField("Option_5_Text", passageQuestions1.getOption5Text());
-        commonV2Response.putField("PassageID", Optional.ofNullable(passageQuestions1.getPassage()).map(Passage::getId)
-                .map(String::valueOf).orElse(""));
-        return generateResponse(Collections.singletonList(commonV2Response));
-    }
-
-
-    @Override
-    public Map<String, List<CommonV2Response>> createPassageAnswers(Map<String, String> request){
-        PassageAnswers passageAnswers = new PassageAnswers();
-        passageAnswers.setSid(BaseEntity.generateByteUuid());
-        passageAnswers.setUserExamId(request.getOrDefault("User_exam_id",""));
-        passageAnswers.setStatus(request.getOrDefault("Status",""));
-        Optional<PassageQuestions> questionId = Optional.ofNullable(request.getOrDefault("Question_id", ""))
-                .map(Integer::parseInt).flatMap(passageQuestionsRepository::findById);
-        passageAnswers.setPassageQuestion(questionId.orElseThrow(()-> new IncorrectArgumentException("Invalid Question id")));
-
-        Optional<Users> author = Optional.ofNullable(request.getOrDefault("User_id","")).map(Integer::parseInt)
-                        .flatMap(userRepository::findById);
-        passageAnswers.setUser(author.orElseThrow(()-> new IncorrectArgumentException("Invalid User Id")));
-
-        log.trace("Submitting Passage question");
-        PassageAnswers passageAnswers1 = passageAnswersRepository.save(passageAnswers);
-        log.debug("Passage created : {}", passageAnswers1.getStringSid());
-
-
-        CommonV2Response commonV2Response = new CommonV2Response();
-        commonV2Response.setId(passageAnswers1.getStringSid());
-        /*commonV2Response.putField("Text", passageAnswers1.getText());
-        commonV2Response.putField("Score", String.valueOf(passageAnswers1.getScore()));
-        commonV2Response.putField("Difficulty", passageAnswers1.getDifficulty());
-        commonV2Response.putField("Option_1_Text", passageAnswers1.getOption1Text());
-        commonV2Response.putField("Option_2_Text", passageAnswers1.getOption2Text());
-        commonV2Response.putField("Option_3_Text", passageAnswers1.getOption3Text());
-        commonV2Response.putField("Option_4_Text", passageAnswers1.getOption4Text());
-        commonV2Response.putField("Option_5_Text", passageAnswers1.getOption5Text());
-        commonV2Response.putField("PassageID", Optional.ofNullable(passageAnswers1.getPassage()).map(Passage::getId)
-                .map(String::valueOf).orElse(""));*/
-        return generateResponse(Collections.singletonList(commonV2Response));
-    }
 }
 

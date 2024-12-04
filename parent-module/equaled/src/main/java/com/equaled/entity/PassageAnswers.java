@@ -25,7 +25,7 @@ public class PassageAnswers extends BaseEntity {
     private String userExplanation;
 
     @Column(name = "answer_date")
-    private Instant dateofAnswer;
+    private Instant dateofAnswer = Instant.now();
 
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
@@ -39,4 +39,9 @@ public class PassageAnswers extends BaseEntity {
 
     @Column(name = "user_exam_id")
     private String userExamId;
+
+    private int score;
+
+    @Column(name = "explanation")
+    private String explanation;
 }

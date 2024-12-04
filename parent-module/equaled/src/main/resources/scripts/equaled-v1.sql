@@ -484,9 +484,13 @@ alter table passage_answers
     drop column difficulty;
 
 alter table passage_answers
-    drop column score;
+    add column score int;
 
+alter table passages
+    drop column passage_questions;
 
+alter table passages
+    modify publication_date datetime default CURRENT_TIMESTAMP not null;
 
 
 

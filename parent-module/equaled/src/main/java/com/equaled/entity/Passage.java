@@ -19,8 +19,8 @@ public class Passage extends BaseEntity {
     @JoinColumn(name = "author", referencedColumnName = "id")
     private Users author;
 
-    @Column(name = "publication_date")
-    private Instant publicationDate;
+    @Column(name = "publication_date",nullable = false)
+    private Instant publicationDate = Instant.now();
 
 
 }
