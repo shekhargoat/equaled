@@ -52,6 +52,8 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     IImprovementRepository improvementRepository;
     IPracticeUseranswerRepository practiceUseranswerRepository;
     IExamScoreRepository examScoreRepository;
+    IFRQuestionRepository frQuestionRepository;
+    IFRQResponseRepository frResponseRepository;
 
     DozerUtils mapper;
 
@@ -930,6 +932,89 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
                 .orElseThrow(() -> new RecordNotFoundException(ErrorCodes.U001,"No Subject Found for "+subjectName));
     }
 
+    @Override
+    public CommonV2Response createFRQuestion(Map<String, String> frquestion){
+
+        log.trace("Creating FRQuestion for data: {}",frquestion);
+        if(MapUtils.isEmpty(frquestion))throw new IncorrectArgumentException("Empty records to enter");
+        Integer subjectId = Optional.ofNullable(frquestion.get("Subject_id")).map(Integer::parseInt).orElseThrow(()->new IncorrectArgumentException("Subject ID must be provided"));
+        Integer createBy = Optional.ofNullable(frquestion.get("CreatedBy")).map(Integer::parseInt).orElseThrow(()->new IncorrectArgumentException("Created By ID must be provided"));
+        String difficulty = MapUtils.getString(frquestion, "Difficulty");
+
+        FRQuestion frQuestion = new FRQuestion();
+        frQuestion.generateUuid();
+        frQuestion.setText(MapUtils.getString(frquestion, "QuestionText", ""));
+        frQuestion.setDifficulty(difficulty);
+        frQuestion.setCreationDate(Instant.now());
+
+        Optional.ofNullable(userRepository.findById(createBy)).ifPresent(users -> users.ifPresent(frQuestion::setCreatedBy));
+        Optional.ofNullable(subjectRepository.findById(subjectId)).ifPresent(subject -> subject.ifPresent(frQuestion::setSubject));
+
+        frQuestionRepository.save(frQuestion);
+
+        CommonV2Response commonV2Response = new CommonV2Response();
+        commonV2Response.setId(frQuestion.getStringSid());
+        commonV2Response.putField("QuestionText",frQuestion.getText());
+        commonV2Response.putField("Difficulty",frQuestion.getDifficulty());
+        commonV2Response.putField("CreationDate",frQuestion.getCreationDate().toString());
+
+        return commonV2Response;
+
+    }
+
+    @Override
+    public void createFRQResponse(CreateFRQResponseRequest createFRQResponseRequest){
+
+        log.trace("Creating FRQResponses for payload : {}",createFRQResponseRequest);
+
+        List<CommonV2Request> incomingRecords = createFRQResponseRequest.getRecords();
+        List<FRQResponse> responsesToSave = new ArrayList<>();
+
+        for (CommonV2Request record : incomingRecords) {
+            Map<String, String> incomingFields = record.getFields();
+            FRQResponse frqResponse = new FRQResponse();
+            frqResponse.generateUuid();
+            try{
+                FRQuestion frQuestion= Optional.ofNullable(incomingFields.get("Question_id")).map(Integer::parseInt)
+                        .flatMap(frQuestionRepository::findById)
+                        .orElseThrow(()-> new IncorrectArgumentException("Question id is not valid"));
+                Users user = Optional.ofNullable(incomingFields.get("User_id")).map(Integer::parseInt)
+                        .flatMap(userRepository::findById)
+                        .orElseThrow(()->new IncorrectArgumentException("User id is not valid"));
+                frqResponse.setQuestion(frQuestion);
+                frqResponse.setUser(user);
+                responsesToSave.add(frqResponse);
+            }catch (IncorrectArgumentException ie){
+                log.error("Error while converting FRQResponses: {}",ie.getMessage());
+            }
+        }
+
+        //saving all the data together
+        frResponseRepository.saveAll(responsesToSave);
+    }
+
+    @Override
+    public void updateFRQResponse(Map<String, String> fields, String responseSid) {
+        log.trace("Updating FRQResponses for Id : {}",responseSid);
+        log.trace("Updating payload : {}",fields);
+
+        FRQResponse frqResponse = Optional.ofNullable(responseSid).filter(StringUtils::isNotEmpty)
+                .flatMap(frResponseRepository::findBySid)
+                .orElseThrow(()->new IncorrectArgumentException("Invalid responseSid"));
+
+        frqResponse.setText(MapUtils.getString(fields, "ResponseText",""));
+        frqResponse.setGrade(MapUtils.getString(fields, "Grade",""));
+        frqResponse.setStrengths(MapUtils.getString(fields, "Strengths",""));
+        frqResponse.setImprovement(MapUtils.getString(fields, "Improvement",""));
+        frqResponse.setSectionMarks(MapUtils.getString(fields, "section_marks",""));
+        frqResponse.setStatus(MapUtils.getString(fields, "Status",""));
+        frqResponse.setSubmissionDate(Instant.now());
+
+        frResponseRepository.save(frqResponse);
+
+        log.debug("FrqResponse updated for : {}",responseSid);
+
+    }
 
 }
 

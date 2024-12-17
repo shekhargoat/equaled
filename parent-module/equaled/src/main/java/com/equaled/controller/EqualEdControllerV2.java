@@ -2,10 +2,7 @@ package com.equaled.controller;
 
 import com.equaled.service.IEqualEdServiceV2;
 import com.equaled.service.IPassageV2;
-import com.equaled.to.CommonV2Request;
-import com.equaled.to.CommonV2Response;
-import com.equaled.to.CreateProfileRequest;
-import com.equaled.to.UserAnswerAITO;
+import com.equaled.to.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -400,5 +397,27 @@ public class EqualEdControllerV2 {
     public ResponseEntity<?> updatePassageAnswers(@PathVariable String answerId,@RequestBody CommonV2Request commonV2Request){
         log.trace("Request received : create passage: {}", commonV2Request);
         return ResponseEntity.ok(passage.updatePassageAnswers(answerId,commonV2Request.getFields()));
+    }
+
+    @PostMapping("/frquestion")
+    public ResponseEntity<?> createFRQuestion(@RequestBody CommonV2Request commonV2Request){
+        log.trace("Request received : create fr question: {}", commonV2Request.getFields());
+        return ResponseEntity.ok(service.createFRQuestion(commonV2Request.getFields()));
+
+    }
+
+    @PostMapping("/frquestion/response")
+    public ResponseEntity<?> createFRQuestionResponse(@RequestBody CreateFRQResponseRequest createFRQResponseRequest){
+        log.trace("Request received : create fr question response: {}", createFRQResponseRequest.getRecords());
+        service.createFRQResponse(createFRQResponseRequest);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/frquestion/response/{responseSid}")
+    public ResponseEntity<?> updateFRQuestionResponse(@RequestBody CommonV2Request commonV2Request,
+    @PathVariable String responseSid){
+        log.trace("Request received : update fr question response: {}", commonV2Request.getFields());
+        service.updateFRQResponse(commonV2Request.getFields(),responseSid);
+        return ResponseEntity.ok().build();
     }
 }

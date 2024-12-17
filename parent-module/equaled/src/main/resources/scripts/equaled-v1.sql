@@ -492,5 +492,101 @@ alter table passages
 alter table passages
     modify publication_date datetime default CURRENT_TIMESTAMP not null;
 
+-- altering the existing frquestions
+
+alter table frquestions
+    change Question_id id int auto_increment;
+
+alter table frquestions
+    change Subject_id subject_id int not null;
+
+alter table frquestions
+    change QuestionText text longtext null;
+
+alter table frquestions
+    change DifficultyLevel difficulty varchar(20) default 'Medium' not null;
+
+alter table frquestions
+    change CreationDate creation_date datetime default CURRENT_TIMESTAMP null;
+
+alter table frquestions
+    change CreatedBy created_by int null;
+
+alter table frquestions
+    add sid binary(32) not null;
+
+alter table frquestions
+    add constraint frquestions_subject__fk
+        foreign key (subject_id) references subject (id);
+
+alter table frquestions
+    add constraint frquestions_user__fk
+        foreign key (created_by) references users (id);
+
+alter table frquestions
+    add time_limit int default 60 not null comment 'time limit in secs';
+
+-- changes to frqresponse table
+
+alter table frqresponse
+    change ResponseID id int auto_increment;
+
+alter table frqresponse
+    drop column User_id;
+
+alter table frqresponse
+    drop column QuestionText;
+
+alter table frqresponse
+    change ResponseText text longtext null;
+
+alter table frqresponse
+    add user_id int not null after text;
+
+
+alter table frqresponse
+    add sid binary(32) null after user_id;
+
+alter table frqresponse
+    change SubmissionDate submission_date datetime null;
+
+alter table frqresponse
+    drop column DifficultyLevel;
+
+alter table frqresponse
+    change Grade grade varchar(255) null;
+
+alter table frqresponse
+    drop column time_limit;
+
+alter table frqresponse
+    change Status status varchar(15) default 'Pending' null;
+
+alter table frqresponse
+    change Strengths strengths mediumtext null;
+
+alter table frqresponse
+    change Improvement improvement mediumtext null;
+
+alter table frqresponse
+    add question_id int not null;
+
+alter table frqresponse
+    modify section_marks integer null;
+
+alter table frqresponse
+    add constraint frqresponse_pk_sid
+        unique (sid);
+
+alter table frqresponse
+    add constraint frqresponse_question__fk
+        foreign key (question_id) references questions (id);
+
+alter table frqresponse
+    add constraint frqresponse_user__fk
+        foreign key (user_id) references users (id);
+
+alter table frqresponse
+    modify section_marks longtext null comment 'Storing the response from AI';
 
 
