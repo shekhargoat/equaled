@@ -91,4 +91,8 @@ public interface IEqualEdServiceV2 {
     void createFRQResponse(CreateFRQResponseRequest createFRQResponseRequest);
 
     void updateFRQResponse(Map<String, String> fields, String responseId);
+
+    Map<String,List<CommonV2Response>> getFRQResponsesByStatusAndUser(String status, Integer userId);
+
+    CommonV2Response getFRQResponseBySid(String responseSid);
 }

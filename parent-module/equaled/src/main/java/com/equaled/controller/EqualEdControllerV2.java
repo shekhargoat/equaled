@@ -420,4 +420,16 @@ public class EqualEdControllerV2 {
         service.updateFRQResponse(commonV2Request.getFields(),responseSid);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/frquestion/response/user/{userId}/status/{status}")
+    public ResponseEntity<?> getFRQResponsesByStatusAndUserId(@PathVariable String status,@PathVariable Integer userId){
+        log.trace("Finding FRQResponses by status: {} and userId: {}", status, userId);
+        return ResponseEntity.ok(service.getFRQResponsesByStatusAndUser(status,userId));
+    }
+
+    @GetMapping("/frquestion/response/{responseSid}")
+    public ResponseEntity<?> getFRQResponsesByResponseSid(@PathVariable String responseSid){
+        log.trace("Finding FRQResponses by responseSid: {}", responseSid);
+        return ResponseEntity.ok(service.getFRQResponseBySid(responseSid));
+    }
 }

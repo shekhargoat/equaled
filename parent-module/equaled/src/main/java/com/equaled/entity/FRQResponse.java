@@ -17,9 +17,9 @@ public class FRQResponse extends BaseEntity{
 
     private String text;
     @Column(name = "submission_date")
-    private Instant submissionDate;
+    private Instant submissionDate = Instant.now();
     private String grade;
-    private String status;
+    private String status = "Pending";
     private String strengths;
     private String improvement;
     @Column(name="section_marks")

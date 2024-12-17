@@ -1,14 +1,18 @@
 package com.equaled.entity;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.Instant;
 
 @Entity
 @Table(name = "frquestions")
-@Data
+@Setter@Getter@NoArgsConstructor
 public class FRQuestion extends BaseEntity{
+    private static final long serialVersionUID = 60790868302929648L;
+
     private String text;
     private String difficulty;
 

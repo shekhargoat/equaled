@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/parent-module/infrastructure/common-ds/common-ds.iml" filepath="$PROJECT_DIR$/parent-module/infrastructure/common-ds/common-ds.iml" />
       <module fileurl="file://$PROJECT_DIR$/parent-module/equaled/equaled.iml" filepath="$PROJECT_DIR$/parent-module/equaled/equaled.iml" />
     </modules>
   </component>
