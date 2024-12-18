@@ -16,10 +16,10 @@ public class UserAnswerAITO extends BaseTO {
     private static final long serialVersionUID = -3894915800610370940L;
     @JsonProperty("answers")
     private List<UserAnswersTO> answers;
-    @JsonProperty("userId")
+    @JsonProperty("User_id")
     private int userId;
     @JsonProperty("examId")
     private String examId;
-    @JsonProperty("examScore")
+    @JsonProperty("exam_score")
     private String examScore;
 }

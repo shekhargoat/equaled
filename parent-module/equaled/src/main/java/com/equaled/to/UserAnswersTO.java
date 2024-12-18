@@ -12,12 +12,20 @@ import lombok.Setter;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserAnswersTO extends BaseTO {
     private static final long serialVersionUID = -5249867812742441052L;
+    @JsonProperty("Correct_option")
     private String correctOption;
+    @JsonProperty("User_option")
     private String userOption;
+    @JsonProperty("Explanation")
     private String explanation;
+    @JsonProperty("Time_Spent")
     private int timeSpent;
+    @JsonProperty("date")
     private long answerDate;
+    @JsonProperty("examId")
     private String examId;
+    @JsonProperty("Subject")
     private SubjectTO subject;
+    @JsonProperty("Question")
     private QuestionsTO question;
 }

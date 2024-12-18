@@ -38,6 +38,7 @@ public class QuestionsTO extends BaseTO {
     private YearGroupTO yearGroup;
     @JsonProperty("subject")
     private SubjectTO subject;
+    @JsonProperty("image_path")
     private String imagePath;
     @JsonProperty("user")
     private UsersTO user;
