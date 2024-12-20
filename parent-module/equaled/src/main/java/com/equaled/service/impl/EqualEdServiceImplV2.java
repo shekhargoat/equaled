@@ -916,7 +916,9 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
                 }).collect(Collectors.toList());
 
         List<Users> usersCreated = userRepository.saveAll(users);
-        guardian.setStudents(new HashSet<>(usersCreated));
+//        guardian.setStudents(new HashSet<>(usersCreated));
+        // adding the new student to the existing students list
+        guardian.getStudents().addAll(usersCreated);
         // saving into teacher_has_students table
         userRepository.save(guardian);
         List<CommonV2Response> commonV2Responses = usersCreated.stream()
