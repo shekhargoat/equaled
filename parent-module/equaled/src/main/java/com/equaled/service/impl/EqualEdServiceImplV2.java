@@ -627,8 +627,12 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
                     .filter(CollectionUtils::isNotEmpty).map(lst -> lst.get(0))
                     .orElseThrow(()-> new IncorrectArgumentException("Invalid Subject Name"));
             setpractice1.setSubject(subject);
-            setpractice1.setYearGroup(yearGroupRepository.findById(MapUtils.getIntValue(setpractice.getFields(), "year_group_id"))
-                    .orElseThrow(()-> new IncorrectArgumentException("Invalid Year Group Id")));
+            /* In the html page the value for the dropdowns are being hardcoded and generally the value is equal to the
+             Year so for 11 it is being put as 11 whereas the actual id will defer in the database
+             Hence we are getting the year group by Year rather than ID*/
+            YearGroup yearGroup = yearGroupRepository.findByYear(MapUtils.getIntValue(setpractice.getFields(), "year_group_id"))
+                            .orElseThrow(()-> new IncorrectArgumentException("Invalid Year Group"));
+            setpractice1.setYearGroup(yearGroup);
 
             setpractice1.setStatus(EqualEdEnums.SetpracticeStatus.PENDING);
             setpractice1.setQuestions(MapUtils.getString(setpractice.getFields(), "questions"));
