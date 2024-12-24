@@ -137,7 +137,29 @@ create table user_tests
 )
     comment 'Stores all the information about the user test data ';
 
-alter table improvement add column created_on datetime;
+create table improvement
+(
+    id              int primary key auto_increment,
+    sid             binary(32)                         null,
+    exam_id         varchar(200)                       null,
+    strong_category varchar(500)                       null,
+    weak_column     varchar(500)                       null,
+    score           int                                null,
+    total_questions int                                null,
+    user_id         int                                not null,
+    subject_id      int                                not null,
+    created_on      datetime default current_timestamp not null,
+    constraint improvement_pk
+        unique (sid),
+    constraint improvement_user_fk
+        foreign key (user_id) references users (id),
+    constraint improvement_subject__fk
+        foreign key (subject_id) references subject (id)
+);
+
+alter table improvement
+    change weak_column weak_category varchar(500) null;
+
 
 create table exam_score
 (
@@ -154,8 +176,428 @@ create table exam_score
 )
     comment 'Stores all the information about the exam score data ';
 
-alter table user_answers add column exam_score_id int;
+create table user_answers
+(
+    id              int auto_increment,
+    sid             binary(32)  not null,
+    correct_option text        null,
+    user_option     text        null,
+    explanation     text        null,
+    time_spent      int         null,
+    answer_date     datetime    null,
+    exam_score_id   int         null,
+    subject_id      int         null,
+    question_id     int         null,
+    user_id         int         null,
+    exam_id         varchar(32) null,
+    constraint user_answers_pk
+        primary key (id),
+    constraint user_answers_exam_score_fk
+        foreign key (exam_score_id) references exam_score (id),
+    constraint user_answers_question_fk
+        foreign key (question_id) references questions (id),
+    constraint user_answers_subject_fk
+        foreign key (subject_id) references subject (id)
+);
+
+alter table user_answers
+    add constraint user_answers_sid_pk
+        unique (sid);
+
+alter table user_answers
+    add constraint user_answers_user__fk
+        foreign key (user_id) references users (id);
+
+
+
+
 alter table questions add column question_ai_id varchar(32);
 alter table questions add unique(question_ai_id);
-ALTER TABLE user_answers ADD FOREIGN KEY (exam_score_id) REFERENCES exam_score(id);
+
+create table dashboard
+(
+    id         int auto_increment,
+    sid        binary(32)                         not null,
+    subject_id int                                null,
+    exam_id    varchar(200)                       null,
+    start_time datetime default current_timestamp null,
+    user_id    int                                null,
+    title      text                               null,
+    constraint dashboard_pk
+        primary key (id),
+    constraint dashboard_pk_2
+        unique (sid),
+    constraint dashboard_subject__fk
+        foreign key (subject_id) references subject (id),
+    constraint dashboard_user__fk
+        foreign key (user_id) references users (id)
+);
+
+create table practice_user_answers
+(
+    id              int auto_increment,
+    sid             binary(32)  not null,
+    correct_option text        null,
+    user_option     text        null,
+    explanation     text        null,
+    time_spent      int         null,
+    answer_date     datetime    null,
+    question_id     int         null,
+    user_id         int         null,
+    exam_id         varchar(32) null,
+    constraint practice_user_answers_pk
+        primary key (id),
+    constraint practice_user_answers_question_fk
+        foreign key (question_id) references questions (id)
+);
+
+alter table practice_user_answers
+    add constraint practice_user_answers_sid_pk
+        unique (sid);
+
+alter table practice_user_answers
+    add constraint practice_user_answers_user__fk
+        foreign key (user_id) references users (id);
+
+create table setpractice
+(
+    id            int auto_increment,
+    sid           binary(32)                  null,
+    user_id       int                         null,
+    practice_name varchar(200)                null,
+    time_limit    int                         null,
+    no_of_q       int                         null,
+    subject_id    int                         null,
+    status        ENUM ('ACTIVE', 'INACTIVE') null,
+    year_group_id int                         null,
+    constraint setpractice_pk
+        primary key (id),
+    constraint setpractice_pk_2
+        unique (sid),
+    constraint setpractice_subject_fk
+        foreign key (subject_id) references subject (id),
+    constraint setpractice_user_fk
+        foreign key (user_id) references users (id),
+    constraint setpractice_year_group_fk
+        foreign key (year_group_id) references year_group (id)
+);
+
+alter table setpractice
+    modify status enum ('COMPLETED', 'PENDING') null;
+
+create table subject_categories
+(
+    id             int auto_increment,
+    sid            binary(32)   null,
+    subject_id     int          null,
+    sub_category   varchar(200) null,
+    sub_category_1 varchar(200) null,
+    year_group_id  int          null,
+    constraint subject_categories_pk
+        primary key (id),
+    constraint subject_categories_pk_2
+        unique (sid),
+    constraint subject_categories_subject__fk
+        foreign key (subject_id) references subject (id),
+    constraint subject_categories_year_group_fk
+        foreign key (year_group_id) references year_group (id)
+);
+
+alter table questions
+    add image_path longtext null;
+
+
+alter table passages
+    change PassageID id int auto_increment;
+
+alter table passages
+    auto_increment = 1;
+
+alter table passages
+    change Content content longtext null;
+
+alter table passages
+    change Title title longtext null;
+
+alter table passages
+    change Author author int null;
+
+alter table passages
+    change PublicationDate publication_date datetime default CURRENT_TIMESTAMP null;
+
+alter table passages
+    change Passagequestions passage_questions json null;
+
+alter table passages
+    change Passageanswer passage_answer longtext null;
+
+alter table passages
+    add sid binary(32) not null;
+
+alter table passages
+    add constraint passages_pk
+        unique (sid);
+
+rename table passageanswer to passage_answer;
+rename table equaled.passagequestions to passage_questions;
+
+alter table passages
+    drop column passage_questions;
+
+alter table passages
+    drop column passage_answer;
+
+alter table passages
+    add constraint passages_user__fk
+        foreign key (author) references users (id);
+
+alter table passage_questions
+    change QuestionID id int auto_increment;
+
+alter table passage_questions
+    change PassageID passage_id int not null;
+
+alter table passage_questions
+    change Text text longtext null;
+
+alter table passage_questions
+    change Option_1_text option_1_text varchar(255) null;
+
+alter table passage_questions
+    change Option_2_text option_2_text varchar(255) null;
+
+alter table passage_questions
+    change Option_3_text option_3_text varchar(255) null;
+
+alter table passage_questions
+    change Option_4_text option_4_text varchar(255) null;
+
+alter table passage_questions
+    change Option_5_text option_5_text varchar(255) null;
+
+alter table passage_questions
+    change Explanation explanation longtext null;
+
+alter table passage_questions
+    add sid binary(32) not null;
+
+alter table passage_questions
+    add constraint passage_questions_unq
+        unique (sid);
+
+alter table passage_questions
+    add constraint passage_questions_id__fk
+        foreign key (passage_id) references passages (id);
+
+
+alter table passage_answer
+    change SeqNo id int auto_increment;
+
+alter table passage_answer
+    change User_answer user_answer longtext null;
+
+alter table passage_answer
+    change User_id user_id int null;
+
+alter table passage_answer
+    drop column Passage;
+
+alter table passage_answer
+    drop column Passagetext;
+
+alter table passage_answer
+    drop column Text;
+
+alter table passage_answer
+    drop column Option_1_text;
+
+alter table passage_answer
+    drop column Option_2_text;
+
+alter table passage_answer
+    drop column Option_3_text;
+
+alter table passage_answer
+    drop column Option_4_text;
+
+alter table passage_answer
+    change User_option user_option varchar(255) null;
+
+alter table passage_answer
+    change User_explanation user_explanation longtext null;
+
+alter table passage_answer
+    change Date date datetime default CURRENT_TIMESTAMP null;
+
+alter table passage_answer
+    change Status status varchar(255) null;
+
+alter table passage_answer
+    change Difficulty difficulty varchar(255) null;
+
+alter table passage_answer
+    change Score score int null;
+
+alter table passage_answer
+    add passage_question_id int not null;
+
+alter table passage_answer
+    add sid binary(32) not null;
+
+alter table passage_answer
+    add constraint passage_answer_pk
+        unique (sid);
+
+alter table passage_answer
+    add constraint passage_answer_quesiton__fk
+        foreign key (passage_question_id) references passage_questions (id);
+
+alter table passage_questions
+    add score int null;
+
+alter table passage_questions
+    add difficulty varchar(15) null;
+
+rename table passage_answer to passage_answers;
+
+alter table passage_answers
+    modify user_id int not null;
+
+alter table passage_answers
+    add constraint passage_answers_user__fk
+        foreign key (user_id) references users (id);
+
+alter table passage_answers
+    add column user_exam_id varchar(64) not null;
+
+alter table passage_answers
+    add constraint passage_answers_exam_id
+        unique (user_exam_id);
+
+alter table passage_answers
+    change date answer_date datetime not null;
+
+alter table passage_answers
+    alter column answer_date set default (current_timestamp);
+
+alter table passage_answers
+    drop column difficulty;
+
+alter table passage_answers
+    add column score int;
+
+alter table passages
+    drop column passage_questions;
+
+alter table passages
+    modify publication_date datetime default CURRENT_TIMESTAMP not null;
+
+-- altering the existing frquestions
+
+alter table frquestions
+    change Question_id id int auto_increment;
+
+alter table frquestions
+    change Subject_id subject_id int not null;
+
+alter table frquestions
+    change QuestionText text longtext null;
+
+alter table frquestions
+    change DifficultyLevel difficulty varchar(20) default 'Medium' not null;
+
+alter table frquestions
+    change CreationDate creation_date datetime default CURRENT_TIMESTAMP null;
+
+alter table frquestions
+    change CreatedBy created_by int null;
+
+alter table frquestions
+    add sid binary(32) not null;
+
+alter table frquestions
+    add constraint frquestions_subject__fk
+        foreign key (subject_id) references subject (id);
+
+alter table frquestions
+    add constraint frquestions_user__fk
+        foreign key (created_by) references users (id);
+
+alter table frquestions
+    add time_limit int default 60 not null comment 'time limit in secs';
+
+-- changes to frqresponse table
+
+alter table frqresponse
+    change ResponseID id int auto_increment;
+
+alter table frqresponse
+    drop column User_id;
+
+alter table frqresponse
+    drop column QuestionText;
+
+alter table frqresponse
+    change ResponseText text longtext null;
+
+alter table frqresponse
+    add user_id int not null after text;
+
+
+alter table frqresponse
+    add sid binary(32) null after user_id;
+
+alter table frqresponse
+    change SubmissionDate submission_date datetime null;
+
+alter table frqresponse
+    drop column DifficultyLevel;
+
+alter table frqresponse
+    change Grade grade varchar(255) null;
+
+alter table frqresponse
+    drop column time_limit;
+
+alter table frqresponse
+    change Status status varchar(15) default 'Pending' null;
+
+alter table frqresponse
+    change Strengths strengths mediumtext null;
+
+alter table frqresponse
+    change Improvement improvement mediumtext null;
+
+alter table frqresponse
+    add question_id int not null;
+
+alter table frqresponse
+    modify section_marks integer null;
+
+alter table frqresponse
+    add constraint frqresponse_pk_sid
+        unique (sid);
+
+alter table frqresponse
+    add constraint frqresponse_question__fk
+        foreign key (question_id) references questions (id);
+
+alter table frqresponse
+    add constraint frqresponse_user__fk
+        foreign key (user_id) references users (id);
+
+alter table frqresponse
+    modify section_marks longtext null comment 'Storing the response from AI';
+
+ALTER TABLE equaled.questions CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE equaled.user_answers CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+use test_gen_ai;
+show grants for 'equalEd'@'%';
+grant all privileges on test_gen_ai.* to 'equalEd'@'%';
+
+
+use equaled;
+select count(tickets.ticket_id) from tickets;
+
 

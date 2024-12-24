@@ -14,5 +14,5 @@ public interface IYearGroupRepository extends JpaRepository<YearGroup, Integer> 
     @Override
     Optional<YearGroup> findById(Integer integer);
 
-    List<YearGroup> findByYear(Integer year);
+    Optional<YearGroup> findByYear(Integer year);
 }

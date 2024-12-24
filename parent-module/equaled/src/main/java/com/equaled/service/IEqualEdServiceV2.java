@@ -1,9 +1,6 @@
 package com.equaled.service;
 
-import com.equaled.to.CommonV2Request;
-import com.equaled.to.CommonV2Response;
-import com.equaled.to.CreateProfileRequest;
-import com.equaled.to.UserAnswerAITO;
+import com.equaled.to.*;
 
 import java.util.List;
 import java.util.Map;
@@ -88,4 +85,14 @@ public interface IEqualEdServiceV2 {
     Map<String, List<CommonV2Response>> createProfile(CreateProfileRequest request, Integer guardianProfile);
 
     Integer getSubjectIdByName(String subjectName);
+
+    CommonV2Response createFRQuestion(Map<String, String> frquestion);
+
+    void createFRQResponse(CreateFRQResponseRequest createFRQResponseRequest);
+
+    void updateFRQResponse(Map<String, String> fields, String responseId);
+
+    Map<String,List<CommonV2Response>> getFRQResponsesByStatusAndUser(String status, Integer userId);
+
+    CommonV2Response getFRQResponseBySid(String responseSid);
 }

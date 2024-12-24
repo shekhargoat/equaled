@@ -1,10 +1,8 @@
 package com.equaled.controller;
 
 import com.equaled.service.IEqualEdServiceV2;
-import com.equaled.to.CommonV2Request;
-import com.equaled.to.CommonV2Response;
-import com.equaled.to.CreateProfileRequest;
-import com.equaled.to.UserAnswerAITO;
+import com.equaled.service.IPassageV2;
+import com.equaled.to.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -27,6 +25,7 @@ import java.util.UUID;
 public class EqualEdControllerV2 {
 
     private final IEqualEdServiceV2 service;
+    private final IPassageV2 passage;
 
     @GetMapping("/dashboard/user/{userId}")
     @ApiOperation(value = "get dashboard by userId", notes = "API to get all dashboards by UserId")
@@ -352,5 +351,85 @@ public class EqualEdControllerV2 {
         commonV2Response.setId(UUID.randomUUID().toString());
         commonV2Response.putField("Subject_Id",String.valueOf(service.getSubjectIdByName(subjectName)));
         return ResponseEntity.ok(commonV2Response);
+    }
+
+    @PostMapping("/passage")
+    @ApiOperation(value = "Update passage by Id")
+    public ResponseEntity<?> createPassage(@RequestBody CommonV2Request commonV2Request){
+        log.trace("Request received : create passage: {}", commonV2Request);
+        return ResponseEntity.ok(passage.createPassage(commonV2Request.getFields()));
+    }
+
+    @PostMapping("/passage/questions")
+    @ApiOperation(value = "Create passageQuestions")
+    public ResponseEntity<?> createPassageQuestions(@RequestBody CommonV2Request commonV2Request){
+        log.trace("Request received : create passage questions: {}", commonV2Request);
+        return ResponseEntity.ok(passage.createPassageQuestions(commonV2Request.getFields()));
+    }
+
+    @PostMapping("/passage/answer")
+    @ApiOperation(value = "Create passageAnswer")
+    public ResponseEntity<?> createPassageAnswers(@RequestBody CommonV2Request commonV2Request){
+        log.trace("Request received : create passage answer: {}", commonV2Request);
+        return ResponseEntity.ok(passage.createPassageAnswer(commonV2Request.getFields()));
+    }
+
+    @GetMapping("/passage/answers/{status}")
+    public ResponseEntity<?> getPassageAnswersByStatus(String status){
+        log.trace("Request received : get Passage Answers by status: {}", status);
+        return ResponseEntity.ok(passage.getPassageAnswersByStatus(status));
+    }
+
+    @GetMapping("/passage/answers/{status}/user/{userId}")
+    public ResponseEntity<?> getPassageAnswersByStatusAndUserId(@PathVariable String status,@PathVariable Integer userId){
+        log.trace("Request received : get Passage Answers by status: {} an userId : {}", status, userId);
+        return ResponseEntity.ok(passage.getPassageAnswersByStatusAndUserId(status,userId));
+    }
+
+    @GetMapping("/passage/answers/user/{userId}/exam/{examId}")
+    public ResponseEntity<?> getPassageAnswersByStatusAndExamId(@PathVariable Integer userId,@PathVariable String examId){
+        log.trace("Request received : get Passage Answers by examId: {} an userId : {}", examId, userId);
+        return ResponseEntity.ok(passage.getPassageAnswersByUserIdAndExamId(userId, examId));
+
+    }
+
+    @PutMapping("/passage/answer/{answerId}")
+    public ResponseEntity<?> updatePassageAnswers(@PathVariable String answerId,@RequestBody CommonV2Request commonV2Request){
+        log.trace("Request received : create passage: {}", commonV2Request);
+        return ResponseEntity.ok(passage.updatePassageAnswers(answerId,commonV2Request.getFields()));
+    }
+
+    @PostMapping("/frquestion")
+    public ResponseEntity<?> createFRQuestion(@RequestBody CommonV2Request commonV2Request){
+        log.trace("Request received : create fr question: {}", commonV2Request.getFields());
+        return ResponseEntity.ok(service.createFRQuestion(commonV2Request.getFields()));
+
+    }
+
+    @PostMapping("/frquestion/response")
+    public ResponseEntity<?> createFRQuestionResponse(@RequestBody CreateFRQResponseRequest createFRQResponseRequest){
+        log.trace("Request received : create fr question response: {}", createFRQResponseRequest.getRecords());
+        service.createFRQResponse(createFRQResponseRequest);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/frquestion/response/{responseSid}")
+    public ResponseEntity<?> updateFRQuestionResponse(@RequestBody CommonV2Request commonV2Request,
+    @PathVariable String responseSid){
+        log.trace("Request received : update fr question response: {}", commonV2Request.getFields());
+        service.updateFRQResponse(commonV2Request.getFields(),responseSid);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/frquestion/response/user/{userId}/status/{status}")
+    public ResponseEntity<?> getFRQResponsesByStatusAndUserId(@PathVariable String status,@PathVariable Integer userId){
+        log.trace("Finding FRQResponses by status: {} and userId: {}", status, userId);
+        return ResponseEntity.ok(service.getFRQResponsesByStatusAndUser(status,userId));
+    }
+
+    @GetMapping("/frquestion/response/{responseSid}")
+    public ResponseEntity<?> getFRQResponsesByResponseSid(@PathVariable String responseSid){
+        log.trace("Finding FRQResponses by responseSid: {}", responseSid);
+        return ResponseEntity.ok(service.getFRQResponseBySid(responseSid));
     }
 }

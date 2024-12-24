@@ -43,6 +43,7 @@ public class IncorrectArgumentException extends BaseException {
 		this.errorCode=error;
 	}
 	public IncorrectArgumentException(String devMsg) {
+		super(devMsg);
 		this.devMessage = devMsg;
 	}
 
