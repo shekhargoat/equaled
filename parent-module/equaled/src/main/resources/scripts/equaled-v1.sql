@@ -589,4 +589,15 @@ alter table frqresponse
 alter table frqresponse
     modify section_marks longtext null comment 'Storing the response from AI';
 
+ALTER TABLE equaled.questions CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE equaled.user_answers CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+use test_gen_ai;
+show grants for 'equalEd'@'%';
+grant all privileges on test_gen_ai.* to 'equalEd'@'%';
+
+
+use equaled;
+select count(tickets.ticket_id) from tickets;
+
 

@@ -64,8 +64,9 @@ public class PassageV2Impl implements IPassageV2 {
         passageQuestions.setOption3Text(request.getOrDefault("Option_3_text",""));
         passageQuestions.setOption4Text(request.getOrDefault("Option_4_text",""));
         passageQuestions.setOption5Text(request.getOrDefault("Option_5_text",""));
-        Optional.ofNullable(request.get("PassageID")).map(Integer::parseInt)
-                .flatMap(passageRepository::findById).ifPresent(passageQuestions::setPassage);
+        Passage passage = Optional.ofNullable(request.get("PassageID")).filter(StringUtils::isNotEmpty)
+                .flatMap(passageRepository::findBySid).orElseThrow(() -> new IncorrectArgumentException("Invalid Passage Sidd"));
+        passageQuestions.setPassage(passage);
 
         log.trace("Submitting Passage question");
         PassageQuestions passageQuestions1 = passageQuestionsRepository.save(passageQuestions);
@@ -96,9 +97,9 @@ public class PassageV2Impl implements IPassageV2 {
         passageAnswers.setStatus(request.getOrDefault("Status",""));
         passageAnswers.setScore(Integer.parseInt(request.getOrDefault("Grade","0")));
 
-        Optional<PassageQuestions> questionId = Optional.ofNullable(request.getOrDefault("Question_id", ""))
-                .map(Integer::parseInt).flatMap(passageQuestionsRepository::findById);
-        passageAnswers.setPassageQuestion(questionId.orElseThrow(()-> new IncorrectArgumentException("Invalid Question id")));
+        Optional<PassageQuestions> question = Optional.ofNullable(request.getOrDefault("Question_id", ""))
+                .filter(StringUtils::isNotEmpty).flatMap(passageQuestionsRepository::findBySid);
+        passageAnswers.setPassageQuestion(question.orElseThrow(()-> new IncorrectArgumentException("Invalid Question id")));
         Optional<Users> author = Optional.ofNullable(request.getOrDefault("User_id","")).map(Integer::parseInt)
                 .flatMap(userRepository::findById);
         passageAnswers.setUser(author.orElseThrow(()-> new IncorrectArgumentException("Invalid User Id")));
