@@ -592,12 +592,12 @@ alter table frqresponse
 ALTER TABLE equaled.questions CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ALTER TABLE equaled.user_answers CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
-use test_gen_ai;
-show grants for 'equalEd'@'%';
-grant all privileges on test_gen_ai.* to 'equalEd'@'%';
+alter table frqresponse
+    drop foreign key frqresponse_question__fk;
 
+alter table frqresponse
+    add constraint frqresponse_question__fk
+        foreign key (question_id) references frquestions (id);
 
-use equaled;
-select count(tickets.ticket_id) from tickets;
 
 
