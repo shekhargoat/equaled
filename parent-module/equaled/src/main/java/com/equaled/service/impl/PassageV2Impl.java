@@ -195,7 +195,7 @@ public class PassageV2Impl implements IPassageV2 {
         CommonV2Response commonV2Response = new CommonV2Response();
         commonV2Response.setId(passageAnswers1.getStringSid());
         commonV2Response.putField("User_exam_id", passageAnswers1.getUserExamId());
-        commonV2Response.putField("PassageText",passageAnswers1.getPassageQuestion().getPassage().getContent());
+        commonV2Response.putField("PassageText",passageAnswers1.getPassageQuestion().getPassage().getTitle());
         commonV2Response.putField("Score",String.valueOf(passageAnswers1.getScore()));//need to understand where this will be coming from
         commonV2Response.putField("Date",String.valueOf(passageAnswers1.getDateofAnswer().getEpochSecond()));
         return commonV2Response;
