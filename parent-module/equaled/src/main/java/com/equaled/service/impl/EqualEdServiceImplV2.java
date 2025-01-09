@@ -247,13 +247,8 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     }
 
     private YearGroup getOrCreateYearGroup(int yearGroupId) {
-        return yearGroupRepository.findById(yearGroupId)
-                .orElseGet(() -> {
-                    YearGroup yearGroup = new YearGroup();
-                    yearGroup.setSid(BaseEntity.generateByteUuid());
-                    yearGroup.setYear(yearGroupId);
-                    return yearGroupRepository.save(yearGroup);
-                });
+        return yearGroupRepository.findByYear(yearGroupId).orElseThrow(()->
+                new IncorrectArgumentException("Incorrect Year group Provided"));
     }
 
 
