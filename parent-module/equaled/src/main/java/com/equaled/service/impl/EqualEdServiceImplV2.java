@@ -191,7 +191,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
                     user.setUsername(record.getFields().get("Username"));
                     user.setEmail(record.getFields().get("Email"));
                     user.setPassword(record.getFields().get("Password"));
-                    user.setYearGroup(getOrCreateYearGroup(Integer.parseInt(record.getFields().get("year_group_id"))));
+                    user.setYearGroup(getYearGroup(Integer.parseInt(record.getFields().get("year_group_id"))));
                     Accounts accounts= Optional.ofNullable(record.getFields().get("account_id")).filter(StringUtils::isNumeric)
                                     .map(Integer::parseInt).map(ids -> getOrCreateAccount(ids, record.getFields().get("Username")))
                             .orElse(accountRepository.findById(1).get());
@@ -246,8 +246,8 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
                 });
     }
 
-    private YearGroup getOrCreateYearGroup(int yearGroupId) {
-        return yearGroupRepository.findByYear(yearGroupId).orElseThrow(()->
+    private YearGroup getYearGroup(int yearGroup) {
+        return yearGroupRepository.findByYear(yearGroup).orElseThrow(()->
                 new IncorrectArgumentException("Incorrect Year group Provided"));
     }
 
@@ -901,7 +901,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
                     user.setUsername(record.getFields().get("Username"));
                     user.setEmail(record.getFields().get("Email"));
                     user.setPassword(record.getFields().get("Password"));
-                    user.setYearGroup(getOrCreateYearGroup(Integer.parseInt(record.getFields().get("year_group_id"))));
+                    user.setYearGroup(getYearGroup(Integer.parseInt(record.getFields().get("year_group_id"))));
                     if(accounts.get() == null){
                         accounts.set(Optional.ofNullable(record.getFields().get("account_id")).filter(StringUtils::isNumeric)
                                 .map(Integer::parseInt).map(ids -> getOrCreateAccount(ids, record.getFields().get("Username")))
