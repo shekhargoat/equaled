@@ -1,6 +1,7 @@
 package com.equaled.service.impl;
 
 import com.equaled.entity.*;
+import com.equaled.eserve.common.JsonUtils;
 import com.equaled.eserve.common.exception.IncorrectArgumentException;
 import com.equaled.repository.IPassageAnswersRepository;
 import com.equaled.repository.IPassageQuestionsRepository;
@@ -196,10 +197,23 @@ public class PassageV2Impl implements IPassageV2 {
         commonV2Response.setId(passageAnswers1.getStringSid());
         commonV2Response.putField("User_exam_id", passageAnswers1.getUserExamId());
         commonV2Response.putField("PassageText",passageAnswers1.getPassageQuestion().getPassage().getTitle());
+        // adding question data
+        PassageQuestions passageQuestions = passageAnswers1.getPassageQuestion();
+        if(StringUtils.isNotEmpty(passageQuestions.getOption1Text())){
+            Map<String,Object> questionData = new HashMap<>();
+            questionData.put("Option_1_text",passageQuestions.getOption1Text());
+            questionData.put("Option_2_text",passageQuestions.getOption2Text());
+            questionData.put("Option_3_text",passageQuestions.getOption3Text());
+            questionData.put("Option_4_text",passageQuestions.getOption4Text());
+            questionData.put("Option_5_text",passageQuestions.getOption5Text());
+            commonV2Response.putField("question", JsonUtils.toJsonString(questionData));
+        }
+        commonV2Response.putField("QuestionText",passageAnswers1.getPassageQuestion().getText());
         commonV2Response.putField("Score",String.valueOf(passageAnswers1.getScore()));//need to understand where this will be coming from
         commonV2Response.putField("Date",String.valueOf(passageAnswers1.getDateofAnswer().getEpochSecond()));
         return commonV2Response;
     }
+
 
     public Map<String,List<CommonV2Response>> generateResponse(List<CommonV2Response> commonV2Responses){
         Map<String,List<CommonV2Response>> response = new HashMap<>();
