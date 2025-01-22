@@ -112,16 +112,7 @@ public class PassageV2Impl implements IPassageV2 {
 
         CommonV2Response commonV2Response = new CommonV2Response();
         commonV2Response.setId(passageAnswers1.getStringSid());
-        /*commonV2Response.putField("Text", passageAnswers1.getText());
-        commonV2Response.putField("Score", String.valueOf(passageAnswers1.getScore()));
-        commonV2Response.putField("Difficulty", passageAnswers1.getDifficulty());
-        commonV2Response.putField("Option_1_Text", passageAnswers1.getOption1Text());
-        commonV2Response.putField("Option_2_Text", passageAnswers1.getOption2Text());
-        commonV2Response.putField("Option_3_Text", passageAnswers1.getOption3Text());
-        commonV2Response.putField("Option_4_Text", passageAnswers1.getOption4Text());
-        commonV2Response.putField("Option_5_Text", passageAnswers1.getOption5Text());
-        commonV2Response.putField("PassageID", Optional.ofNullable(passageAnswers1.getPassage()).map(Passage::getId)
-                .map(String::valueOf).orElse(""));*/
+
         return generateResponse(Collections.singletonList(commonV2Response));
     }
 
@@ -208,11 +199,14 @@ public class PassageV2Impl implements IPassageV2 {
             questionData.put("Option_3_text",passageQuestions.getOption3Text());
             questionData.put("Option_4_text",passageQuestions.getOption4Text());
             questionData.put("Option_5_text",passageQuestions.getOption5Text());
+            questionData.put("Correct_option",passageQuestions.getCorrectOption());
             commonV2Response.putField("question", JsonUtils.toJsonString(questionData));
         }
         commonV2Response.putField("QuestionText",passageAnswers1.getPassageQuestion().getText());
         commonV2Response.putField("Score",String.valueOf(passageAnswers1.getScore()));//need to understand where this will be coming from
         commonV2Response.putField("Date",String.valueOf(passageAnswers1.getDateofAnswer().getEpochSecond()));
+        commonV2Response.putField("User_option",passageAnswers1.getUserOption());
+        commonV2Response.putField("User_explanation",passageAnswers1.getUserExplanation());
         return commonV2Response;
     }
 
