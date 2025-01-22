@@ -600,4 +600,9 @@ alter table frqresponse
         foreign key (question_id) references frquestions (id);
 
 
+alter table users
+    modify role enum ('STUDENT', 'TEACHER', 'PARENT') default 'STUDENT' not null comment 'defines the role of the user ';
+
+
+
 

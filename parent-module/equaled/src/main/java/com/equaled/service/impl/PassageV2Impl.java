@@ -197,6 +197,8 @@ public class PassageV2Impl implements IPassageV2 {
         commonV2Response.setId(passageAnswers1.getStringSid());
         commonV2Response.putField("User_exam_id", passageAnswers1.getUserExamId());
         commonV2Response.putField("PassageText",passageAnswers1.getPassageQuestion().getPassage().getTitle());
+        commonV2Response.putField("Passage",Optional.ofNullable(passageAnswers1.getPassageQuestion())
+                .map(PassageQuestions::getPassage).map(Passage::getContent).orElse(StringUtils.EMPTY));
         // adding question data
         PassageQuestions passageQuestions = passageAnswers1.getPassageQuestion();
         if(StringUtils.isNotEmpty(passageQuestions.getOption1Text())){
