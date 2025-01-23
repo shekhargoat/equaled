@@ -45,5 +45,5 @@ public class PassageAnswers extends BaseEntity {
     @Column(name = "explanation")
     private String explanation;
 
-    private int grade;
+    private int grade = 0;
 }

@@ -13,7 +13,7 @@ import java.util.Optional;
 public interface IPassageAnswersRepository extends JpaRepository<PassageAnswers, Integer> {
 
     List<PassageAnswers> findPassageAnswersByStatus(String status);
-    List<PassageAnswers> findPassageAnswersByStatusAndAndUser(String status, Users user);
+    List<PassageAnswers> findPassageAnswersByStatusAndUser(String status, Users user);
     List<PassageAnswers> findPassageAnswersByUserAndUserExamId(Users user, String examId);
 
     @Query(value = "select pa from PassageAnswers  pa where hex(pa.sid) = :sid")

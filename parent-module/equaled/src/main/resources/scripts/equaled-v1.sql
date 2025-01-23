@@ -603,6 +603,7 @@ alter table frqresponse
 alter table users
     modify role enum ('STUDENT', 'TEACHER', 'PARENT') default 'STUDENT' not null comment 'defines the role of the user ';
 
-
+alter table passage_answers
+    alter column grade set default 0;
 
 

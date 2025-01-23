@@ -136,7 +136,7 @@ public class PassageV2Impl implements IPassageV2 {
                 .orElseThrow(()->new IncorrectArgumentException("Incorrect User ID"));
 
         List<PassageAnswers> passageAnswers = Optional.ofNullable(status).filter(StringUtils::isNotEmpty)
-                .map(stat->passageAnswersRepository.findPassageAnswersByStatusAndAndUser(stat, users))
+                .map(stat->passageAnswersRepository.findPassageAnswersByStatusAndUser(stat, users))
                 .orElseThrow(()->new IncorrectArgumentException("Incorrect Status"));
 
         List<CommonV2Response> commonV2Responses = passageAnswers.stream().map(PassageV2Impl::createPassageAnswerResponse)
