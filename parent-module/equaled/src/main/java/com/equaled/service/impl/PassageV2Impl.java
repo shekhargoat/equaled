@@ -203,7 +203,8 @@ public class PassageV2Impl implements IPassageV2 {
             commonV2Response.putField("question", JsonUtils.toJsonString(questionData));
         }
         commonV2Response.putField("QuestionText",passageAnswers1.getPassageQuestion().getText());
-        commonV2Response.putField("Score",String.valueOf(passageAnswers1.getScore()));//need to understand where this will be coming from
+        commonV2Response.putField("Score",String.valueOf(passageAnswers1.getScore()));
+        commonV2Response.putField("Grade",Optional.ofNullable(passageAnswers1.getGrade()).map(String::valueOf).orElse(StringUtils.EMPTY));
         commonV2Response.putField("Date",String.valueOf(passageAnswers1.getDateofAnswer().getEpochSecond()));
         commonV2Response.putField("User_option",passageAnswers1.getUserOption());
         commonV2Response.putField("User_explanation",passageAnswers1.getUserExplanation());
