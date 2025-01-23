@@ -96,7 +96,7 @@ public class PassageV2Impl implements IPassageV2 {
         passageAnswers.setSid(BaseEntity.generateByteUuid());
         passageAnswers.setUserExamId(request.getOrDefault("User_exam_id",""));
         passageAnswers.setStatus(request.getOrDefault("Status",""));
-        passageAnswers.setScore(Integer.parseInt(request.getOrDefault("Grade","0")));
+        passageAnswers.setScore(Integer.parseInt(request.getOrDefault("Score","0")));
 
         Optional<PassageQuestions> question = Optional.ofNullable(request.getOrDefault("Question_id", ""))
                 .filter(StringUtils::isNotEmpty).flatMap(passageQuestionsRepository::findBySid);
@@ -167,13 +167,13 @@ public class PassageV2Impl implements IPassageV2 {
         String userOption = requests.getOrDefault("User_option","");
         String userExplanation = requests.getOrDefault("User_explanation","");
         String explanation = requests.getOrDefault("explanation","");
-        String score = requests.getOrDefault("Score","");
+        String grade = requests.getOrDefault("Grade","");
         PassageAnswers passageAnswers = passageAnswersRepository
                 .findBySid(answerSid).orElseThrow(()->new IncorrectArgumentException("Invalid Answer sid"));
         Optional.ofNullable(userExplanation).filter(StringUtils::isNotEmpty).ifPresent(passageAnswers::setUserExplanation);
         Optional.ofNullable(userOption).filter(StringUtils::isNotEmpty).ifPresent(passageAnswers::setUserOption);
         passageAnswers.setDateofAnswer(Instant.now());
-        Optional.ofNullable(score).filter(StringUtils::isNotEmpty).map(Integer::parseInt).ifPresent(passageAnswers::setScore);
+        Optional.ofNullable(grade).filter(StringUtils::isNotEmpty).map(Integer::parseInt).ifPresent(passageAnswers::setGrade);
         Optional.ofNullable(explanation).filter(StringUtils::isNotEmpty).ifPresent(passageAnswers::setExplanation);
         Optional.ofNullable(status).filter(StringUtils::isNotBlank).ifPresent(passageAnswers::setStatus);
         passageAnswersRepository.save(passageAnswers);
