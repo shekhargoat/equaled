@@ -606,4 +606,9 @@ alter table users
 alter table passage_answers
     alter column grade set default 0;
 
+alter table passage_answers
+    modify user_option mediumtext null;
+
+
+
 
