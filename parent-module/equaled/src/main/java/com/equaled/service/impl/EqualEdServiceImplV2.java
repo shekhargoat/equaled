@@ -39,6 +39,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
 
     private final RestTemplateConfig restTemplateConfig;
     private final CustomRepositoyImpl customRepositoyImpl;
+    private final DozerUtils dozerUtils;
     IDashboardRepository dashboardRepository;
     ISubjectCategoryRepository subjectCategoryRepository;
     ITestRepository testRepository;
@@ -54,6 +55,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     IExamScoreRepository examScoreRepository;
     IFRQuestionRepository frQuestionRepository;
     IFRQResponseRepository frResponseRepository;
+    IStagingQuestionsRepository stagingQuestionsRepository;
 
     DozerUtils mapper;
 
@@ -1057,6 +1059,34 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
         commonV2Response.putField("Time_limit",String.valueOf(frqResponse.getQuestion().getTimeLimit()));
         return commonV2Response;
     }
+
+    @Override
+    public Optional<String> createStagingQuestion(StagingQuestionsTO stagingQuestionsTO) {
+        StagingQuestions stagingQuestion=new StagingQuestions();
+
+        stagingQuestion.setImage_path(stagingQuestionsTO.getImage_path());
+        stagingQuestion.setDifficult_level(stagingQuestionsTO.getDifficult_level());
+        stagingQuestion.setCategory(stagingQuestionsTO.getCategory());
+        stagingQuestion.setSub_category(stagingQuestionsTO.getSub_category());
+        stagingQuestion.setText(stagingQuestionsTO.getText());
+        stagingQuestion.setOption_1_text(stagingQuestionsTO.getOption_1_text());
+        stagingQuestion.setOption_2_text(stagingQuestionsTO.getOption_2_text());
+        stagingQuestion.setOption_3_text(stagingQuestionsTO.getOption_3_text());
+        stagingQuestion.setOption_4_text(stagingQuestion.getOption_4_text());
+        stagingQuestion.setCorrect_option(stagingQuestionsTO.getCorrect_option());
+        stagingQuestion.setExplanation(stagingQuestionsTO.getExplanation());
+        stagingQuestion.setSub_category_1(stagingQuestionsTO.getSub_category_1());
+        stagingQuestion.setSub_category_2(stagingQuestionsTO.getSub_category_2());
+        YearGroup yearGroup = yearGroupRepository.findByYear(stagingQuestionsTO.getYear_group_id())
+                .orElseThrow(()-> new IncorrectArgumentException("Invalid Year Group"));
+        Subject subject = subjectRepository.findById(stagingQuestionsTO.getSubject_id())
+                .orElseThrow(()-> new IncorrectArgumentException("Invalid Subject Id"));
+        stagingQuestion.setYearGroup(yearGroup);
+        stagingQuestion.setSubject(subject);
+        stagingQuestionsRepository.save(stagingQuestion);
+        return Optional.of(String.valueOf(stagingQuestion.getId()));
+    }
+
 
 }
 

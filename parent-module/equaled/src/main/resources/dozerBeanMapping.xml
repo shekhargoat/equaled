@@ -17,4 +17,16 @@
             <b>sid</b>
         </field>
     </mapping>
+    <mapping map-id="SG-to-SGTO-bi">
+        <class-a>com.equaled.entity.StagingQuestions</class-a>
+        <class-b>com.equaled.to.StagingQuestionsTO</class-b>
+        <field-exclude>
+            <a>subject</a>
+            <b>Subject_id</b>
+        </field-exclude>
+        <field-exclude>
+            <a>yearGroupId</a>
+            <b>year_group_id</b>
+        </field-exclude>
+    </mapping>
 </mappings>

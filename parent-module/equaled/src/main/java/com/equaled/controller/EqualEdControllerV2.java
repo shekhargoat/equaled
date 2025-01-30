@@ -9,6 +9,7 @@ import io.swagger.annotations.ApiParam;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -431,5 +432,11 @@ public class EqualEdControllerV2 {
     public ResponseEntity<?> getFRQResponsesByResponseSid(@PathVariable String responseSid){
         log.trace("Finding FRQResponses by responseSid: {}", responseSid);
         return ResponseEntity.ok(service.getFRQResponseBySid(responseSid));
+    }
+
+    @PostMapping("/stage/question")
+    public ResponseEntity<?> createStageQuestion(@RequestBody StagingQuestionsTO stagingQuestionsTO){
+        log.trace("Request received : create stage question: {}", stagingQuestionsTO);
+        return ResponseEntity.ok(service.createStagingQuestion(stagingQuestionsTO).orElse(StringUtils.EMPTY));
     }
 }

@@ -4,6 +4,7 @@ import com.equaled.to.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public interface IEqualEdServiceV2 {
 
@@ -95,4 +96,6 @@ public interface IEqualEdServiceV2 {
     Map<String,List<CommonV2Response>> getFRQResponsesByStatusAndUser(String status, Integer userId);
 
     CommonV2Response getFRQResponseBySid(String responseSid);
+
+    Optional<String> createStagingQuestion(StagingQuestionsTO stagingQuestionsTO);
 }

@@ -610,5 +610,36 @@ alter table passage_answers
     modify user_option mediumtext null;
 
 
+alter table users
+    modify username varchar(100);
+
+create table question_staging
+(
+    id              int auto_increment,
+    Image_path      varchar(400)                 null,
+    Subject_id      int          default 2       not null,
+    year_group_id   int                          not null,
+    Difficult_level varchar(10)                  null,
+    category        varchar(100) default 'MATHS' null,
+    sub_category    varchar(300)                 null,
+    Text            longtext                     null,
+    Option_1_text   longtext                     null,
+    Option_2_text   longtext                     null,
+    Option_3_text   longtext                     null,
+    Option_4_text   longtext                     null,
+    Correct_option  longtext                     null,
+    Explanation      longtext                     null,
+    sub_category_1  varchar(300)                 null,
+    sub_category_2  varchar(300)                 null,
+    ingested_on     datetime                     null,
+    constraint question_staging_pk
+        primary key (id),
+    constraint question_staging_subject__fk
+        foreign key (Subject_id) references subject (id),
+    constraint question_staging_yg__fk
+        foreign key (year_group_id) references year_group (id)
+)
+    comment 'This table will act as a staging data holder before being processed by AI model and in';
+
 
 
