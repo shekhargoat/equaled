@@ -1,5 +1,6 @@
 package com.equaled.controller;
 
+import com.equaled.service.AWSUploadClient;
 import com.equaled.service.IEqualEdServiceV2;
 import com.equaled.service.IPassageV2;
 import com.equaled.to.*;
@@ -10,8 +11,10 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -27,6 +30,7 @@ public class EqualEdControllerV2 {
 
     private final IEqualEdServiceV2 service;
     private final IPassageV2 passage;
+    private final AWSUploadClient awsUploadClient;
 
     @GetMapping("/dashboard/user/{userId}")
     @ApiOperation(value = "get dashboard by userId", notes = "API to get all dashboards by UserId")
@@ -438,5 +442,15 @@ public class EqualEdControllerV2 {
     public ResponseEntity<?> createStageQuestion(@RequestBody StagingQuestionsTO stagingQuestionsTO){
         log.trace("Request received : create stage question: {}", stagingQuestionsTO);
         return ResponseEntity.ok(service.createStagingQuestion(stagingQuestionsTO).orElse(StringUtils.EMPTY));
+    }
+
+    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ApiOperation(value = "Uploading file to s3 bucket as of now", notes = "This API uploads a file provided as a "
+            + "part of MultipartFile to a S3 bucket and returns back the file name which needs to saved in appropriate tables")
+    public ResponseEntity<String> uploadFile(
+            @ApiParam(value = "file", required = true) @RequestParam(value = "file") MultipartFile multipartFile) {
+        // Get the file and save it somewhere
+        String filePath = awsUploadClient.uploadFile(multipartFile);
+        return ResponseEntity.ok(filePath);
     }
 }
