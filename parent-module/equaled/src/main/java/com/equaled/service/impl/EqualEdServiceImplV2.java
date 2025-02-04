@@ -25,6 +25,7 @@ import org.apache.commons.text.WordUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -1047,7 +1048,10 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     private static CommonV2Response createCommonFRQresponses(FRQResponse frqResponse) {
         CommonV2Response commonV2Response = new CommonV2Response();
         commonV2Response.setId(frqResponse.getStringSid());
-        commonV2Response.setCreatedTime(Instant.now().toString());
+        commonV2Response.setCreatedTime(Optional.ofNullable(frqResponse.getSubmissionDate())
+                        .map(instant -> LocalDateTime.ofInstant(instant,ZoneId.systemDefault()))
+                .map(ldt -> ldt.format(DateTimeFormatter.ISO_DATE_TIME))
+                .orElse(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)));
         commonV2Response.putField("QuestionText", frqResponse.getQuestion().getText());
         commonV2Response.putField("ResponseText", frqResponse.getText());
         commonV2Response.putField("Grade", frqResponse.getGrade());
