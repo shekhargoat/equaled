@@ -16,7 +16,7 @@ public interface IPassageAnswersRepository extends JpaRepository<PassageAnswers,
     List<PassageAnswers> findPassageAnswersByStatusAndUser(String status, Users user);
     List<PassageAnswers> findPassageAnswersByUserAndUserExamId(Users user, String examId);
 
-    @Query(value = "select pa from PassageAnswers  pa where hex(pa.sid) = :sid")
+    @Query(value = "select pa from PassageAnswers  pa where pa.sid = decode(:sid,'hex')")
     Optional<PassageAnswers> findBySid(String sid);
 
 }

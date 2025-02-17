@@ -9,6 +9,6 @@ import java.util.Optional;
 
 public interface IPassageQuestionsRepository extends JpaRepository<PassageQuestions, Integer> {
 
-    @Query("select pq from PassageQuestions pq where hex(pq.sid)=:sid")
+    @Query("select pq from PassageQuestions pq where pq.sid= decode(:sid,'hex')")
     Optional<PassageQuestions> findBySid(String sid);
 }

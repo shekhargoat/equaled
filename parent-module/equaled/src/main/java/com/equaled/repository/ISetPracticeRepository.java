@@ -16,7 +16,7 @@ public interface ISetPracticeRepository extends JpaRepository<Setpractice, Integ
 
     @Transactional
     @Modifying
-    @Query(value = "update Setpractice twh set twh.status= :status where twh.sid = unhex(:sid)")
+    @Query(value = "update Setpractice twh set twh.status= :status where twh.sid = decode(:sid,'hex')")
     void markStatus(String sid, EqualEdEnums.SetpracticeStatus status);
 
     @Query(value = "select sp from Setpractice sp where sp.user.id = :userId and sp.status = :status")

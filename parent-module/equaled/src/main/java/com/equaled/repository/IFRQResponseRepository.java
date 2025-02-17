@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public interface IFRQResponseRepository extends JpaRepository<FRQResponse, Integer> {
 
-    @Query(value = "select frq from FRQResponse frq where hex(frq.sid) = :sid")
+    @Query(value = "select frq from FRQResponse frq where frq.sid = decode(:sid,'hex')")
     Optional<FRQResponse> findBySid(String sid);
 
     @Query(value = "select frq from FRQResponse frq where frq.user.id = :userId and frq.status=:status")

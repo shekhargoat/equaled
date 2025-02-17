@@ -14,7 +14,7 @@ public interface IUserRepository extends JpaRepository<Users, Integer> {
     Optional<Users> findById(Integer integer);
     Optional<Users> findByUsernameIs(String username);
 
-    @Query(value = "select u from Users u where hex(u.sid) = :sid")
+    @Query(value = "select u from Users u where u.sid = decode(:sid,'hex')")
     Optional<Users> findBySid(String sid);
 
     Optional<Users> findByEmailIs(String email);

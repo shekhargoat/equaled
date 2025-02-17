@@ -10,7 +10,7 @@ public interface IDashboardRepository extends JpaRepository<Dashboard,Integer> {
 
         @Query(value = "select d from Dashboard d where d.user.id = :id")
         List<Dashboard> findDashboardsByUserId(Integer id);
-        @Query(value = "select d from Dashboard d where hex(d.user.sid) = :sid")
+        @Query(value = "select d from Dashboard d where d.user.sid = decode(:sid,'hex')")
         List<Dashboard> findDashboardsByUserSid(String sid);
 
         @Query(value = "select d from Dashboard d where d.user.id = :id and d.title like '%suggested%'")
