@@ -884,7 +884,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
             questions.setImagePath(questionsTO.getImagePath());
             questions.setQuestionAiId(questionsTO.getQuestionAiId());
             questions.setSubject(subjectRepository.findById(questionsTO.getSubjectId()).orElseThrow(()-> new IncorrectArgumentException("Invalid Subject Id")));
-            questions.setYearGroupId(yearGroupRepository.findById(questionsTO.getYear_group_id()).orElseThrow(()-> new IncorrectArgumentException("Invalid Year Group Id")));
+            questions.setYearGroupId(yearGroupRepository.findByYear(questionsTO.getYear_group_id()).orElseThrow(()-> new IncorrectArgumentException("Invalid Year Group Id")));
             questions.setDifficulty(questionsTO.getDifficulty());
             questions.setCategory(questionsTO.getCategory());
             questions.setSubCategory(questionsTO.getSubCategory());
