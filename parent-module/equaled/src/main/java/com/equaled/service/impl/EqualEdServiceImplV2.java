@@ -667,7 +667,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
             commonV2Response.putField("Subject_id", Optional.ofNullable(setpractice.getSubject())
                     .map(Subject::getId).map(String::valueOf).orElse(StringUtils.EMPTY));
             commonV2Response.putField("year_group_id", Optional.ofNullable(setpractice.getYearGroup())
-                    .map(YearGroup::getId).map(String::valueOf).orElse(StringUtils.EMPTY));
+                    .map(YearGroup::getYear).map(String::valueOf).orElse(StringUtils.EMPTY));
 
             return commonV2Response;
         }).collect(Collectors.toList());
