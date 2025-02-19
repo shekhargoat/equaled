@@ -398,7 +398,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
             commonV2Response.putField("text", answers.getQuestion().getQuestion());
             commonV2Response.putField("category", Optional.ofNullable(answers.getQuestion().getCategory())
                     .orElse(answers.getQuestion().getSubject().getName()));
-            commonV2Response.putField("sub_category", answers.getQuestion().getSubCategory());
+            commonV2Response.putField("sub_category", Optional.ofNullable(answers.getQuestion().getSubCategory()).orElse(StringUtils.EMPTY));
             commonV2Response.putField("Correct_option", answers.getQuestion().getCorrectOption());
             commonV2Response.putField("question_id", String.valueOf(answers.getQuestion().id));
             commonV2Response.putField("Explanation", answers.getExplanation());
