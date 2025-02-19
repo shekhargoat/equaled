@@ -20,7 +20,7 @@ public class QuestionsTO extends BaseTO {
     private EqualEdEnums.Difficulty difficulty;
     @JsonProperty("category")
     private String category;
-    @JsonProperty("sub_category")
+    @JsonProperty("subCategory")
     private String subCategory;
     @JsonProperty("option1")
     private String option1;
