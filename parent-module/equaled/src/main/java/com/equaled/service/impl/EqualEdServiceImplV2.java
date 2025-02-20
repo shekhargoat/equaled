@@ -482,7 +482,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
         commonV2Response.putField("Email", users.getEmail());
         commonV2Response.putField("Password", users.getPassword());
         commonV2Response.putField("User_id", String.valueOf(users.getId()));
-        commonV2Response.putField("year_group_id", String.valueOf(users.getYearGroup().getId()));
+        commonV2Response.putField("year_group_id", String.valueOf(users.getYearGroup().getYear()));
         commonV2Response.putField("role", WordUtils.capitalizeFully(users.getRole().name().toLowerCase()));
         commonV2Response.putField("lastlogin", LocalDateTime.ofInstant(users.getLastLogin(),
                 ZoneId.of("UTC")).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
