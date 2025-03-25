@@ -404,6 +404,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
             commonV2Response.putField("Explanation", answers.getExplanation());
             commonV2Response.putField("Time_Spent", String.valueOf(answers.getTimeSpent()));
             commonV2Response.putField("date", answers.getAnswerDate().toString());
+            commonV2Response.putField("difficulty", Optional.ofNullable(String.valueOf(answers.getQuestion().getDifficulty())).orElse(StringUtils.EMPTY));
             commonV2Response.putField("User_option", Optional.ofNullable(answers.getUserOption()).orElse(StringUtils.EMPTY));
             commonV2Response.putField("Option_1_text",Optional.ofNullable(answers.getQuestion()).map(Questions::getOption1).orElse(StringUtils.EMPTY));
             commonV2Response.putField("Option_2_text",Optional.ofNullable(answers.getQuestion()).map(Questions::getOption2).orElse(StringUtils.EMPTY));
