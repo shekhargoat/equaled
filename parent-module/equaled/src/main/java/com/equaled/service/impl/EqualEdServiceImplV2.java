@@ -412,7 +412,6 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
             commonV2Response.putField("Option_4_text",Optional.ofNullable(answers.getQuestion()).map(Questions::getOption4).orElse(StringUtils.EMPTY));
             return commonV2Response;
         }).collect(Collectors.toList());
-
         return generateResponse(commonV2Responses);
     }
 
