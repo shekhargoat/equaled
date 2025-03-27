@@ -462,12 +462,6 @@ public class EqualEdControllerV2 {
     }
 
     // get categories by yearGroupId and subject  : sub_category {sub category 1}
-//    @GetMapping(value = "/categories/{yearGroupId}/{subject}")
-//    @ApiOperation(value = "fetching categories by yearGroupId and Subject", notes = "This API to get categories by yearGroupId and Subject")
-//    public ResponseEntity<?> subjectByYearGroupId(@PathVariable String yearGroupId, String subject){
-//        return ResponseEntity.ok(service.getAllUsers());
-//    }
-
     @GetMapping("/categories/subject/{subjectName}/yearGroupId/{yearGroupId}")
     @ApiOperation(value = "get categories by Subject name and year group id",
             notes = "API to get categories by Subject name and year group id")

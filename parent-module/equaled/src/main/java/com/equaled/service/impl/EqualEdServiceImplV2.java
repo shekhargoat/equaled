@@ -622,7 +622,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
             Map<String, Object> subCategoryMap = new LinkedHashMap<>();
             subCategoryMap.put("name", category.getSubCategory());
 
-            List<String> subCategoryDetails = Arrays.asList(category.getSubCategory1().split("\n"));
+            List<String> subCategoryDetails = Arrays.asList(category.getSubCategory1().split(","));
             subCategoryMap.put("sub_category_1", subCategoryDetails);
             commonV2Response.putField("sub_category", subCategoryMap);
             return commonV2Response;
