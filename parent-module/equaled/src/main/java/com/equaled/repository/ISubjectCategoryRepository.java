@@ -4,6 +4,7 @@ import com.equaled.entity.Subject;
 import com.equaled.entity.SubjectCategories;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -11,5 +12,11 @@ public interface ISubjectCategoryRepository extends JpaRepository<SubjectCategor
 
     @Query(value = "select s from SubjectCategories s where s.yearGroup.year = :yr")
     List<SubjectCategories> findSubjectsCategoriesByYrGroupId(Integer yr);
+
+    @Query("select distinct s.subject from SubjectCategories s where s.yearGroup.id = :yearGroupId")
+    List<Subject> findDistinctSubjectsByYearGroup(@Param("yearGroupId") Integer yearGroupId);
+
+    @Query("select c from SubjectCategories c where c.subject.id = (select s.id from Subject s where s.name = :subjectName) and c.yearGroup.id = :yearGroupId")
+    List<SubjectCategories> getSubjectCategoriesBySubjectAndYearGroupId(@Param("subjectName") String subjectName, @Param("yearGroupId") Integer yearGroupId);
 
 }

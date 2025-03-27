@@ -453,4 +453,27 @@ public class EqualEdControllerV2 {
         String filePath = awsUploadClient.uploadFile(multipartFile);
         return ResponseEntity.ok(filePath);
     }
+
+    // get unique subject by year group id: name and id
+    @GetMapping(value = "/unique/subject/yearGroupId/{yearGroupId}")
+    @ApiOperation(value = "Unique subject by year_group_id", notes = "This API to get Unique subject by year_group_id")
+    public ResponseEntity<?> subjectByYearGroupId(@PathVariable Integer yearGroupId){
+        return ResponseEntity.ok(service.getSubjectByYearGroupId(yearGroupId));
+    }
+
+    // get categories by yearGroupId and subject  : sub_category {sub category 1}
+//    @GetMapping(value = "/categories/{yearGroupId}/{subject}")
+//    @ApiOperation(value = "fetching categories by yearGroupId and Subject", notes = "This API to get categories by yearGroupId and Subject")
+//    public ResponseEntity<?> subjectByYearGroupId(@PathVariable String yearGroupId, String subject){
+//        return ResponseEntity.ok(service.getAllUsers());
+//    }
+
+    @GetMapping("/categories/subject/{subjectName}/yearGroupId/{yearGroupId}")
+    @ApiOperation(value = "get categories by Subject name and year group id",
+            notes = "API to get categories by Subject name and year group id")
+    public ResponseEntity<?> getCategoriesBySubAndYearGroupIds(
+            @ApiParam(value = "Subject Name", required = true) @PathVariable("subjectName") String subjectName,
+            @ApiParam(value = "Year Group Id", required = true) @PathVariable("yearGroupId") Integer yearGroupId){
+        return ResponseEntity.ok(service.getCategoriesBySubAndYearGroup(subjectName, yearGroupId));
+    }
 }

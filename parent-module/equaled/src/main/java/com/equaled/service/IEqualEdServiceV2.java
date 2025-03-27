@@ -98,4 +98,8 @@ public interface IEqualEdServiceV2 {
     CommonV2Response getFRQResponseBySid(String responseSid);
 
     Optional<String> createStagingQuestion(StagingQuestionsTO stagingQuestionsTO);
+
+    Map<String,List<CommonV2Response>> getSubjectByYearGroupId(Integer yearGroupId);
+
+    Map<String, List<CommonV2Response>> getCategoriesBySubAndYearGroup(String subjectName, Integer yearGroup);
 }

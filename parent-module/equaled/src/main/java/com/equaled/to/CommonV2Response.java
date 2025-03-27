@@ -1,8 +1,5 @@
 package com.equaled.to;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,7 +9,7 @@ public class CommonV2Response implements Serializable {
     private static final long serialVersionUID = 8066274194975110787L;
     private String id;
     private String createdTime;
-    private Map<String,String> fields;
+    private Map<String, Object> fields;
 
     public String getId() {
         return id;
@@ -30,15 +27,15 @@ public class CommonV2Response implements Serializable {
         this.createdTime = createdTime;
     }
 
-    public Map<String, String> getFields() {
+    public Map<String, Object> getFields() {
         return fields;
     }
 
-    public void setFields(Map<String, String> fields) {
+    public void setFields(Map<String, Object> fields) {
         this.fields = fields;
     }
 
-    public void putField(String key,String value){
+    public void putField(String key,Object value){
         if(fields==null) fields = new HashMap<>();
         fields.put(key, value);
     }

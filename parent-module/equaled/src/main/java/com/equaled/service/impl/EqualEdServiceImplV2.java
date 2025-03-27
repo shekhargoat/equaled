@@ -23,9 +23,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 import org.springframework.stereotype.Service;
-
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -116,6 +114,22 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
         }).collect(Collectors.toList());
 
 
+        return generateResponse(commonV2Responses);
+    }
+
+    @Override
+    public Map<String,List<CommonV2Response>> getSubjectByYearGroupId(Integer yearGroupId){
+        log.trace("Finding Subject by yearGroupId: {}",yearGroupId);
+        List<Subject> subjects = Optional.ofNullable(subjectCategoryRepository.findDistinctSubjectsByYearGroup(yearGroupId))
+                .orElse(ListUtils.EMPTY_LIST);
+        log.debug("Subject fetched for year {} = {}",yearGroupId, subjects.size());
+
+        List<CommonV2Response> commonV2Responses = subjects.stream().map(subject -> {
+            CommonV2Response commonV2Response = new CommonV2Response();
+            commonV2Response.setId(subject.getStringSid());
+            commonV2Response.putField("subject", String.valueOf(subject.getName()));
+            return commonV2Response;
+        }).collect(Collectors.toList());
         return generateResponse(commonV2Responses);
     }
 
@@ -595,6 +609,25 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
                 .getQuestionsBySubjectAndYearGroupId(subjectName, yearGroup)).orElse(ListUtils.EMPTY_LIST);
         log.debug("Finding Questions for subject {} and year group {} = {}",subjectName, yearGroup, questions.size());
         return createQuestionsResponse(questions);
+    }
+
+    @Override
+    public Map<String, List<CommonV2Response>> getCategoriesBySubAndYearGroup(String subjectName, Integer yearGroup) {
+        log.trace("Finding Categories for subject {} and year group {}", subjectName, yearGroup);
+        List<SubjectCategories> categories = Optional.ofNullable(subjectCategoryRepository
+                .getSubjectCategoriesBySubjectAndYearGroupId(subjectName, yearGroup)).orElse(ListUtils.EMPTY_LIST);
+        log.debug("Fetched Categories for subject {} and year group {} = {}", subjectName, yearGroup, categories.size());
+        List<CommonV2Response> commonV2Responses = categories.stream().map(category -> {
+            CommonV2Response commonV2Response = new CommonV2Response();
+            Map<String, Object> subCategoryMap = new LinkedHashMap<>();
+            subCategoryMap.put("name", category.getSubCategory());
+
+            List<String> subCategoryDetails = Arrays.asList(category.getSubCategory1().split("\n"));
+            subCategoryMap.put("sub_category_1", subCategoryDetails);
+            commonV2Response.putField("sub_category", subCategoryMap);
+            return commonV2Response;
+        }).collect(Collectors.toList());
+        return generateResponse(commonV2Responses);
     }
 
     @Override
