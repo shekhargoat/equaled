@@ -24,6 +24,13 @@ public class SubjectCategories extends BaseEntity{
     @JoinColumn(name = "year_group_id", referencedColumnName = "id", nullable = false)
     private YearGroup yearGroup;
 
+    @Column(name = "video_url")
+    private String videoUrl;
+    @Column(name = "country_id")
+    private Integer countryId;
+    @Column(name = "sort_order")
+    private Integer sortOrder;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

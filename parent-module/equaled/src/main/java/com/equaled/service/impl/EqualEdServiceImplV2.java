@@ -617,7 +617,8 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
         List<SubjectCategories> categories = Optional.ofNullable(subjectCategoryRepository
                 .getSubjectCategoriesBySubjectAndYearGroupId(subjectName, yearGroup)).orElse(ListUtils.EMPTY_LIST);
         log.debug("Fetched Categories for subject {} and year group {} = {}", subjectName, yearGroup, categories.size());
-        List<CommonV2Response> commonV2Responses = categories.stream().map(category -> {
+        List<CommonV2Response> commonV2Responses = categories.stream()
+                .sorted(Comparator.comparingInt(SubjectCategories::getSortOrder)).map(category -> {
             CommonV2Response commonV2Response = new CommonV2Response();
             Map<String, Object> subCategoryMap = new LinkedHashMap<>();
             subCategoryMap.put("name", category.getSubCategory());
