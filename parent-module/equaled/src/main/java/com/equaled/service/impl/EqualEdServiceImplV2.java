@@ -24,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 import org.springframework.stereotype.Service;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -208,6 +209,11 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
                     user.setUsername(record.getFields().get("Username"));
                     user.setEmail(record.getFields().get("Email"));
                     user.setPassword(record.getFields().get("Password"));
+                    user.setFirstname(record.getFields().get("Firstname"));
+                    user.setLastname(record.getFields().get("Lastname"));
+                    user.setCountryCode(record.getFields().get("Countrycode"));
+                    user.setStateCode(record.getFields().get("Statecode"));
+                    user.setDob(LocalDate.parse(record.getFields().get("Dob")));
                     user.setYearGroup(getYearGroup(Integer.parseInt(record.getFields().get("year_group_id"))));
                     Accounts accounts= Optional.ofNullable(record.getFields().get("account_id")).filter(StringUtils::isNumeric)
                                     .map(Integer::parseInt).map(ids -> getOrCreateAccount(ids, record.getFields().get("Username")))
