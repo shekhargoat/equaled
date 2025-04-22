@@ -5,7 +5,7 @@ import java.util.Arrays;
 
 public class EqualEdEnums {
     public enum UserRole{
-        STUDENT, TEACHER, PARENT
+        STUDENT, TEACHER, PARENT, ADMIN
     }
 
     public enum Difficulty {
