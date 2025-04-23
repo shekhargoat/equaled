@@ -1157,9 +1157,16 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
             subject = subjectRepository.save(newSubject);
         }
         // Fetch YearGroup
-        long yearGroupId = Long.parseLong(yearGroupIdStr);
+        int yearGroupId = (int) Long.parseLong(yearGroupIdStr);
         YearGroup yearGroup = yearGroupRepository.findById(Math.toIntExact(yearGroupId))
-                .orElseThrow(() -> new RuntimeException("Invalid year_group_id: " + yearGroupIdStr));
+                .orElseGet(() -> {
+                    // Create a new YearGroup if not found
+                    log.info("Creating new year_group_id: {}", yearGroupId);
+                    YearGroup newYearGroup = new YearGroup();
+                    newYearGroup.setYear(yearGroupId);
+                    newYearGroup.setSid(BaseEntity.generateByteUuid());
+                    return yearGroupRepository.save(newYearGroup);
+                });
         Map<String, Object> jsonResponse = (LinkedHashMap<String, Object>) payload.get("json_response");
         List<LinkedHashMap<String, Object>> categories = (List<LinkedHashMap<String, Object>>) jsonResponse.get("categories");
         int sortOrder = 1;
