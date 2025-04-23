@@ -2,6 +2,7 @@ package com.equaled.service;
 
 import com.equaled.to.*;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -102,4 +103,6 @@ public interface IEqualEdServiceV2 {
     Map<String,List<CommonV2Response>> getSubjectByYearGroupId(Integer yearGroupId);
 
     Map<String, List<CommonV2Response>> getCategoriesBySubAndYearGroup(String subjectName, Integer yearGroup);
+
+    void saveSubjectData(LinkedHashMap<String, Object> payload);
 }

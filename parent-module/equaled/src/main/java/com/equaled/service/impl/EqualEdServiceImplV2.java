@@ -1132,6 +1132,68 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
         return Optional.of(String.valueOf(stagingQuestion.getId()));
     }
 
+    public void saveSubjectData(LinkedHashMap<String, Object> payload) {
+        Map<String, Object> metadata = (LinkedHashMap<String, Object>) payload.get("metadata");
+        String subjectName = (String) metadata.get("subject");
+        String yearGroupIdStr = (String) metadata.get("year_group_id");
+        Integer countryId = (Integer) metadata.get("country_id");
+        String curriculum = (String) metadata.get("curriculum");
+        String state = (String) metadata.get("state");
+        String language = (String) metadata.get("language");
+        String notes = (String) metadata.get("notes");
 
+        // Find or create subject
+        List<Subject> subjects = subjectRepository.findByName(subjectName);
+        Subject subject;
+        if (!subjects.isEmpty()) {
+            log.info("Subject found: {}", subjectName);
+            subject = subjects.get(0);
+        } else {
+            Subject newSubject = new Subject();
+            newSubject.setName(subjectName);
+            newSubject.setSid(BaseEntity.generateByteUuid());
+            newSubject.setCreatedOn(Instant.now());
+            newSubject.setLastUpdatedOn(Instant.now());
+            subject = subjectRepository.save(newSubject);
+        }
+        // Fetch YearGroup
+        long yearGroupId = Long.parseLong(yearGroupIdStr);
+        YearGroup yearGroup = yearGroupRepository.findById(Math.toIntExact(yearGroupId))
+                .orElseThrow(() -> new RuntimeException("Invalid year_group_id: " + yearGroupIdStr));
+        Map<String, Object> jsonResponse = (LinkedHashMap<String, Object>) payload.get("json_response");
+        List<LinkedHashMap<String, Object>> categories = (List<LinkedHashMap<String, Object>>) jsonResponse.get("categories");
+        int sortOrder = 1;
+        for (Map<String, Object> category : categories) {
+            String subCategory = (String) category.get("name");
+            List<String> subcategories = (List<String>) category.get("subcategories");
+            // Join subcategories into a single string
+            String joinedSubcategories = subcategories.stream()
+                    .map(this::formatSubcategory)
+                    .collect(Collectors.joining(""));
+            SubjectCategories categoryEntity = new SubjectCategories();
+            categoryEntity.setSubject(subject);
+            categoryEntity.setYearGroup(yearGroup);
+            categoryEntity.setCountryId(countryId);
+            categoryEntity.setCurriculum(curriculum);
+            categoryEntity.setState(state);
+            categoryEntity.setNotes(notes);
+            categoryEntity.setLanguage(language);
+            categoryEntity.setSortOrder(sortOrder++);
+            categoryEntity.setSubCategory(subCategory);
+            categoryEntity.setSubCategory1(joinedSubcategories);
+            subjectCategoryRepository.save(categoryEntity);
+        }
+    }
+
+    private String formatSubcategory(String input) {
+        // If input contains any non-alphanumeric character, skip formatting
+        if (!input.matches("^[a-zA-Z0-9]*$")) {
+            return input + "\n";
+        }
+        // Otherwise format to spaced text
+        return Arrays.stream(input.split("(?=[A-Z])"))
+                .map(String::trim)
+                .collect(Collectors.joining(" ")) + "\n";
+    }
 }
 

@@ -30,6 +30,14 @@ public class SubjectCategories extends BaseEntity{
     private Integer countryId;
     @Column(name = "sort_order")
     private Integer sortOrder;
+    @Column(name = "curriculum")
+    private String curriculum;
+    @Column(name = "state")
+    private String state;
+    @Column(name = "language")
+    private String language;
+    @Column(name = "notes")
+    private String notes;
 
     @Override
     public boolean equals(Object o) {

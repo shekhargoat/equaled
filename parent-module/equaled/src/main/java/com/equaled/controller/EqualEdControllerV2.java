@@ -16,10 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @AllArgsConstructor
@@ -469,5 +466,11 @@ public class EqualEdControllerV2 {
             @ApiParam(value = "Subject Name", required = true) @PathVariable("subjectName") String subjectName,
             @ApiParam(value = "Year Group Id", required = true) @PathVariable("yearGroupId") Integer yearGroupId){
         return ResponseEntity.ok(service.getCategoriesBySubAndYearGroup(subjectName, yearGroupId));
+    }
+
+    @PostMapping("/save/subject/data")
+    public ResponseEntity<String> saveSubjectData(@RequestBody LinkedHashMap<String, Object> payload) {
+        service.saveSubjectData(payload);
+        return ResponseEntity.ok("Subject data saved successfully.");
     }
 }
