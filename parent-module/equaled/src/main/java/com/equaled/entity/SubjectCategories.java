@@ -27,7 +27,7 @@ public class SubjectCategories extends BaseEntity{
     @Column(name = "video_url")
     private String videoUrl;
     @Column(name = "country_id")
-    private Integer countryId;
+    private String countryId;
     @Column(name = "sort_order")
     private Integer sortOrder;
     @Column(name = "curriculum")

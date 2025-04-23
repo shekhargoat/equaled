@@ -1136,7 +1136,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
         Map<String, Object> metadata = (LinkedHashMap<String, Object>) payload.get("metadata");
         String subjectName = (String) metadata.get("subject");
         String yearGroupIdStr = (String) metadata.get("year_group_id");
-        Integer countryId = (Integer) metadata.get("country_id");
+        String countryId = (String) metadata.get("country_id");
         String curriculum = (String) metadata.get("curriculum");
         String state = (String) metadata.get("state");
         String language = (String) metadata.get("language");
