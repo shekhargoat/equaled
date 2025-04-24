@@ -1133,15 +1133,14 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     }
 
     public void saveSubjectData(LinkedHashMap<String, Object> payload) {
-        Map<String, Object> metadata = (LinkedHashMap<String, Object>) payload.get("metadata");
-        String subjectName = (String) metadata.get("subject");
-        String yearGroupIdStr = (String) metadata.get("year_group_id");
-        String countryId = (String) metadata.get("country_id");
-        String curriculum = (String) metadata.get("curriculum");
-        String state = (String) metadata.get("state");
-        String language = (String) metadata.get("language");
-        String notes = (String) metadata.get("notes");
-
+        Map<String, Object> metadata = MapUtils.getMap(payload, "metadata");
+        String subjectName = MapUtils.getString(metadata, "subject");
+        String yearGroupIdStr = MapUtils.getString(metadata, "year_group_id");
+        String countryId = MapUtils.getString(metadata, "country_id");
+        String curriculum = MapUtils.getString(metadata, "curriculum");
+        String state = MapUtils.getString(metadata, "state");
+        String language = MapUtils.getString(metadata, "language");
+        String notes = MapUtils.getString(metadata, "notes");
         // Find or create subject
         List<Subject> subjects = subjectRepository.findByName(subjectName);
         Subject subject;
@@ -1149,6 +1148,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
             log.info("Subject found: {}", subjectName);
             subject = subjects.get(0);
         } else {
+            log.info("Creating new Subject: {}",subjectName);
             Subject newSubject = new Subject();
             newSubject.setName(subjectName);
             newSubject.setSid(BaseEntity.generateByteUuid());
@@ -1156,28 +1156,31 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
             newSubject.setLastUpdatedOn(Instant.now());
             subject = subjectRepository.save(newSubject);
         }
-        // Fetch YearGroup
         int yearGroupId = (int) Long.parseLong(yearGroupIdStr);
-        YearGroup yearGroup = yearGroupRepository.findById(Math.toIntExact(yearGroupId))
-                .orElseGet(() -> {
-                    // Create a new YearGroup if not found
-                    log.info("Creating new year_group_id: {}", yearGroupId);
-                    YearGroup newYearGroup = new YearGroup();
-                    newYearGroup.setYear(yearGroupId);
-                    newYearGroup.setSid(BaseEntity.generateByteUuid());
-                    return yearGroupRepository.save(newYearGroup);
-                });
-        Map<String, Object> jsonResponse = (LinkedHashMap<String, Object>) payload.get("json_response");
-        List<LinkedHashMap<String, Object>> categories = (List<LinkedHashMap<String, Object>>) jsonResponse.get("categories");
+        // Find or create YearGroup
+        YearGroup yearGroup;
+        Optional<YearGroup> optionalYearGroup = yearGroupRepository.findByYear(yearGroupId);
+        if (optionalYearGroup.isPresent()) {
+            log.info("YearGroup found: {}", yearGroupId);
+            yearGroup = optionalYearGroup.get();
+        } else {
+            log.info("Creating new YearGroup: {}", yearGroupId);
+            YearGroup newYearGroup = new YearGroup();
+            newYearGroup.setYear(yearGroupId);
+            newYearGroup.setSid(BaseEntity.generateByteUuid());
+            yearGroup = yearGroupRepository.save(newYearGroup);
+        }
+        Map<String, Object> jsonResponse = MapUtils.getMap(payload, "json_response");
+        List<Map<String, Object>> categories = (List<Map<String, Object>>) jsonResponse.get("categories");
         int sortOrder = 1;
         for (Map<String, Object> category : categories) {
-            String subCategory = (String) category.get("name");
+            String subCategory = MapUtils.getString(category, "name");
             List<String> subcategories = (List<String>) category.get("subcategories");
-            // Join subcategories into a single string
             String joinedSubcategories = subcategories.stream()
-                    .map(this::formatSubcategory)
-                    .collect(Collectors.joining(""));
+                    .map(this::formatSubcategory).collect(Collectors.joining(""));
+            log.info("Saving subject categories data: {}",sortOrder);
             SubjectCategories categoryEntity = new SubjectCategories();
+            categoryEntity.setSid(BaseEntity.generateByteUuid());
             categoryEntity.setSubject(subject);
             categoryEntity.setYearGroup(yearGroup);
             categoryEntity.setCountryId(countryId);
