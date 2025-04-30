@@ -1208,6 +1208,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     @Override
     public Map<String, List<CommonV2Response>> getWeeklyAnswersByYearGroupId(Integer yearGroupId) {
         log.trace("Finding weekly submissions by yearGroupId: {}", yearGroupId);
+
         LocalDateTime now = LocalDateTime.now();
         int dayOfWeek = now.getDayOfWeek().getValue();
         int daysSinceSunday = dayOfWeek % 7;
@@ -1218,23 +1219,43 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
         ZonedDateTime startOfWeekUTC = startOfWeekLocal.atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC);
         ZonedDateTime endOfWeekUTC = endOfWeekLocal.atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC);
 
-        Instant startTime = Instant.parse(startOfWeekUTC.toInstant().toString());
-        Instant endTime = Instant.parse(endOfWeekUTC.toInstant().toString());
+        Instant startTime = startOfWeekUTC.toInstant();
+        Instant endTime = endOfWeekUTC.toInstant();
 
         List<Object[]> records = useranswerRepository.findWeeklyUserDifficultiesNative(yearGroupId, startTime, endTime);
-        log.info("Found: {} response for yearGroup: {}", records.size(), yearGroupId);
-        Map<String, List<String>> grouped = new HashMap<>();
+        log.info("Found: {} responses for yearGroup: {}", records.size(), yearGroupId);
+
+        // Grouping: userId -> examId -> list of answers
+        Map<String, Map<String, List<Map<String, String>>>> groupedByUser = new HashMap<>();
+
         for (Object[] row : records) {
-            String userId = String.valueOf(row[0]);
+            String userId = row[0] != null ? row[0].toString() : "";
             String difficulty = row[1] != null ? row[1].toString() : "";
-            grouped.computeIfAbsent(userId, k -> new ArrayList<>()).add(difficulty);
+            String userOption = row[2] != null ? row[2].toString() : "";
+            String correctOption = row[3] != null ? row[3].toString() : "";
+            String examId = row[4] != null ? row[4].toString() : "";
+
+            Map<String, String> answerData = new HashMap<>();
+            answerData.put("difficulty", difficulty);
+            answerData.put("userOption", userOption);
+            answerData.put("correctOption", correctOption);
+
+            groupedByUser
+                    .computeIfAbsent(userId, k -> new HashMap<>())
+                    .computeIfAbsent(examId, k -> new ArrayList<>())
+                    .add(answerData);
         }
-        List<CommonV2Response> responses = grouped.entrySet().stream().map(entry -> {
+
+        List<CommonV2Response> responses = groupedByUser.entrySet().stream().map(userEntry -> {
+            String userId = userEntry.getKey();
+            Collection<List<Map<String, String>>> submissionsPerExam = userEntry.getValue().values();
+
             CommonV2Response response = new CommonV2Response();
-            response.setId(entry.getKey());
-            response.putField("difficulties", entry.getValue());
+            response.setId(userId);
+            response.putField("submissions", new ArrayList<>(submissionsPerExam));
             return response;
         }).collect(Collectors.toList());
+
         return generateResponse(responses);
     }
 }
