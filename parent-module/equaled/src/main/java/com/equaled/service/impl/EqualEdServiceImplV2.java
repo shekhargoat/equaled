@@ -1260,6 +1260,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
         return generateResponse(responses);
     }
 
+    @Override
     public Map<String, List<CommonV2Response>> getNameById(Integer id) {
         log.trace("Finding user by id: {}", id);
         Users user = userRepository.findById(id)
@@ -1268,7 +1269,8 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
                 .filter(name -> name != null && !name.trim().isEmpty())
                 .collect(Collectors.joining(" "));
         if (fullName.isEmpty()) {
-            log.warn("Name is empty for user ID: {}", user.getId());
+            log.warn("Name is empty for user: {}, adding username", user.getId());
+            fullName = user.getUsername();
         }
         CommonV2Response response = new CommonV2Response();
         response.putField("userName", fullName);
