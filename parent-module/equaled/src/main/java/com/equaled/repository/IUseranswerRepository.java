@@ -17,12 +17,9 @@ public interface IUseranswerRepository extends JpaRepository<UserAnswers, Intege
     @Query(value = "select ua from UserAnswers ua where ua.user.id = :userId")
     List<UserAnswers> findByUserId(Integer userId);
 
-    @Query(value = "SELECT ua.user_id, q.difficulty " +
-            "FROM user_answers ua " +
-            "JOIN questions q ON ua.question_id = q.id " +
-            "JOIN year_group yg ON q.year_group_id = yg.id " +
-            "WHERE yg.year = :yearGroupId " +
-            "AND ua.answer_date BETWEEN :startOfWeek AND :endOfWeek",
+    @Query(value = "SELECT user_id, difficulty FROM weekly_user_difficulties_view " +
+            "WHERE year_group = :yearGroupId " +
+            "AND answer_date BETWEEN :startOfWeek AND :endOfWeek",
             nativeQuery = true)
     List<Object[]> findWeeklyUserDifficultiesNative(@Param("yearGroupId") Integer yearGroupId,
                                                     @Param("startOfWeek") Instant startOfWeek,
