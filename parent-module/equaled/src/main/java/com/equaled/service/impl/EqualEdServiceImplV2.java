@@ -23,10 +23,8 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 import org.springframework.stereotype.Service;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -1192,6 +1190,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
             categoryEntity.setSubCategory(subCategory);
             categoryEntity.setSubCategory1(joinedSubcategories);
             subjectCategoryRepository.save(categoryEntity);
+            log.info("Subject data saved successfully.");
         }
     }
 
@@ -1204,6 +1203,39 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
         return Arrays.stream(input.split("(?=[A-Z])"))
                 .map(String::trim)
                 .collect(Collectors.joining(" ")) + "\n";
+    }
+
+    @Override
+    public Map<String, List<CommonV2Response>> getWeeklyAnswersByYearGroupId(Integer yearGroupId) {
+        log.trace("Finding weekly submissions by yearGroupId: {}", yearGroupId);
+        LocalDateTime now = LocalDateTime.now();
+        int dayOfWeek = now.getDayOfWeek().getValue();
+        int daysSinceSunday = dayOfWeek % 7;
+
+        LocalDateTime startOfWeekLocal = now.minusDays(daysSinceSunday).with(LocalTime.MIN);
+        LocalDateTime endOfWeekLocal = startOfWeekLocal.plusDays(6).with(LocalTime.MAX);
+
+        ZonedDateTime startOfWeekUTC = startOfWeekLocal.atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC);
+        ZonedDateTime endOfWeekUTC = endOfWeekLocal.atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC);
+
+        Instant startTime = Instant.parse(startOfWeekUTC.toInstant().toString());
+        Instant endTime = Instant.parse(endOfWeekUTC.toInstant().toString());
+
+        List<Object[]> records = useranswerRepository.findWeeklyUserDifficultiesNative(yearGroupId, startTime, endTime);
+        log.info("Found: {} response for yearGroup: {}", records.size(), yearGroupId);
+        Map<String, List<String>> grouped = new HashMap<>();
+        for (Object[] row : records) {
+            String userId = String.valueOf(row[0]);
+            String difficulty = row[1] != null ? row[1].toString() : "";
+            grouped.computeIfAbsent(userId, k -> new ArrayList<>()).add(difficulty);
+        }
+        List<CommonV2Response> responses = grouped.entrySet().stream().map(entry -> {
+            CommonV2Response response = new CommonV2Response();
+            response.setId(entry.getKey());
+            response.putField("difficulties", entry.getValue());
+            return response;
+        }).collect(Collectors.toList());
+        return generateResponse(responses);
     }
 }
 

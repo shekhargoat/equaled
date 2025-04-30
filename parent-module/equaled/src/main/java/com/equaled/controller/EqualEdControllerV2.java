@@ -473,4 +473,10 @@ public class EqualEdControllerV2 {
         service.saveSubjectData(payload);
         return ResponseEntity.ok("Subject data saved successfully.");
     }
+
+    @GetMapping(value = "/weekly/submissions/yearGroupId/{yearGroupId}")
+    @ApiOperation(value = "Current week answers by yearGroupId", notes = "This API to get current week answers by year_group_id")
+    public ResponseEntity<?> answersByYearGroupId(@PathVariable("yearGroupId") Integer yearGroupId){
+        return ResponseEntity.ok(service.getWeeklyAnswersByYearGroupId(yearGroupId));
+    }
 }

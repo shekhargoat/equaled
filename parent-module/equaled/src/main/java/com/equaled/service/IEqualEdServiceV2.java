@@ -105,4 +105,6 @@ public interface IEqualEdServiceV2 {
     Map<String, List<CommonV2Response>> getCategoriesBySubAndYearGroup(String subjectName, Integer yearGroup);
 
     void saveSubjectData(LinkedHashMap<String, Object> payload);
+
+    Map<String,List<CommonV2Response>> getWeeklyAnswersByYearGroupId(Integer yearGroupId);
 }
