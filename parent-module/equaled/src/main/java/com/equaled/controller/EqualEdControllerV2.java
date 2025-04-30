@@ -72,7 +72,6 @@ public class EqualEdControllerV2 {
         log.debug(String.format("Request received : Users %s for GET /user/{userId} " +
                 "for particular ", userId));
         return ResponseEntity.ok(service.getUserById(userId));
-
     }
 
     @GetMapping("/setpractice/user/{userId}/practice/{practiceName}/{subjectName}")
@@ -477,6 +476,13 @@ public class EqualEdControllerV2 {
     @GetMapping(value = "/weekly/submissions/yearGroupId/{yearGroupId}")
     @ApiOperation(value = "Current week answers by yearGroupId", notes = "This API to get current week answers by year_group_id")
     public ResponseEntity<?> answersByYearGroupId(@PathVariable("yearGroupId") Integer yearGroupId){
-        return ResponseEntity.ok(service.getWeeklyAnswersByYearGroupId(yearGroupId));
+        return ResponseEntity.ok(service.getWeeklySubmissionsByYearGroupId(yearGroupId));
+    }
+
+    @GetMapping("/name/user/{userId}")
+    @ApiOperation(value = "get user name by userId", notes = "API to get user name by userId")
+    public ResponseEntity<?> getUserNameById(
+            @ApiParam(value = "User id", required = true) @PathVariable("userId") Integer userId){
+        return ResponseEntity.ok(service.getNameById(userId));
     }
 }

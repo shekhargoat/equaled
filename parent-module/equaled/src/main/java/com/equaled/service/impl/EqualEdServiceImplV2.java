@@ -29,6 +29,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @Slf4j
@@ -1206,7 +1207,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     }
 
     @Override
-    public Map<String, List<CommonV2Response>> getWeeklyAnswersByYearGroupId(Integer yearGroupId) {
+    public Map<String, List<CommonV2Response>> getWeeklySubmissionsByYearGroupId(Integer yearGroupId) {
         log.trace("Finding weekly submissions by yearGroupId: {}", yearGroupId);
 
         LocalDateTime now = LocalDateTime.now();
@@ -1257,6 +1258,21 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
         }).collect(Collectors.toList());
 
         return generateResponse(responses);
+    }
+
+    public Map<String, List<CommonV2Response>> getNameById(Integer id) {
+        log.trace("Finding user by id: {}", id);
+        Users user = userRepository.findById(id)
+                .orElseThrow(() -> new RecordNotFoundException(ErrorCodes.U001, "User not found for given id: " + id));
+        String fullName = Stream.of(user.getFirstname(), user.getLastname())
+                .filter(name -> name != null && !name.trim().isEmpty())
+                .collect(Collectors.joining(" "));
+        if (fullName.isEmpty()) {
+            log.warn("Name is empty for user ID: {}", user.getId());
+        }
+        CommonV2Response response = new CommonV2Response();
+        response.putField("userName", fullName);
+        return generateResponse(Collections.singletonList(response));
     }
 }
 

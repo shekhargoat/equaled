@@ -106,5 +106,7 @@ public interface IEqualEdServiceV2 {
 
     void saveSubjectData(LinkedHashMap<String, Object> payload);
 
-    Map<String,List<CommonV2Response>> getWeeklyAnswersByYearGroupId(Integer yearGroupId);
+    Map<String,List<CommonV2Response>> getWeeklySubmissionsByYearGroupId(Integer yearGroupId);
+
+    Map<String,List<CommonV2Response>> getNameById(Integer id);
 }
