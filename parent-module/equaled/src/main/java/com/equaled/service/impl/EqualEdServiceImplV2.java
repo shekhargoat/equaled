@@ -55,6 +55,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     IFRQuestionRepository frQuestionRepository;
     IFRQResponseRepository frResponseRepository;
     IStagingQuestionsRepository stagingQuestionsRepository;
+    IUserProgressRepository userProgressRepository;
 
     DozerUtils mapper;
 
@@ -1275,6 +1276,67 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
         CommonV2Response response = new CommonV2Response();
         response.putField("userName", fullName);
         return generateResponse(Collections.singletonList(response));
+    }
+
+    @Override
+    public CommonV2Response createUserProgress(Map<String, String> fields) {
+        if (fields == null || fields.isEmpty()) {
+            throw new IllegalArgumentException("Request fields cannot be null or empty");
+        }
+        try {
+            String userIdStr = fields.get("user_id");
+            String completedStr = fields.get("completed");
+            if (userIdStr == null || userIdStr.isEmpty()) {
+                throw new IllegalArgumentException("user_id is required");
+            }
+            if (completedStr == null || completedStr.isEmpty()) {
+                throw new IllegalArgumentException("completed field is required");
+            }
+            int userId = Integer.parseInt(userIdStr);
+            Users user = userRepository.findById(userId)
+                    .orElseThrow(() -> new IllegalArgumentException("User with id " + userId + " not found"));
+            UserProgress progress = new UserProgress();
+            progress.setUser(user);
+            progress.setCompleted(Boolean.parseBoolean(completedStr));
+            progress.setSubject(fields.getOrDefault("subject", ""));
+            progress.setCategory(fields.getOrDefault("category", ""));
+            progress.setCompletedAt(parseDateTime(fields.get("completed_at")));
+            progress.setScore(parseInteger(fields.get("score")));
+            progress.setTotalQuestions(parseInteger(fields.get("total_questions")));
+            progress.setPercentage(parseInteger(fields.get("percentage")));
+            UserProgress saved = userProgressRepository.save(progress);
+            log.info("User progress saved successfully with id {} for userId {}", saved.getId(), user.getId());
+            CommonV2Response response = new CommonV2Response();
+            response.setId(String.valueOf(saved.getId()));
+            response.putField("message", "User progress saved successfully.");
+            response.putField("user_id", userIdStr);
+            return response;
+        } catch (IllegalArgumentException e) {
+            log.warn("Validation error: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Failed to save user progress", e);
+            throw new RuntimeException("Failed to save user progress: " + e.getMessage(), e);
+        }
+    }
+
+
+    private Integer parseInteger(String value) {
+        try {
+            return (value != null && !value.isEmpty()) ? Integer.parseInt(value) : null;
+        } catch (NumberFormatException e) {
+            log.warn("Invalid integer value: {}", value);
+            return null;
+        }
+    }
+
+    private LocalDateTime parseDateTime(String value) {
+        try {
+            return (value != null && !value.isEmpty()) ? LocalDateTime.parse(value) : null;
+        } catch (Exception e) {
+            log.warn("Invalid datetime format: {}", value);
+            return null;
+        }
     }
 }
 

@@ -485,4 +485,10 @@ public class EqualEdControllerV2 {
             @ApiParam(value = "User id", required = true) @PathVariable("userId") Integer userId){
         return ResponseEntity.ok(service.getNameById(userId));
     }
+
+    @PostMapping("/create/user/progress")
+    public ResponseEntity<?> createUserProgress(@RequestBody CommonV2Request commonV2Request) {
+        log.trace("Request received : create user progress: {}", commonV2Request.getFields());
+        return ResponseEntity.ok(service.createUserProgress(commonV2Request.getFields()));
+    }
 }

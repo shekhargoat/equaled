@@ -1,5 +1,6 @@
 package com.equaled.service;
 
+import com.equaled.entity.UserProgress;
 import com.equaled.to.*;
 
 import java.util.LinkedHashMap;
@@ -109,4 +110,6 @@ public interface IEqualEdServiceV2 {
     Map<String,List<CommonV2Response>> getWeeklySubmissionsByYearGroupId(Integer yearGroupId);
 
     Map<String,List<CommonV2Response>> getNameById(Integer id);
+
+    CommonV2Response createUserProgress(Map<String, String> fields);
 }
