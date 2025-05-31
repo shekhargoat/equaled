@@ -14,6 +14,8 @@ import com.equaled.repository.*;
 import com.equaled.service.IEqualEdServiceV2;
 import com.equaled.to.*;
 import com.equaled.value.EqualEdEnums;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -1320,7 +1322,6 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
         }
     }
 
-
     private Integer parseInteger(String value) {
         try {
             return (value != null && !value.isEmpty()) ? Integer.parseInt(value) : null;
@@ -1337,6 +1338,123 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
             log.warn("Invalid datetime format: {}", value);
             return null;
         }
+    }
+
+    @Override
+    public CommonV2Response createUserProgressBulk(Map<String, String> fields) {
+        if (fields == null || !fields.containsKey("progress_items")) {
+            throw new IllegalArgumentException("Missing 'progress_items' field in request.");
+        }
+        try {
+            String progressItemsJson = fields.get("progress_items");
+            List<Map<String, Object>> progressItems = new ObjectMapper().readValue(
+                    progressItemsJson,
+                    new TypeReference<List<Map<String, Object>>>() {}
+            );
+            int savedCount = 0;
+            List<String> failedItems = new ArrayList<>();
+            for (Map<String, Object> item : progressItems) {
+                try {
+                    String userIdStr = String.valueOf(item.get("user_id"));
+                    String completedStr = String.valueOf(item.get("completed"));
+                    if (userIdStr == null || userIdStr.isEmpty()) {
+                        throw new IllegalArgumentException("user_id is required");
+                    }
+                    if (completedStr == null || completedStr.isEmpty()) {
+                        throw new IllegalArgumentException("completed field is required");
+                    }
+                    int userId = Integer.parseInt(userIdStr);
+                    Users user = userRepository.findById(userId)
+                            .orElseThrow(() -> new IllegalArgumentException("User with id " + userId + " not found"));
+                    UserProgress progress = new UserProgress();
+                    progress.setUser(user);
+                    progress.setCompleted(Boolean.parseBoolean(completedStr));
+                    progress.setSubject(String.valueOf(item.getOrDefault("subject", "")));
+                    progress.setCategory(String.valueOf(item.getOrDefault("category", "")));
+                    progress.setCompletedAt(parseDateTimeFromObject(item.get("completed_at")));
+                    progress.setScore(parseIntegerFromObject(item.get("score")));
+                    progress.setTotalQuestions(parseIntegerFromObject(item.get("total_questions")));
+                    progress.setPercentage(parseIntegerFromObject(item.get("percentage")));
+                    userProgressRepository.save(progress);
+                    savedCount++;
+                } catch (Exception e) {
+                    log.warn("Failed to save progress item: {}", e.getMessage());
+                    failedItems.add(e.getMessage());
+                }
+            }
+            CommonV2Response response = new CommonV2Response();
+            response.putField("saved_count", String.valueOf(savedCount));
+            response.putField("failed_count", String.valueOf(failedItems.size()));
+            response.putField("message", "Bulk user progress saved successfully.");
+            if (!failedItems.isEmpty()) {
+                response.putField("errors", failedItems.toString());
+            }
+            return response;
+        } catch (Exception e) {
+            log.error("Error processing bulk user progress", e);
+            throw new RuntimeException("Failed to process bulk user progress: " + e.getMessage(), e);
+        }
+    }
+
+    private Integer parseIntegerFromObject(Object value) {
+        try {
+            return (value != null && !value.toString().isEmpty()) ? Integer.parseInt(value.toString()) : null;
+        } catch (NumberFormatException e) {
+            log.warn("Invalid integer value: {}", value);
+            return null;
+        }
+    }
+
+    private LocalDateTime parseDateTimeFromObject(Object value) {
+        try {
+            return (value != null && !value.toString().isEmpty()) ? LocalDateTime.parse(value.toString()) : null;
+        } catch (Exception e) {
+            log.warn("Invalid datetime format: {}", value);
+            return null;
+        }
+    }
+
+    @Override
+    public Map<String, Object> getUserProgress(int userId, String subject) {
+        Users user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User with id " + userId + " not found"));
+        List<UserProgress> progressList = (subject != null && !subject.isEmpty())
+                ? userProgressRepository.findByUserIdAndSubject(userId, subject)
+                : userProgressRepository.findByUserId(userId);
+        List<Map<String, Object>> progressData = new ArrayList<>();
+        int completedTopics = 0;
+
+        for (UserProgress p : progressList) {
+            boolean isCompleted = Boolean.TRUE.equals(p.getCompleted());
+            if (isCompleted) completedTopics++;
+
+            Map<String, Object> entry = new HashMap<>();
+            entry.put("user_id", userId);
+            entry.put("subject", p.getSubject());
+            entry.put("category", p.getCategory());
+            entry.put("completed", isCompleted);
+            entry.put("completed_at", p.getCompletedAt());
+            entry.put("score", p.getScore());
+            entry.put("total_questions", p.getTotalQuestions());
+            entry.put("percentage", p.getPercentage() != null ? p.getPercentage().doubleValue() : 0.0);
+            progressData.add(entry);
+        }
+
+        int totalTopics = progressList.size();
+        double completionPercentage = totalTopics > 0
+                ? Math.round((completedTopics * 10000.0 / totalTopics)) / 100.0 : 0.0;
+
+        Map<String, Object> summary = new HashMap<>();
+        summary.put("total_topics", totalTopics);
+        summary.put("completed_topics", completedTopics);
+        summary.put("overall_completion", completionPercentage);
+        summary.put("badges_earned", completedTopics);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("progress", progressData);
+        response.put("summary", summary);
+        return response;
     }
 }
 

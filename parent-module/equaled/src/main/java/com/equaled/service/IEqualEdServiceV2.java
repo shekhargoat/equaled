@@ -112,4 +112,8 @@ public interface IEqualEdServiceV2 {
     Map<String,List<CommonV2Response>> getNameById(Integer id);
 
     CommonV2Response createUserProgress(Map<String, String> fields);
+
+    CommonV2Response createUserProgressBulk(Map<String, String> fields);
+
+    Map<String, Object> getUserProgress(int userId, String subject);
 }

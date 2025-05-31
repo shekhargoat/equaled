@@ -491,4 +491,17 @@ public class EqualEdControllerV2 {
         log.trace("Request received : create user progress: {}", commonV2Request.getFields());
         return ResponseEntity.ok(service.createUserProgress(commonV2Request.getFields()));
     }
+
+    @PostMapping("/create/user/progress/bulk")
+    public ResponseEntity<?> createUserProgressBulk(@RequestBody CommonV2Request commonV2Request) {
+        log.trace("Request received : create user progress in bulk: {}", commonV2Request.getFields());
+        return ResponseEntity.ok(service.createUserProgressBulk(commonV2Request.getFields()));
+    }
+
+    @GetMapping("/api/user/progress/{userId}/{subject}")
+    public ResponseEntity<?> getUserProgress(@PathVariable("userId") int userId,
+            @PathVariable(value = "subject", required = false) String subject) {
+        log.trace("Fetching progress for user_id={} with subject={}", userId, subject);
+        return ResponseEntity.ok(service.getUserProgress(userId, subject));
+    }
 }
