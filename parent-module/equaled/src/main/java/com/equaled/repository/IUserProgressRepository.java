@@ -9,6 +9,8 @@ public interface IUserProgressRepository extends JpaRepository<UserProgress, Int
 
     List<UserProgress> findByUserId(int userId);
 
+    List<UserProgress> findBySubject(String subject);
+
     List<UserProgress> findByUserIdAndSubject(int userId, String subject);
 
 }

@@ -498,10 +498,13 @@ public class EqualEdControllerV2 {
         return ResponseEntity.ok(service.createUserProgressBulk(commonV2Request.getFields()));
     }
 
+    @GetMapping("/api/user/progress/{userId}")
+    public ResponseEntity<?> getAllProgress(@PathVariable int userId) {
+        return ResponseEntity.ok(service.getUserProgress(userId, null));
+    }
+
     @GetMapping("/api/user/progress/{userId}/{subject}")
-    public ResponseEntity<?> getUserProgress(@PathVariable("userId") int userId,
-            @PathVariable(value = "subject", required = false) String subject) {
-        log.trace("Fetching progress for user_id={} with subject={}", userId, subject);
+    public ResponseEntity<?> getSubjectProgress(@PathVariable int userId, @PathVariable String subject) {
         return ResponseEntity.ok(service.getUserProgress(userId, subject));
     }
 }
