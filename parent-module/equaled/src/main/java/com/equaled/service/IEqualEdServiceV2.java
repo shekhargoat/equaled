@@ -116,4 +116,8 @@ public interface IEqualEdServiceV2 {
     CommonV2Response createUserProgressBulk(Map<String, String> fields);
 
     Map<String, Object> getUserProgress(int userId, String subject);
+
+    CommonV2Response saveLLMUsageAndPremiumStatus(LLMUsageWrapperDTO wrapperDTO);
+
+    LLMUsageSummaryResponse getLLMUsageSummary(String userId);
 }

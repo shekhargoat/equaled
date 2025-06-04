@@ -507,4 +507,16 @@ public class EqualEdControllerV2 {
     public ResponseEntity<?> getSubjectProgress(@PathVariable int userId, @PathVariable String subject) {
         return ResponseEntity.ok(service.getUserProgress(userId, subject));
     }
+
+    @PostMapping("/save/llm/usage/status")
+    public ResponseEntity<?> saveLLMUsageAndPremiumStatus(@RequestBody LLMUsageWrapperDTO wrapperDTO) {
+        log.info("Received request to save LLM usage and premium status");
+        return ResponseEntity.ok(service.saveLLMUsageAndPremiumStatus(wrapperDTO));
+    }
+
+    @GetMapping("/llm/usage/summary/{user_id}")
+    public ResponseEntity<?> getLLMUsageSummary(@PathVariable("user_id") String userId) {
+        log.info("Received request to get LLM usage summary for userId={}", userId);
+        return ResponseEntity.ok(service.getLLMUsageSummary(userId));
+    }
 }

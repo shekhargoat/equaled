@@ -14,6 +14,7 @@ import com.equaled.repository.*;
 import com.equaled.service.IEqualEdServiceV2;
 import com.equaled.to.*;
 import com.equaled.value.EqualEdEnums;
+import com.equaled.value.UserType;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
@@ -28,6 +29,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -58,6 +60,8 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     IFRQResponseRepository frResponseRepository;
     IStagingQuestionsRepository stagingQuestionsRepository;
     IUserProgressRepository userProgressRepository;
+    LLMUsageRepository llmUsageRepository;
+    UserPremiumStatusRepository userPremiumStatusRepository;
 
     DozerUtils mapper;
 
@@ -1455,6 +1459,116 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
         response.put("progress", progressData);
         response.put("summary", summary);
         return response;
+    }
+
+    @Override
+    public CommonV2Response saveLLMUsageAndPremiumStatus(LLMUsageWrapperDTO wrapperDTO) {
+        try {
+            if (wrapperDTO == null) {
+                throw new IllegalArgumentException("Request body is null");
+            }
+            if (wrapperDTO.getLlm_usage() != null) {
+                for (LLMUsageDTO dto : wrapperDTO.getLlm_usage()) {
+                    if (dto.getUser_id() == null || dto.getWeek_start() == null || dto.getWeek_end() == null) continue;
+
+                    LLMUsage usage = new LLMUsage();
+                    usage.setUserId(dto.getUser_id());
+                    usage.setWeekStart(parseDateTimeFromObject(dto.getWeek_start()));
+                    usage.setWeekEnd(parseDateTimeFromObject(dto.getWeek_end()));
+                    usage.setCallCount(dto.getCall_count() != null ? dto.getCall_count() : 0);
+                    usage.setIsPremium(Boolean.TRUE.equals(dto.getIs_premium()));
+                    usage.setUserType(Optional.ofNullable(dto.getUser_type()).orElse("free"));
+                    usage.setCreatedAt(parseDateTimeFromObject(dto.getCreated_at()));
+                    usage.setUpdatedAt(parseDateTimeFromObject(dto.getUpdated_at()));
+                    llmUsageRepository.save(usage);
+                }
+            }
+            if (wrapperDTO.getUser_premium_status() != null) {
+                for (UserPremiumStatusDTO dto : wrapperDTO.getUser_premium_status()) {
+                    if (dto.getUser_id() == null) continue;
+
+                    UserPremiumStatus status = new UserPremiumStatus();
+                    status.setUserId(dto.getUser_id());
+                    status.setIsPremium(Boolean.TRUE.equals(dto.getIs_premium()));
+                    status.setUserType(Optional.ofNullable(dto.getUser_type()).orElse("free"));
+                    status.setPremiumStartDate(parseDateTimeFromObject(dto.getPremium_start_date()));
+                    status.setPremiumEndDate(parseDateTimeFromObject(dto.getPremium_end_date()));
+                    status.setSubscriptionType(Optional.ofNullable(dto.getSubscription_type()).orElse("free"));
+                    status.setCreatedAt(parseDateTimeFromObject(dto.getCreated_at()));
+                    status.setUpdatedAt(parseDateTimeFromObject(dto.getUpdated_at()));
+                    userPremiumStatusRepository.save(status);
+                }
+            }
+            CommonV2Response res = new CommonV2Response();
+            res.putField("message", "LLM usage and premium status saved successfully.");
+            return res;
+        } catch (Exception e) {
+            log.error("Failed to save LLM usage and premium status", e);
+            throw new RuntimeException("Error saving data: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public LLMUsageSummaryResponse getLLMUsageSummary(String userId) {
+        LocalDateTime now = LocalDateTime.now();
+        int dayOfWeek = now.getDayOfWeek().getValue(); // Monday=1 ... Sunday=7
+        int daysSinceSunday = dayOfWeek % 7;
+
+        LocalDateTime startOfWeekLocal = now.minusDays(daysSinceSunday).with(LocalTime.MIN);
+        LocalDateTime endOfWeekLocal = startOfWeekLocal.plusDays(6).with(LocalTime.MAX);
+
+        UserPremiumStatus status = userPremiumStatusRepository.findByUserId(userId)
+                .orElseGet(() -> {
+                    UserPremiumStatus s = new UserPremiumStatus();
+                    s.setUserId(userId);
+                    s.setIsPremium(false);
+                    s.setUserType(UserType.FREE.getType());
+                    s.setSubscriptionType(UserType.FREE.getType());
+                    return s;
+                });
+        LLMUsage usage = llmUsageRepository.findByUserIdAndWeekStartGreaterThanEqualAndWeekEndLessThanEqual(
+                        userId, startOfWeekLocal, endOfWeekLocal)
+                .orElseGet(() -> {
+                    LLMUsage u = new LLMUsage();
+                    u.setUserId(userId);
+                    u.setWeekStart(startOfWeekLocal);
+                    u.setWeekEnd(endOfWeekLocal);
+                    u.setCallCount(0);
+                    return u;
+                });
+
+        UserType userTypeEnum = UserType.fromString(status.getUserType());
+        int currentUsage = usage.getCallCount();
+        int limit = userTypeEnum.getLimit();
+        int warningThreshold = userTypeEnum.getWarningThreshold();
+        int criticalThreshold = userTypeEnum.getCriticalThreshold();
+        boolean isUnlimited = userTypeEnum.isUnlimited();
+
+        int remaining = isUnlimited ? -1 : Math.max(0, limit - currentUsage);
+        boolean limitReached = !isUnlimited && currentUsage >= limit;
+        double percentageUsed = isUnlimited ? 0.0 : (currentUsage * 100.0 / limit);
+        boolean isWarning = !isUnlimited && currentUsage >= warningThreshold;
+        boolean isCritical = !isUnlimited && currentUsage >= criticalThreshold;
+        long daysUntilReset = ChronoUnit.DAYS.between(now.toLocalDate(), endOfWeekLocal.toLocalDate().plusDays(1));
+
+        return LLMUsageSummaryResponse.builder()
+                .current_usage(currentUsage)
+                .limit(isUnlimited ? "unlimited" : limit)
+                .remaining(isUnlimited ? "unlimited" : remaining)
+                .limit_reached(limitReached)
+                .percentage_used(percentageUsed)
+                .user_type(status.getUserType())
+                .is_premium(status.getIsPremium())
+                .is_unlimited(isUnlimited)
+                .subscription_type(status.getSubscriptionType())
+                .warning_threshold(warningThreshold)
+                .critical_threshold(criticalThreshold)
+                .is_warning(isWarning)
+                .is_critical(isCritical)
+                .week_start(startOfWeekLocal)
+                .week_end(endOfWeekLocal)
+                .days_until_reset((int) daysUntilReset)
+                .build();
     }
 }
 
