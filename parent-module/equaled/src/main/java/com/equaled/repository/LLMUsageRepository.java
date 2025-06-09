@@ -12,4 +12,6 @@ public interface LLMUsageRepository extends JpaRepository<LLMUsage, Long> {
 
     Optional<LLMUsage> findByUserIdAndWeekStartGreaterThanEqualAndWeekEndLessThanEqual(String userId, LocalDateTime weekStart, LocalDateTime weekEnd);
 
+    LLMUsage findByUserId(String userId);
+
 }

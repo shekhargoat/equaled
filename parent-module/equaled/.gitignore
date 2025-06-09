@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+vector_dump_20250609.sql
+equaled_full_dump_mysql_20250609.sql

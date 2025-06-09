@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.Valid;
 import java.util.*;
 
 @Slf4j
@@ -509,7 +510,7 @@ public class EqualEdControllerV2 {
     }
 
     @PostMapping("/save/llm/usage/status")
-    public ResponseEntity<?> saveLLMUsageAndPremiumStatus(@RequestBody LLMUsageWrapperDTO wrapperDTO) {
+    public ResponseEntity<?> saveLLMUsageAndPremiumStatus(@RequestBody @Valid LLMUsageWrapperDTO wrapperDTO) {
         log.info("Received request to save LLM usage and premium status");
         return ResponseEntity.ok(service.saveLLMUsageAndPremiumStatus(wrapperDTO));
     }
@@ -518,5 +519,11 @@ public class EqualEdControllerV2 {
     public ResponseEntity<?> getLLMUsageSummary(@PathVariable("user_id") String userId) {
         log.info("Received request to get LLM usage summary for userId={}", userId);
         return ResponseEntity.ok(service.getLLMUsageSummary(userId));
+    }
+
+    @PutMapping("/llm/usage")
+    public ResponseEntity<String> updateLLMUsageAndPremiumStatus(@RequestBody @Valid LLMUsageWrapperDTO wrapperDTO) {
+        service.updateLLMUsageAndPremiumStatus(wrapperDTO);
+        return ResponseEntity.ok("LLM usage and premium status updated successfully.");
     }
 }

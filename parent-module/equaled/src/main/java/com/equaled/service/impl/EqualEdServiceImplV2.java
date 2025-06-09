@@ -27,6 +27,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -1479,7 +1480,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
                     usage.setIsPremium(Boolean.TRUE.equals(dto.getIs_premium()));
                     usage.setUserType(Optional.ofNullable(dto.getUser_type()).orElse("free"));
                     usage.setCreatedAt(parseDateTimeFromObject(dto.getCreated_at()));
-                    usage.setUpdatedAt(parseDateTimeFromObject(dto.getUpdated_at()));
+                    usage.setUpdatedAt(Optional.ofNullable(parseDateTimeFromObject(dto.getUpdated_at())).orElse(LocalDateTime.now()));
                     llmUsageRepository.save(usage);
                 }
             }
@@ -1495,7 +1496,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
                     status.setPremiumEndDate(parseDateTimeFromObject(dto.getPremium_end_date()));
                     status.setSubscriptionType(Optional.ofNullable(dto.getSubscription_type()).orElse("free"));
                     status.setCreatedAt(parseDateTimeFromObject(dto.getCreated_at()));
-                    status.setUpdatedAt(parseDateTimeFromObject(dto.getUpdated_at()));
+                    status.setUpdatedAt(Optional.ofNullable(parseDateTimeFromObject(dto.getUpdated_at())).orElse(LocalDateTime.now()));
                     userPremiumStatusRepository.save(status);
                 }
             }
@@ -1569,6 +1570,52 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
                 .week_end(endOfWeekLocal)
                 .days_until_reset((int) daysUntilReset)
                 .build();
+    }
+
+    @Override
+    @Transactional
+    public void updateLLMUsageAndPremiumStatus(LLMUsageWrapperDTO wrapperDTO) {
+        if (wrapperDTO == null) {
+            log.warn("Wrapper DTO is null, skipping update.");
+            return;
+        }
+        // Update LLM Usage
+        Optional.ofNullable(wrapperDTO.getLlm_usage()).ifPresent(llmList -> {
+            llmList.forEach(dto -> {
+                Optional.ofNullable(dto.getUser_id()).ifPresent(userId -> {
+                    LLMUsage existing = llmUsageRepository.findByUserId(userId);
+                    if (existing != null) {
+                        // Only increment if TO contains call_count
+                        Optional.ofNullable(dto.getCall_count()).ifPresent(incomingCount -> {
+                            int currentCount = Optional.ofNullable(existing.getCallCount()).orElse(0);
+                            existing.setCallCount(currentCount + 1); // increment by 1
+                        });
+                        Optional.ofNullable(dto.getWeek_start()).ifPresent(v -> existing.setWeekStart(LocalDateTime.parse(v)));
+                        Optional.ofNullable(dto.getWeek_end()).ifPresent(v -> existing.setWeekEnd(LocalDateTime.parse(v)));
+                        Optional.ofNullable(dto.getIs_premium()).ifPresent(existing::setIsPremium);
+                        Optional.ofNullable(dto.getUser_type()).ifPresent(existing::setUserType);
+                        Optional.ofNullable(dto.getCreated_at()).ifPresent(v -> existing.setCreatedAt(LocalDateTime.parse(v)));
+                        Optional.ofNullable(dto.getUpdated_at()).ifPresent(v -> existing.setUpdatedAt(LocalDateTime.parse(v)));
+                        llmUsageRepository.save(existing);
+                    }
+                });
+            });
+        });
+        // Update User Premium Status
+        Optional.ofNullable(wrapperDTO.getUser_premium_status()).ifPresent(statusList -> {
+            statusList.forEach(dto -> {
+                Optional.ofNullable(dto.getUser_id()).flatMap(userId -> userPremiumStatusRepository.findByUserId(userId)).ifPresent(existing -> {
+                    Optional.ofNullable(dto.getIs_premium()).ifPresent(existing::setIsPremium);
+                    Optional.ofNullable(dto.getUser_type()).ifPresent(existing::setUserType);
+                    Optional.ofNullable(dto.getSubscription_type()).ifPresent(existing::setSubscriptionType);
+                    Optional.ofNullable(dto.getPremium_start_date()).ifPresent(v -> existing.setPremiumStartDate(LocalDateTime.parse(v)));
+                    Optional.ofNullable(dto.getPremium_end_date()).ifPresent(v -> existing.setPremiumEndDate(LocalDateTime.parse(v)));
+                    Optional.ofNullable(dto.getCreated_at()).ifPresent(v -> existing.setCreatedAt(LocalDateTime.parse(v)));
+                    Optional.ofNullable(dto.getUpdated_at()).ifPresent(v -> existing.setUpdatedAt(LocalDateTime.parse(v)));
+                    userPremiumStatusRepository.save(existing);
+                });
+            });
+        });
     }
 }
 
