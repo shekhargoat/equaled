@@ -13,3 +13,4 @@ bin
 atlassian-ide-plugin.xml
 faces-config.xml
 *.orig
+vector_dump_*.sql
