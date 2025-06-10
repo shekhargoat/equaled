@@ -220,6 +220,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
                     user.setLastname(record.getFields().get("Lastname"));
                     user.setCountryCode(record.getFields().get("Countrycode"));
                     user.setStateCode(record.getFields().get("Statecode"));
+                    user.setSchoolName(record.getFields().get("Schoolname"));
                     user.setDob(LocalDate.parse(record.getFields().get("Dob")));
                     user.setYearGroup(getYearGroup(Integer.parseInt(record.getFields().get("year_group_id"))));
                     Accounts accounts= Optional.ofNullable(record.getFields().get("account_id")).filter(StringUtils::isNumeric)

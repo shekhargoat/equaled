@@ -96,7 +96,6 @@ public class EqualEdControllerV2 {
         else return ResponseEntity.ok(service.createProfile(request, guardianId));
     }
 
-
     @PostMapping("/create/dashboard")
     public ResponseEntity<?> createDashboard(@RequestBody CommonV2Request request){
         return ResponseEntity.ok(service.createDashboard(request));

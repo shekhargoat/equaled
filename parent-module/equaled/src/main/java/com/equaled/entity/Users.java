@@ -43,7 +43,8 @@ public class Users extends BaseEntity{
     private String countryCode;
     @Column(name = "state_code")
     private String stateCode;
-
+    @Column(name = "school_name")
+    private String schoolName;
 
     @ManyToOne
     @JoinColumn(name = "related_account", referencedColumnName = "id", nullable = false)
@@ -78,6 +79,7 @@ public class Users extends BaseEntity{
                 Objects.equals(lastname, users.lastname) &&
                 Objects.equals(dob, users.dob) &&
                 Objects.equals(countryCode, users.countryCode) &&
+                Objects.equals(schoolName, users.schoolName) &&
                 Objects.equals(stateCode, users.stateCode) &&
                 Objects.equals(lastLogin, users.lastLogin) &&
                 Objects.equals(lastUpdatedOn, users.lastUpdatedOn) &&
@@ -89,7 +91,7 @@ public class Users extends BaseEntity{
     @Override
     public int hashCode() {
         int result = Objects.hash(id, username, password, email, role, enabled, firstname, lastname,
-                dob, countryCode, stateCode, lastLogin, lastUpdatedOn, relatedAccount, yearGroup);
+                dob, countryCode, schoolName, stateCode, lastLogin, lastUpdatedOn, relatedAccount, yearGroup);
         result = 31 * result + Arrays.hashCode(sid);
         return result;
     }
