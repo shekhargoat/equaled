@@ -122,4 +122,6 @@ public interface IEqualEdServiceV2 {
     LLMUsageSummaryResponse getLLMUsageSummary(String userId);
 
     void updateLLMUsageAndPremiumStatus(LLMUsageWrapperDTO wrapperDTO);
+
+    CommonV2Response getSystemConfig();
 }

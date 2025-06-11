@@ -525,4 +525,10 @@ public class EqualEdControllerV2 {
         service.updateLLMUsageAndPremiumStatus(wrapperDTO);
         return ResponseEntity.ok("LLM usage and premium status updated successfully.");
     }
+
+    @GetMapping("/system/config")
+    public ResponseEntity<?> getSystemConfig() {
+        log.info("Received request to get all system config data.");
+        return ResponseEntity.ok(service.getSystemConfig());
+    }
 }
