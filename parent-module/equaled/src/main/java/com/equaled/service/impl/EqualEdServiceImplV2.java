@@ -1638,13 +1638,12 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
                         map.put("created_at", config.getCreatedAt());
                         map.put("updated_at", config.getUpdatedAt());
                         return map;
-                    })
-                    .collect(Collectors.toList());
+                    }).collect(Collectors.toList());
             response.putField("success", true);
             response.putField("message", "System configuration fetched successfully.");
             response.putField("data", configList);
         } catch (Exception e) {
-            log.error("Error while fetching system config", e);
+            log.error("Error while fetching system config: {}", e.getMessage());
             response.putField("success", false);
             response.putField("message", "Failed to fetch system configuration.");
             response.putField("data", Collections.emptyList());
