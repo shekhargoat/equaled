@@ -1514,10 +1514,9 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     @Override
     public LLMUsageSummaryResponse getLLMUsageSummary(String userId) {
         LocalDateTime now = LocalDateTime.now();
-        int dayOfWeek = now.getDayOfWeek().getValue(); // Monday=1 ... Sunday=7
-        int daysSinceSunday = dayOfWeek % 7;
-
-        LocalDateTime startOfWeekLocal = now.minusDays(daysSinceSunday).with(LocalTime.MIN);
+        int dayOfWeek = now.getDayOfWeek().getValue();
+        int daysSinceMonday = dayOfWeek - DayOfWeek.MONDAY.getValue();
+        LocalDateTime startOfWeekLocal = now.minusDays(daysSinceMonday).with(LocalTime.MIN);
         LocalDateTime endOfWeekLocal = startOfWeekLocal.plusDays(6).with(LocalTime.MAX);
 
         UserPremiumStatus status = userPremiumStatusRepository.findByUserId(userId)
