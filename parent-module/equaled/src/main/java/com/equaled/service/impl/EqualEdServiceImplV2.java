@@ -32,6 +32,7 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -1575,48 +1576,72 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
 
     @Override
     @Transactional
-    public void updateLLMUsageAndPremiumStatus(LLMUsageWrapperDTO wrapperDTO) {
+    public String updateLLMUsageAndPremiumStatus(LLMUsageWrapperDTO wrapperDTO) {
         if (wrapperDTO == null) {
             log.warn("Wrapper DTO is null, skipping update.");
-            return;
+            return "No data to update.";
         }
-        // Update LLM Usage
-        Optional.ofNullable(wrapperDTO.getLlm_usage()).ifPresent(llmList -> {
-            llmList.forEach(dto -> {
-                Optional.ofNullable(dto.getUser_id()).ifPresent(userId -> {
-                    LLMUsage existing = llmUsageRepository.findByUserId(userId);
-                    if (existing != null) {
-                        // Only increment if TO contains call_count
-                        Optional.ofNullable(dto.getCall_count()).ifPresent(incomingCount -> {
-                            int currentCount = Optional.ofNullable(existing.getCallCount()).orElse(0);
-                            existing.setCallCount(currentCount + 1); // increment by 1
-                        });
-                        Optional.ofNullable(dto.getWeek_start()).ifPresent(v -> existing.setWeekStart(LocalDateTime.parse(v)));
-                        Optional.ofNullable(dto.getWeek_end()).ifPresent(v -> existing.setWeekEnd(LocalDateTime.parse(v)));
-                        Optional.ofNullable(dto.getIs_premium()).ifPresent(existing::setIsPremium);
-                        Optional.ofNullable(dto.getUser_type()).ifPresent(existing::setUserType);
-                        Optional.ofNullable(dto.getCreated_at()).ifPresent(v -> existing.setCreatedAt(LocalDateTime.parse(v)));
-                        Optional.ofNullable(dto.getUpdated_at()).ifPresent(v -> existing.setUpdatedAt(LocalDateTime.parse(v)));
-                        llmUsageRepository.save(existing);
-                    }
-                });
-            });
-        });
-        // Update User Premium Status
-        Optional.ofNullable(wrapperDTO.getUser_premium_status()).ifPresent(statusList -> {
-            statusList.forEach(dto -> {
-                Optional.ofNullable(dto.getUser_id()).flatMap(userId -> userPremiumStatusRepository.findByUserId(userId)).ifPresent(existing -> {
-                    Optional.ofNullable(dto.getIs_premium()).ifPresent(existing::setIsPremium);
-                    Optional.ofNullable(dto.getUser_type()).ifPresent(existing::setUserType);
-                    Optional.ofNullable(dto.getSubscription_type()).ifPresent(existing::setSubscriptionType);
-                    Optional.ofNullable(dto.getPremium_start_date()).ifPresent(v -> existing.setPremiumStartDate(LocalDateTime.parse(v)));
-                    Optional.ofNullable(dto.getPremium_end_date()).ifPresent(v -> existing.setPremiumEndDate(LocalDateTime.parse(v)));
-                    Optional.ofNullable(dto.getCreated_at()).ifPresent(v -> existing.setCreatedAt(LocalDateTime.parse(v)));
-                    Optional.ofNullable(dto.getUpdated_at()).ifPresent(v -> existing.setUpdatedAt(LocalDateTime.parse(v)));
-                    userPremiumStatusRepository.save(existing);
-                });
-            });
-        });
+        AtomicInteger llmUpdatedCount = new AtomicInteger();
+        AtomicInteger premiumUpdatedCount = new AtomicInteger();
+        List<LLMUsageDTO> llmList = wrapperDTO.getLlm_usage();
+        if (llmList != null) {
+            for (LLMUsageDTO dto : llmList) {
+                String userId = dto.getUser_id();
+                if (userId == null || userId.trim().isEmpty()) {
+                    log.warn("LLMUsage entry has null or empty user_id, skipping.");
+                    continue;
+                }
+                LLMUsage existing = llmUsageRepository.findByUserId(userId);
+                if (existing == null) {
+                    String msg = "User not found for LLMUsage with user_id: " + userId;
+                    log.error(msg);
+                    throw new RuntimeException(msg);
+                }
+                if (dto.getCall_count() != null) {
+                    int currentCount = Optional.ofNullable(existing.getCallCount()).orElse(0);
+                    existing.setCallCount(currentCount + 1);
+                }
+                if (dto.getWeek_start() != null) existing.setWeekStart(LocalDateTime.parse(dto.getWeek_start()));
+                if (dto.getWeek_end() != null) existing.setWeekEnd(LocalDateTime.parse(dto.getWeek_end()));
+                if (dto.getIs_premium() != null) existing.setIsPremium(dto.getIs_premium());
+                if (dto.getUser_type() != null) existing.setUserType(dto.getUser_type());
+                if (dto.getCreated_at() != null) existing.setCreatedAt(LocalDateTime.parse(dto.getCreated_at()));
+                if (dto.getUpdated_at() != null) existing.setUpdatedAt(LocalDateTime.parse(dto.getUpdated_at()));
+                llmUsageRepository.save(existing);
+                llmUpdatedCount.incrementAndGet();
+                log.info("Updated LLM usage for user_id: {}", userId);
+            }
+        }
+        List<UserPremiumStatusDTO> statusList = wrapperDTO.getUser_premium_status();
+        if (statusList != null) {
+            for (UserPremiumStatusDTO dto : statusList) {
+                String userId = dto.getUser_id();
+                if (userId == null || userId.trim().isEmpty()) {
+                    log.warn("UserPremiumStatus entry has null or empty user_id, skipping.");
+                    continue;
+                }
+                Optional<UserPremiumStatus> optionalExisting = userPremiumStatusRepository.findByUserId(userId);
+                if (!optionalExisting.isPresent()) {
+                    String msg = "User not found for UserPremiumStatus with user_id: " + userId;
+                    log.error(msg);
+                    throw new RuntimeException(msg);
+                }
+                UserPremiumStatus existing = optionalExisting.get();
+                if (dto.getIs_premium() != null) existing.setIsPremium(dto.getIs_premium());
+                if (dto.getUser_type() != null) existing.setUserType(dto.getUser_type());
+                if (dto.getSubscription_type() != null) existing.setSubscriptionType(dto.getSubscription_type());
+                if (dto.getPremium_start_date() != null) existing.setPremiumStartDate(LocalDateTime.parse(dto.getPremium_start_date()));
+                if (dto.getPremium_end_date() != null) existing.setPremiumEndDate(LocalDateTime.parse(dto.getPremium_end_date()));
+                if (dto.getCreated_at() != null) existing.setCreatedAt(LocalDateTime.parse(dto.getCreated_at()));
+                if (dto.getUpdated_at() != null) existing.setUpdatedAt(LocalDateTime.parse(dto.getUpdated_at()));
+                userPremiumStatusRepository.save(existing);
+                premiumUpdatedCount.incrementAndGet();
+                log.info("Updated premium status for user_id: {}", userId);
+            }
+        }
+        String message = String.format("Successfully updated %d LLM usage entries and %d premium status entries.", llmUpdatedCount.get(), premiumUpdatedCount.get());
+        log.info(message);
+        return message;
     }
 
     @Override

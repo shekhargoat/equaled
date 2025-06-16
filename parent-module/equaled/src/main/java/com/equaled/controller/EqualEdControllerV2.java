@@ -522,8 +522,8 @@ public class EqualEdControllerV2 {
 
     @PutMapping("/llm/usage")
     public ResponseEntity<String> updateLLMUsageAndPremiumStatus(@RequestBody @Valid LLMUsageWrapperDTO wrapperDTO) {
-        service.updateLLMUsageAndPremiumStatus(wrapperDTO);
-        return ResponseEntity.ok("LLM usage and premium status updated successfully.");
+        String resultMessage = service.updateLLMUsageAndPremiumStatus(wrapperDTO);
+        return ResponseEntity.ok(resultMessage);
     }
 
     @GetMapping("/system/config")
