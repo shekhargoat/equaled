@@ -1682,8 +1682,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
             Map<String, String> fields = record.getFields();
             String email = fields.get("Email");
             EqualEdEnums.UserRole role = Optional.ofNullable(fields.get("role"))
-                    .map(String::toUpperCase)
-                    .map(EqualEdEnums.UserRole::valueOf)
+                    .map(String::toUpperCase).map(EqualEdEnums.UserRole::valueOf)
                     .orElseThrow(() -> new IllegalArgumentException("Role is required for user with email: " + email));
             Users user = userRepository.findByEmailAndRole(email, role)
                     .orElseThrow(() -> new IllegalArgumentException("User not found: " + email + " with role: " + role));
@@ -1714,16 +1713,14 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
         List<Users> usersToUpdate = new ArrayList<>();
         for (CommonV2Request record : request.getRecords()) {
             Map<String, String> fields = record.getFields();
-            String username = fields.get("Username");
-            Users user = userRepository.findByUsername(username)
-                    .orElseThrow(() -> new IllegalArgumentException("User not found: " + username));
-            Optional.ofNullable(fields.get("Email")).ifPresent(user::setEmail);
-            Optional.ofNullable(fields.get("Firstname")).ifPresent(user::setFirstname);
-            Optional.ofNullable(fields.get("Lastname")).ifPresent(user::setLastname);
-            Optional.ofNullable(fields.get("year_group_id")).filter(StringUtils::isNumeric).map(Integer::parseInt).map(this::getYearGroup).ifPresent(user::setYearGroup);
-            Optional.ofNullable(fields.get("role")).map(String::toUpperCase).map(EqualEdEnums.UserRole::valueOf).ifPresent(user::setRole);
-            user.setLastUpdatedOn(Instant.now());
-            usersToUpdate.add(user);
+            Optional.ofNullable(fields.get("Username")).ifPresent(guardian::setUsername);
+            Optional.ofNullable(fields.get("Email")).ifPresent(guardian::setEmail);
+            Optional.ofNullable(fields.get("Firstname")).ifPresent(guardian::setFirstname);
+            Optional.ofNullable(fields.get("Lastname")).ifPresent(guardian::setLastname);
+            Optional.ofNullable(fields.get("year_group_id")).filter(StringUtils::isNumeric).map(Integer::parseInt).map(this::getYearGroup).ifPresent(guardian::setYearGroup);
+            Optional.ofNullable(fields.get("role")).map(String::toUpperCase).map(EqualEdEnums.UserRole::valueOf).ifPresent(guardian::setRole);
+            guardian.setLastUpdatedOn(Instant.now());
+            usersToUpdate.add(guardian);
         }
         List<Users> updatedUsers = userRepository.saveAll(usersToUpdate);
         guardian.getStudents().addAll(updatedUsers);
