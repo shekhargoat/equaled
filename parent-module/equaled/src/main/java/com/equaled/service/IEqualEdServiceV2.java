@@ -124,4 +124,10 @@ public interface IEqualEdServiceV2 {
     String updateLLMUsageAndPremiumStatus(LLMUsageWrapperDTO wrapperDTO);
 
     CommonV2Response getSystemConfig();
+
+    Map<String, List<CommonV2Response>> updateProfile(CreateProfileRequest request, Integer guardianId);
+
+    Map<String, List<CommonV2Response>> updateProfile(CreateProfileRequest request);
+
+    Map<String, Long> getUserRoleCounts();
 }

@@ -983,7 +983,6 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
         return generateResponse(commonV2Responses);
     }
 
-
     @Override
     public Integer getSubjectIdByName(String subjectName){
         return Optional.ofNullable(subjectName).filter(StringUtils::isNotEmpty).map(subjectRepository::findByName)
@@ -1673,6 +1672,82 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
             response.putField("data", Collections.emptyList());
         }
         return response;
+    }
+
+    @Override
+    public Map<String, List<CommonV2Response>> updateProfile(CreateProfileRequest request) {
+        List<Users> usersToUpdate = new ArrayList<>();
+
+        for (CommonV2Request record : request.getRecords()) {
+            Map<String, String> fields = record.getFields();
+            String email = fields.get("Email");
+            EqualEdEnums.UserRole role = Optional.ofNullable(fields.get("role"))
+                    .map(String::toUpperCase)
+                    .map(EqualEdEnums.UserRole::valueOf)
+                    .orElseThrow(() -> new IllegalArgumentException("Role is required for user with email: " + email));
+            Users user = userRepository.findByEmailAndRole(email, role)
+                    .orElseThrow(() -> new IllegalArgumentException("User not found: " + email + " with role: " + role));
+            Optional.ofNullable(fields.get("Username")).ifPresent(user::setUsername);
+            Optional.ofNullable(fields.get("Firstname")).ifPresent(user::setFirstname);
+            Optional.ofNullable(fields.get("Lastname")).ifPresent(user::setLastname);
+            Optional.ofNullable(fields.get("Countrycode")).ifPresent(user::setCountryCode);
+            Optional.ofNullable(fields.get("Statecode")).ifPresent(user::setStateCode);
+            Optional.ofNullable(fields.get("Schoolname")).ifPresent(user::setSchoolName);
+            Optional.ofNullable(fields.get("Dob")).ifPresent(d -> user.setDob(LocalDate.parse(d)));
+            Optional.ofNullable(fields.get("year_group_id"))
+                    .filter(StringUtils::isNumeric).map(Integer::parseInt).map(this::getYearGroup).ifPresent(user::setYearGroup);
+            Optional.ofNullable(fields.get("role"))
+                    .map(String::toUpperCase).map(EqualEdEnums.UserRole::valueOf).ifPresent(user::setRole);
+            user.setLastUpdatedOn(Instant.now());
+            usersToUpdate.add(user);
+        }
+        List<Users> updatedUsers = userRepository.saveAll(usersToUpdate);
+        List<CommonV2Response> responses = updatedUsers.stream()
+                .map(EqualEdServiceImplV2::createCommonUserResponse).collect(Collectors.toList());
+        return generateResponse(responses);
+    }
+
+    @Override
+    public Map<String, List<CommonV2Response>> updateProfile(CreateProfileRequest request, Integer guardianId) {
+        Users guardian = userRepository.findById(guardianId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Guardian Id"));
+        List<Users> usersToUpdate = new ArrayList<>();
+        for (CommonV2Request record : request.getRecords()) {
+            Map<String, String> fields = record.getFields();
+            String username = fields.get("Username");
+            Users user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new IllegalArgumentException("User not found: " + username));
+            Optional.ofNullable(fields.get("Email")).ifPresent(user::setEmail);
+            Optional.ofNullable(fields.get("Firstname")).ifPresent(user::setFirstname);
+            Optional.ofNullable(fields.get("Lastname")).ifPresent(user::setLastname);
+            Optional.ofNullable(fields.get("year_group_id")).filter(StringUtils::isNumeric).map(Integer::parseInt).map(this::getYearGroup).ifPresent(user::setYearGroup);
+            Optional.ofNullable(fields.get("role")).map(String::toUpperCase).map(EqualEdEnums.UserRole::valueOf).ifPresent(user::setRole);
+            user.setLastUpdatedOn(Instant.now());
+            usersToUpdate.add(user);
+        }
+        List<Users> updatedUsers = userRepository.saveAll(usersToUpdate);
+        guardian.getStudents().addAll(updatedUsers);
+        userRepository.save(guardian);
+        List<CommonV2Response> responses = updatedUsers.stream()
+                .map(EqualEdServiceImplV2::createCommonUserResponse).collect(Collectors.toList());
+        return generateResponse(responses);
+    }
+
+    @Override
+    public Map<String, Long> getUserRoleCounts() {
+        // Initialize map with all roles
+        Map<String, Long> roleCounts = new HashMap<>();
+        for (EqualEdEnums.UserRole role : EqualEdEnums.UserRole.values()) {
+            roleCounts.put(role.name(), 0L);
+        }
+        // fetch role counts from DB
+        List<Object[]> results = userRepository.countUsersByRole();
+        for (Object[] result : results) {
+            EqualEdEnums.UserRole role = (EqualEdEnums.UserRole) result[0];
+            Long count = (Long) result[1];
+            roleCounts.put(role.name(), count);
+        }
+        return roleCounts;
     }
 }
 

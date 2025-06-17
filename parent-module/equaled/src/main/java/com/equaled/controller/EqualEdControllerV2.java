@@ -531,4 +531,21 @@ public class EqualEdControllerV2 {
         log.info("Received request to get all system config data.");
         return ResponseEntity.ok(service.getSystemConfig());
     }
+
+    @PutMapping("/update/profile")
+    public ResponseEntity<?> updateProfile(@RequestBody CreateProfileRequest request, @RequestHeader Map<String, String> headers) {
+        Integer guardianId = Optional.ofNullable(headers)
+                .map(map -> MapUtils.getString(map, "guardian_id", "0"))
+                .map(Integer::parseInt).orElse(0);
+        if (guardianId == 0)
+            return ResponseEntity.ok(service.updateProfile(request));
+        else
+            return ResponseEntity.ok(service.updateProfile(request, guardianId));
+    }
+
+    @GetMapping("/role/counts")
+    public ResponseEntity<Map<String, Long>> getUserRoleCounts() {
+        log.info("Received request to fetch user role counts");
+        return ResponseEntity.ok(service.getUserRoleCounts());
+    }
 }
