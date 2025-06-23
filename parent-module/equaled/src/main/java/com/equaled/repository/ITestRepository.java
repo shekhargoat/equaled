@@ -13,4 +13,7 @@ public interface ITestRepository extends JpaRepository<Test,Integer> {
 
     @Query(value = "select t from Test t where t.yearGroupId.year = :yearGroupId")
     List<Test> getTestByYearGroupId(Integer yearGroupId);
+
+    @Query("SELECT t FROM Test t WHERE t.yearGroupId.id = :yearGroupId AND t.state = :state AND t.countryId = :countryId")
+    List<Test> findByYearGroupStateAndCountry(Integer yearGroupId, String state, String countryId);
 }

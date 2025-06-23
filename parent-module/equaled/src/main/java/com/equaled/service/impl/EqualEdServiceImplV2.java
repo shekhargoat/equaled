@@ -515,6 +515,8 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
         commonV2Response.putField("User_id", String.valueOf(users.getId()));
         commonV2Response.putField("year_group_id", String.valueOf(users.getYearGroup().getYear()));
         commonV2Response.putField("role", WordUtils.capitalizeFully(users.getRole().name().toLowerCase()));
+        commonV2Response.putField("state_code", Optional.ofNullable(users.getStateCode()).orElse(StringUtils.EMPTY));
+        commonV2Response.putField("country_code", Optional.ofNullable(users.getCountryCode()).orElse(StringUtils.EMPTY));
         commonV2Response.putField("lastlogin", LocalDateTime.ofInstant(users.getLastLogin(),
                 ZoneId.of("UTC")).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         if(CollectionUtils.isNotEmpty(users.getStudents())){
@@ -587,10 +589,9 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     }
 
     @Override
-    public Map<String, List<CommonV2Response>> getTestsByYearGroup(Integer yearGroupId) {
+    public Map<String, List<CommonV2Response>> getTestsByYearGroup(Integer yearGroupId, String state, String countryId) {
         log.trace("Finding Tests for Year {}",yearGroupId);
-        List<Test> tests = Optional.ofNullable(testRepository.getTestByYearGroupId(yearGroupId))
-                .orElse(ListUtils.EMPTY_LIST);
+        List<Test> tests = Optional.ofNullable(testRepository.findByYearGroupStateAndCountry(yearGroupId, state, countryId)).orElse(ListUtils.EMPTY_LIST);
         log.debug("Tests fetched for year {} = {}",yearGroupId, tests.size());
 
         List<CommonV2Response> commonV2Responses = tests.stream().map(test -> {
@@ -604,6 +605,8 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
             commonV2Response.putField("year_group_id", String.valueOf(test.getYearGroupId().getYear()));
             commonV2Response.putField("No_Questions", String.valueOf(test.getNoOfQuestions()));
             commonV2Response.putField("Learn", String.valueOf(test.getTestType()));
+            commonV2Response.putField("state_code", Optional.ofNullable(test.getState()).orElse(StringUtils.EMPTY));
+            commonV2Response.putField("country_code", Optional.ofNullable(test.getCountryId()).orElse(StringUtils.EMPTY));
             return commonV2Response;
         }).collect(Collectors.toList());
 

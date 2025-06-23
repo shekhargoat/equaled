@@ -196,13 +196,13 @@ public class EqualEdControllerV2 {
         return ResponseEntity.ok(service.getSetpracticeByUserIdAndStatus(userId, status));
     }
 
-    @GetMapping("/tests/year/{yearGroup}")
+    @GetMapping("/tests/state/{stateId}/country/{countryId}/year/{yearGroup}")
     public ResponseEntity<?> getTestsByYearGroup(
-            @ApiParam(value = "Year id", required = true) @PathVariable("yearGroup") Integer yearGroup){
+            @ApiParam(value = "Year id", required = true) @PathVariable("yearGroup") Integer yearGroup, @PathVariable("stateId") String state, @PathVariable("countryId") String country){
         log.debug(String.format("Request received : Tests %s for GET  " +
                 "/tests/year/{yearGroup}" +
                 "for particular ", yearGroup));
-        return ResponseEntity.ok(service.getTestsByYearGroup(yearGroup));
+        return ResponseEntity.ok(service.getTestsByYearGroup(yearGroup, state, country));
     }
 
     @GetMapping("/user/name/{username}")

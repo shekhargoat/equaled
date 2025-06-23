@@ -49,7 +49,7 @@ public interface IEqualEdServiceV2 {
 
     Map<String, List<CommonV2Response>> getSetpracticeByUserIdAndStatus(Integer userId, String status);
 
-    Map<String,List<CommonV2Response>> getTestsByYearGroup(Integer yearGroupId);
+    Map<String,List<CommonV2Response>> getTestsByYearGroup(Integer yearGroupId, String state, String countryId);
 
     Map<String,List<CommonV2Response>> getUserByUserName(String username);
 

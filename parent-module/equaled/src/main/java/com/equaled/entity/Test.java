@@ -36,17 +36,33 @@ public class Test extends BaseEntity{
     private Subject subject;
     @Column(name = "no_of_q")
     private int noOfQuestions;
+    @Column(name = "state")
+    private String state;
+    @Column(name = "country_id")
+    private String countryId;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof Test)) return false;
         Test test = (Test) o;
-        return id == test.id && Arrays.equals(sid,test.sid) && lastUpdatedOn == test.lastUpdatedOn && Objects.equals(name, test.name) && Objects.equals(description, test.description) && Objects.equals(timeAllottedInMins, test.timeAllottedInMins) && testType == test.testType && Objects.equals(enabled, test.enabled) && Objects.equals(yearGroupId, test.yearGroupId) && Objects.equals(subject, test.subject);
+        return Objects.equals(id, test.id) &&
+                Arrays.equals(sid, test.sid) &&
+                Objects.equals(name, test.name) &&
+                Objects.equals(description, test.description) &&
+                timeAllottedInMins == test.timeAllottedInMins &&
+                testType == test.testType &&
+                enabled == test.enabled &&
+                Objects.equals(lastUpdatedOn, test.lastUpdatedOn) &&
+                Objects.equals(yearGroupId, test.yearGroupId) &&
+                Objects.equals(subject, test.subject) &&
+                Objects.equals(state, test.state) &&
+                Objects.equals(countryId, test.countryId);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(name, description, timeAllottedInMins, testType, enabled, lastUpdatedOn, yearGroupId, subject);
+        int result = Objects.hash(id, name, description, timeAllottedInMins, testType, enabled, lastUpdatedOn, yearGroupId, subject, state, countryId);
         result = 31 * result + Arrays.hashCode(sid);
         return result;
     }
