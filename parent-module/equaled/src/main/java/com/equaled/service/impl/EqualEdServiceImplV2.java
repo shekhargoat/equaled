@@ -65,6 +65,7 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     LLMUsageRepository llmUsageRepository;
     UserPremiumStatusRepository userPremiumStatusRepository;
     private final SystemConfigRepository systemConfigRepository;
+    private final IPassageRepository passageRepository;
 
     DozerUtils mapper;
 
@@ -1748,6 +1749,19 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
             roleCounts.put(role.name(), count);
         }
         return roleCounts;
+    }
+
+    @Override
+    public List<Map<String, String>> getPassages() {
+        List<Passage> passageEntities = passageRepository.findAll();
+        List<Map<String, String>> passagesList = new ArrayList<>();
+        for (Passage passage : passageEntities) {
+            Map<String, String> passageMap = new HashMap<>();
+            passageMap.put("title", passage.getTitle());
+            passageMap.put("content", passage.getContent());
+            passagesList.add(passageMap);
+        }
+        return passagesList;
     }
 }
 

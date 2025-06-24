@@ -548,4 +548,10 @@ public class EqualEdControllerV2 {
         log.info("Received request to fetch user role counts");
         return ResponseEntity.ok(service.getUserRoleCounts());
     }
+
+    @GetMapping("/passages")
+    public ResponseEntity<?> getPassages() {
+        log.info("Received request to fetch passages");
+        return ResponseEntity.ok(service.getPassages());
+    }
 }

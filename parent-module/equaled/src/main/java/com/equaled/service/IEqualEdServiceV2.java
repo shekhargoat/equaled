@@ -130,4 +130,6 @@ public interface IEqualEdServiceV2 {
     Map<String, List<CommonV2Response>> updateProfile(CreateProfileRequest request);
 
     Map<String, Long> getUserRoleCounts();
+
+    List<Map<String, String>> getPassages();
 }
