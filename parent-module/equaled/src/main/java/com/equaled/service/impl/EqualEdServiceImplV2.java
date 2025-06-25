@@ -1753,8 +1753,8 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     }
 
     @Override
-    public List<Map<String, String>> getPassages() {
-        List<Passage> passageEntities = passageRepository.findAll();
+    public List<Map<String, String>> getPassagesByYearGroup(String yearGroupId) {
+        List<Passage> passageEntities = passageRepository.findByYearGroupId(yearGroupId);
         List<Map<String, String>> passagesList = new ArrayList<>();
         for (Passage passage : passageEntities) {
             Map<String, String> passageMap = new HashMap<>();

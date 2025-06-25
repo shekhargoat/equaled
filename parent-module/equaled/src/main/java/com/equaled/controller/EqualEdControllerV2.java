@@ -553,9 +553,9 @@ public class EqualEdControllerV2 {
         return ResponseEntity.ok(service.getUserRoleCounts());
     }
 
-    @GetMapping("/passages")
-    public ResponseEntity<?> getPassages() {
-        log.info("Received request to fetch passages");
-        return ResponseEntity.ok(service.getPassages());
+    @GetMapping("/passages/yearGroup/{yearGroupId}")
+    public ResponseEntity<?> getPassagesByYearGroup(@PathVariable("yearGroupId") String yearGroupId) {
+        log.info("Received request to fetch passages for yearGroupId: {}", yearGroupId);
+        return ResponseEntity.ok(service.getPassagesByYearGroup(yearGroupId));
     }
 }
