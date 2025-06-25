@@ -19,4 +19,19 @@ public interface ISubjectCategoryRepository extends JpaRepository<SubjectCategor
     @Query("select c from SubjectCategories c where c.subject.id = (select s.id from Subject s where s.name = :subjectName) and c.yearGroup.id = :yearGroupId")
     List<SubjectCategories> getSubjectCategoriesBySubjectAndYearGroupId(@Param("subjectName") String subjectName, @Param("yearGroupId") Integer yearGroupId);
 
+    @Query("SELECT sc FROM SubjectCategories sc " +
+            "WHERE sc.subject.name = :subjectName " +
+            "AND sc.yearGroup.id = :yearGroup " +
+            "AND sc.state = :stateCode " +
+            "AND sc.countryId = :countryCode")
+    List<SubjectCategories> findBySubjectYearGroupStateAndCountry(@Param("subjectName") String subjectName, @Param("yearGroup") Integer yearGroup,
+                                                                  @Param("stateCode") String stateCode, @Param("countryCode") String countryCode);
+
+    @Query("SELECT DISTINCT sc.subject FROM SubjectCategories sc " +
+            "WHERE sc.yearGroup.id = :yearGroupId " +
+            "AND sc.state = :stateCode " +
+            "AND sc.countryId = :countryCode")
+    List<Subject> findDistinctSubjectsByYearGroupAndStateAndCountry(@Param("yearGroupId") Integer yearGroupId,
+                                                             @Param("stateCode") String stateCode,
+                                                             @Param("countryCode") String countryCode);
 }

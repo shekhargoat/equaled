@@ -129,11 +129,12 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     }
 
     @Override
-    public Map<String,List<CommonV2Response>> getSubjectByYearGroupId(Integer yearGroupId){
-        log.trace("Finding Subject by yearGroupId: {}",yearGroupId);
-        List<Subject> subjects = Optional.ofNullable(subjectCategoryRepository.findDistinctSubjectsByYearGroup(yearGroupId))
-                .orElse(ListUtils.EMPTY_LIST);
-        log.debug("Subject fetched for year {} = {}",yearGroupId, subjects.size());
+    public Map<String,List<CommonV2Response>> getSubjectByYearGroupId(Integer yearGroupId, String stateCode, String countryCode){
+        log.trace("Finding Subjects by yearGroupId: {}, state: {}, country: {}", yearGroupId, stateCode, countryCode);
+
+        List<Subject> subjects = Optional.ofNullable(subjectCategoryRepository
+                        .findDistinctSubjectsByYearGroupAndStateAndCountry(yearGroupId, stateCode, countryCode)).orElse(ListUtils.EMPTY_LIST);
+        log.debug("Subjects fetched for yearGroupId {} = {}", yearGroupId, subjects.size());
 
         List<CommonV2Response> commonV2Responses = subjects.stream().map(subject -> {
             CommonV2Response commonV2Response = new CommonV2Response();
@@ -632,11 +633,11 @@ public class EqualEdServiceImplV2 implements IEqualEdServiceV2 {
     }
 
     @Override
-    public Map<String, List<CommonV2Response>> getCategoriesBySubAndYearGroup(String subjectName, Integer yearGroup) {
-        log.trace("Finding Categories for subject {} and year group {}", subjectName, yearGroup);
+    public Map<String, List<CommonV2Response>> getCategoriesBySubAndYearGroup(String subjectName, Integer yearGroup, String stateCode, String countryCode) {
+        log.trace("Finding Categories for subject {}, yearGroup {}, state {}, country {}", subjectName, yearGroup, stateCode, countryCode);
         List<SubjectCategories> categories = Optional.ofNullable(subjectCategoryRepository
-                .getSubjectCategoriesBySubjectAndYearGroupId(subjectName, yearGroup)).orElse(ListUtils.EMPTY_LIST);
-        log.debug("Fetched Categories for subject {} and year group {} = {}", subjectName, yearGroup, categories.size());
+                        .findBySubjectYearGroupStateAndCountry(subjectName, yearGroup, stateCode, countryCode)).orElse(ListUtils.EMPTY_LIST);
+        log.debug("Fetched {} Categories for subject {}, yearGroup {}, state {}, country {}", categories.size(), subjectName, yearGroup, stateCode, countryCode);
         List<CommonV2Response> commonV2Responses = categories.stream()
                 .sorted(Comparator.comparingInt(SubjectCategories::getSortOrder)).map(category -> {
             CommonV2Response commonV2Response = new CommonV2Response();

@@ -451,20 +451,24 @@ public class EqualEdControllerV2 {
     }
 
     // get unique subject by year group id: name and id
-    @GetMapping(value = "/unique/subject/yearGroupId/{yearGroupId}")
+    @GetMapping(value = "/unique/subject/yearGroupId/{yearGroupId}/state/{state}/country/{country}")
     @ApiOperation(value = "Unique subject by year_group_id", notes = "This API to get Unique subject by year_group_id")
-    public ResponseEntity<?> subjectByYearGroupId(@PathVariable Integer yearGroupId){
-        return ResponseEntity.ok(service.getSubjectByYearGroupId(yearGroupId));
+    public ResponseEntity<?> subjectByYearGroupId(@ApiParam(value = "Year Group Id", required = true) @PathVariable("yearGroupId") Integer yearGroupId,
+                                                  @ApiParam(value = "State Code", required = true) @PathVariable("state") String stateCode,
+                                                  @ApiParam(value = "Country Code", required = true) @PathVariable("country") String countryCode){
+        return ResponseEntity.ok(service.getSubjectByYearGroupId(yearGroupId, stateCode, countryCode));
     }
 
     // get categories by yearGroupId and subject  : sub_category {sub category 1}
-    @GetMapping("/categories/subject/{subjectName}/yearGroupId/{yearGroupId}")
+    @GetMapping("/categories/subject/{subjectName}/yearGroupId/{yearGroupId}/state/{state}/country/{country}")
     @ApiOperation(value = "get categories by Subject name and year group id",
             notes = "API to get categories by Subject name and year group id")
     public ResponseEntity<?> getCategoriesBySubAndYearGroupIds(
             @ApiParam(value = "Subject Name", required = true) @PathVariable("subjectName") String subjectName,
+            @ApiParam(value = "State Code", required = true) @PathVariable("state") String stateCode,
+            @ApiParam(value = "Country Code", required = true) @PathVariable("country") String countryCode,
             @ApiParam(value = "Year Group Id", required = true) @PathVariable("yearGroupId") Integer yearGroupId){
-        return ResponseEntity.ok(service.getCategoriesBySubAndYearGroup(subjectName, yearGroupId));
+        return ResponseEntity.ok(service.getCategoriesBySubAndYearGroup(subjectName, yearGroupId, stateCode, countryCode));
     }
 
     @PostMapping("/save/subject/data")

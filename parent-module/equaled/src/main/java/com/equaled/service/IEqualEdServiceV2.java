@@ -101,9 +101,9 @@ public interface IEqualEdServiceV2 {
 
     Optional<String> createStagingQuestion(StagingQuestionsTO stagingQuestionsTO);
 
-    Map<String,List<CommonV2Response>> getSubjectByYearGroupId(Integer yearGroupId);
+    Map<String,List<CommonV2Response>> getSubjectByYearGroupId(Integer yearGroupId, String stateCode, String countryCode);
 
-    Map<String, List<CommonV2Response>> getCategoriesBySubAndYearGroup(String subjectName, Integer yearGroup);
+    Map<String, List<CommonV2Response>> getCategoriesBySubAndYearGroup(String subjectName, Integer yearGroup, String stateCode, String countryCode);
 
     void saveSubjectData(LinkedHashMap<String, Object> payload);
 
