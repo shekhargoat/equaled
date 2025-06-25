@@ -131,5 +131,5 @@ public interface IEqualEdServiceV2 {
 
     Map<String, Long> getUserRoleCounts();
 
-    List<Map<String, String>> getPassagesByYearGroup(String yearGroupId);
+    List<Map<String, String>> getPassagesByYearGroup(Integer yearGroupId);
 }

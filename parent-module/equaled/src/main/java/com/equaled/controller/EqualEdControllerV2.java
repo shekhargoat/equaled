@@ -554,7 +554,7 @@ public class EqualEdControllerV2 {
     }
 
     @GetMapping("/passages/yearGroup/{yearGroupId}")
-    public ResponseEntity<?> getPassagesByYearGroup(@PathVariable("yearGroupId") String yearGroupId) {
+    public ResponseEntity<?> getPassagesByYearGroup(@PathVariable("yearGroupId") Integer yearGroupId) {
         log.info("Received request to fetch passages for yearGroupId: {}", yearGroupId);
         return ResponseEntity.ok(service.getPassagesByYearGroup(yearGroupId));
     }
