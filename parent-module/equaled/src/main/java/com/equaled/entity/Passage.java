@@ -22,5 +22,6 @@ public class Passage extends BaseEntity {
     @Column(name = "publication_date",nullable = false)
     private Instant publicationDate = Instant.now();
 
-
+    @Column(name = "year_group_id")
+    private Integer yearGroupId;
 }

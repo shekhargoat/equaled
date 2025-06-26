@@ -35,6 +35,10 @@ public class PassageV2Impl implements IPassageV2 {
         passage.setSid(BaseEntity.generateByteUuid());
         passage.setTitle(request.getOrDefault("Title",""));
         passage.setContent(request.getOrDefault("Content",""));
+        Object yearGroupIdObj = request.get("year_group_id");
+        if (yearGroupIdObj != null) {
+            passage.setYearGroupId(Integer.parseInt(yearGroupIdObj.toString()));
+        }
         Optional<Users> author = Optional.ofNullable(request.get("Author")).map(Integer::parseInt)
                 .flatMap(userRepository::findById);
         passage.setAuthor(author.orElseThrow(() -> new IncorrectArgumentException("Invalid User Id")));
@@ -50,6 +54,7 @@ public class PassageV2Impl implements IPassageV2 {
         commonV2Response.putField("Content", passage1.getContent());
         commonV2Response.putField("Author", String.valueOf(passage1.getAuthor().getId()));
         commonV2Response.putField("PublicationDate", passage1.getPublicationDate().toString());
+        commonV2Response.putField("year_group_id", String.valueOf(passage1.getYearGroupId()));
         return generateResponse(Collections.singletonList(commonV2Response));
     }
 
