@@ -4,7 +4,11 @@ import com.equaled.controller.mcp.dto.McpToolSchema;
 import com.equaled.controller.mcp.dto.McpToolsResponse;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class EqualEdMcpCatalog {
