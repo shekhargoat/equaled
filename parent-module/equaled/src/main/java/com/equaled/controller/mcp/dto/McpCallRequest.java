@@ -1,10 +1,19 @@
 package com.equaled.controller.mcp.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import javax.validation.constraints.NotNull;
 import java.util.Map;
 
-public record McpCallRequest(
-    @NotNull EqualEdToolName name,
-    Map<String, Object> arguments
-) {}
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class McpCallRequest {
 
+    @NotNull
+    private EqualEdToolName name;
+
+    private Map<String, Object> arguments;
+}

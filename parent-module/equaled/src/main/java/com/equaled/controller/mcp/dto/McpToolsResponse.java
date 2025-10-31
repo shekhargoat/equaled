@@ -1,5 +1,15 @@
 package com.equaled.controller.mcp.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.List;
 
-public record McpToolsResponse(List<McpToolSchema> tools) {}
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class McpToolsResponse {
+
+    private List<McpToolSchema> tools;
+}
