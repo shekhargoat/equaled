@@ -2,6 +2,8 @@ package com.equaled.controller.mcp;
 
 import com.equaled.controller.mcp.dto.EqualEdToolName;
 import com.equaled.service.IEqualEdServiceV2;
+import com.equaled.to.CommonV2Request;
+import com.equaled.to.CreateProfileRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,6 +11,9 @@ import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -16,74 +21,43 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class EqualEdMcpDispatcher {
 
-  private final ObjectMapper mapper;
-  private final IEqualEdServiceV2 service;
+    private final ObjectMapper mapper;
+    private final IEqualEdServiceV2 service;
 
-  /**
-   * Dispatches the tool call to the appropriate handler
-   */
-  public Object dispatch(EqualEdToolName name, Map<String, Object> args, String traceId) {
-    // Convert untyped args → typed inputs for safety
-      if (Objects.requireNonNull(name) == EqualEdToolName.GET_STUDENT) {
-          GetStudentInput input = mapper.convertValue(args, GetStudentInput.class);
-          requireNonEmpty(input.getEmail(), "email");
-          return service.getUserByEmail(input.getEmail());
-          //return equalEdService.getStudent(input.getEmail(), traceId);
-      }
-      throw new IllegalArgumentException("Unknown tool: " + name);
-  }
+    public Object dispatch(EqualEdToolName name, Map<String, Object> args, String traceId) {
+        switch (Objects.requireNonNull(name)) {
+            case GET_STUDENT: {
+                GetStudentInput input = mapper.convertValue(args, GetStudentInput.class);
+                requireNonEmpty(input.getEmail(), "email");
+                return service.getUserByEmail(input.getEmail());
+            }
+            case CREATE_STUDENT: {
+                Map<String, String> fields = new HashMap<>();
+                for (Map.Entry<String, Object> entry : args.entrySet()) {
+                    fields.put(entry.getKey(), entry.getValue() == null ? "" : entry.getValue().toString());
+                }
+                CommonV2Request record = new CommonV2Request();
+                record.setFields(fields);
 
-  /**
-   * Validates that a string field is not empty or blank
-   */
-  private void requireNonEmpty(String v, String field) {
-    if (v == null || v.trim().isEmpty()) {
-      throw new IllegalArgumentException(field + " is required");
+                CreateProfileRequest request = new CreateProfileRequest();
+                request.setRecords(Collections.singletonList(record));
+
+                return service.createProfile(request);
+            }
+            case CREATE_DASHBOARD: {
+                CommonV2Request dashboardRequest = mapper.convertValue(args, CommonV2Request.class);
+                return service.createDashboard(dashboardRequest);
+            }
+            default:
+                throw new IllegalArgumentException("Unknown tool: " + name);
+        }
     }
-  }
-
-  /**
-   * Typed input for safer mapping and validation
-   */
-  @Data
-  @NoArgsConstructor
-  @AllArgsConstructor
-  public static class GetStudentInput {
-    private String email;
-  }
-
-    /*
-    private void validate(CreateStudentInput in) {
-        requireNonEmpty(in.email(), "email");
-        requireNonEmpty(in.name(), "name");
-    }
-    */
-
-  // Typed inputs for safer mapping
-    /*
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class CreateStudentInput {
-        private String name;
-        private String email;
-        private String grade;
+    private void requireNonEmpty(String v, String field) {
+        if (v == null || v.trim().isEmpty()) {
+            throw new IllegalArgumentException(field + " is required");
+        }
     }
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class ListCoursesInput {
-        private Integer page;
-        private Integer size;
-    }
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class EnrollStudentInput {
-        private String student_id;
-        private String course_id;
-    }
-    */
+    @Data @NoArgsConstructor @AllArgsConstructor
+    public static class GetStudentInput { private String email; }
 }
