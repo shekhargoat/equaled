@@ -4,11 +4,7 @@ import com.equaled.controller.mcp.dto.McpToolSchema;
 import com.equaled.controller.mcp.dto.McpToolsResponse;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class EqualEdMcpCatalog {
@@ -44,7 +40,7 @@ public class EqualEdMcpCatalog {
         email.put("type", "string");
         properties.put("email", email);
         GET_STUDENT_SCHEMA.put("properties", properties);
-        GET_STUDENT_SCHEMA.put("required", Arrays.asList("email"));
+        GET_STUDENT_SCHEMA.put("required", Collections.singletonList("email"));
     }
 
     /*
