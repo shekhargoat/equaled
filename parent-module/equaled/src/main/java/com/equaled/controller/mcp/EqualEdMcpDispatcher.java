@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,20 +37,15 @@ public class EqualEdMcpDispatcher {
                 }
                 CommonV2Request record = new CommonV2Request();
                 record.setFields(fields);
-
                 CreateProfileRequest request = new CreateProfileRequest();
                 request.setRecords(Collections.singletonList(record));
-
                 return service.createProfile(request);
-            }
-            case CREATE_DASHBOARD: {
-                CommonV2Request dashboardRequest = mapper.convertValue(args, CommonV2Request.class);
-                return service.createDashboard(dashboardRequest);
             }
             default:
                 throw new IllegalArgumentException("Unknown tool: " + name);
         }
     }
+
     private void requireNonEmpty(String v, String field) {
         if (v == null || v.trim().isEmpty()) {
             throw new IllegalArgumentException(field + " is required");
